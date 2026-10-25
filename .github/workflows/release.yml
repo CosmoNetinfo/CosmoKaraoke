@@ -1,0 +1,92 @@
+name: Compila e pubblica
+
+# Ogni volta che carichi codice su "main" con un NUMERO DI VERSIONE NUOVO,
+# GitHub compila l'app per Windows e Mac e pubblica gli installer.
+# Le app già installate vedono la nuova versione e propongono l'aggiornamento.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  versione:
+    name: Controlla la versione
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.v.outputs.version }}
+      nuova: ${{ steps.v.outputs.nuova }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: v
+        run: |
+          VERSION=$(node -p "require('./src-tauri/tauri.conf.json').version")
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          if git ls-remote --exit-code --tags origin "refs/tags/v$VERSION" >/dev/null 2>&1; then
+            echo "nuova=false" >> "$GITHUB_OUTPUT"
+            echo "La versione $VERSION è già pubblicata: per un nuovo rilascio cambia il numero con 'npm run bump'."
+          else
+            echo "nuova=true" >> "$GITHUB_OUTPUT"
+          fi
+
+  pubblica:
+    name: Compila ${{ matrix.nome }}
+    needs: versione
+    if: needs.versione.outputs.nuova == 'true' || github.event_name == 'workflow_dispatch'
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - nome: Windows
+            os: windows-latest
+            args: ''
+            rust_targets: ''
+          - nome: Mac (Apple Silicon + Intel)
+            os: macos-latest
+            args: '--target universal-apple-darwin'
+            rust_targets: 'aarch64-apple-darwin,x86_64-apple-darwin'
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Controlla la chiave di firma degli aggiornamenti
+        shell: bash
+        env:
+          K: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          P: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+        run: |
+          if [ -z "$K" ] || [ -z "$P" ]; then
+            echo "::error::Mancano i segreti TAURI_SIGNING_PRIVATE_KEY e TAURI_SIGNING_PRIVATE_KEY_PASSWORD. Vai su Settings > Secrets and variables > Actions e aggiungili (vedi README)."
+            exit 1
+          fi
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.rust_targets }}
+
+      - uses: swatinem/rust-cache@v2
+        with:
+          workspaces: './src-tauri -> target'
+
+      - run: npm ci
+
+      - uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+        with:
+          tagName: v__VERSION__
+          releaseName: 'CosmoKaraoke v__VERSION__'
+          releaseBody: 'Scarica il file giusto per il tuo computer: il programma di installazione .exe per Windows, il file .dmg per Mac. Se hai già CosmoKaraoke installato, ti proporrà da solo di aggiornarsi.'
+          releaseDraft: false
+          prerelease: false
+          includeUpdaterJson: true
+          args: ${{ matrix.args }}
