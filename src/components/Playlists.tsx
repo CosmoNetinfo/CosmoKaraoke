@@ -2,14 +2,16 @@ import {
   ArrowLeftRight,
   ChevronDown,
   ChevronUp,
-  FolderOpen,
+  Disc3,
+  Film,
   GripVertical,
+  ListMusic,
+  Music,
   Play,
   Save,
   Trash2,
-  Upload,
-  UserPlus,
-  X,
+  Users,
+  Video,
 } from 'lucide-react'
 import { useState } from 'react'
 import { startPlayback } from '../lib/player'
@@ -23,14 +25,43 @@ interface RowProps {
   which: 'A' | 'B'
   isDragging: boolean
   isDragOver: boolean
-  onDragStart: (e: React.DragEvent) => void
-  onDragEnd: (e: React.DragEvent) => void
+  onDragStart: () => void
+  onDragEnd: () => void
   onDragOver: (e: React.DragEvent) => void
-  onDragLeave: (e: React.DragEvent) => void
-  onDrop: (e: React.DragEvent) => void
+  onDragLeave: () => void
+  onDrop: () => void
 }
 
-function Row({
+function FormatBadge({ format, isYt }: { format: string; isYt?: boolean }) {
+  if (isYt) {
+    return (
+      <span className="inline-flex items-center gap-1 rounded-md border border-red-500/30 bg-red-950/40 px-1.5 py-0.5 text-xs font-bold text-red-400">
+        <Film className="h-3 w-3" /> YT
+      </span>
+    )
+  }
+  if (format === 'kar') {
+    return (
+      <span className="inline-flex items-center gap-1 rounded-md border border-emerald-500/30 bg-emerald-950/40 px-1.5 py-0.5 text-xs font-bold text-emerald-400">
+        <Music className="h-3 w-3" /> KAR
+      </span>
+    )
+  }
+  if (format === 'video') {
+    return (
+      <span className="inline-flex items-center gap-1 rounded-md border border-amber-500/30 bg-amber-950/40 px-1.5 py-0.5 text-xs font-bold text-amber-400">
+        <Video className="h-3 w-3" /> Video
+      </span>
+    )
+  }
+  return (
+    <span className="inline-flex items-center gap-1 rounded-md border border-indigo-500/30 bg-indigo-950/40 px-1.5 py-0.5 text-xs font-bold text-indigo-300">
+      <Disc3 className="h-3 w-3" /> CD+G
+    </span>
+  )
+}
+
+function QueueRow({
   item,
   index,
   which,
@@ -48,6 +79,8 @@ function Row({
   const removeFromQueue = useStore((s) => s.removeFromQueue)
   const setSingerOf = useStore((s) => s.setSingerOf)
 
+  const isYt = Boolean(item.song.yt || item.song.path.startsWith('https://'))
+
   return (
     <li
       draggable
@@ -56,66 +89,81 @@ function Row({
       onDragOver={onDragOver}
       onDragLeave={onDragLeave}
       onDrop={onDrop}
-      className={`flex items-center gap-1.5 rounded-lg bg-row px-2.5 py-2 transition-all ${
+      className={`group flex items-center gap-2.5 rounded-xl border border-line/60 bg-row p-2.5 transition-all hover:border-line hover:bg-row-hover ${
         isDragging ? 'opacity-40' : ''
-      } ${isDragOver ? 'border-t-2 border-accent' : ''}`}
+      } ${isDragOver ? 'border-t-2 border-accent shadow-sm' : ''}`}
     >
       <span
-        title="Trascina per spostare"
-        className="cursor-grab text-muted hover:text-text active:cursor-grabbing"
+        title="Trascina per riordinare"
+        className="cursor-grab text-muted/60 transition-colors hover:text-text active:cursor-grabbing"
       >
         <GripVertical size={16} />
       </span>
-      <span className="w-5 text-center text-base tabular-nums text-muted">{index + 1}</span>
+      <span className="w-5 text-center text-sm font-bold tabular-nums text-muted/80">{index + 1}</span>
+      
       <div className="min-w-0 flex-1">
-        <div className="truncate text-base font-medium">{item.song.title}</div>
+        <div className="flex items-center gap-2 truncate">
+          <span className="truncate text-base font-bold text-text">{item.song.title}</span>
+          <FormatBadge format={item.song.format} isYt={isYt} />
+        </div>
+        
+        <div className="flex items-center gap-2 text-sm text-muted">
+          {item.song.artist && <span className="truncate">{item.song.artist}</span>}
+          {item.song.artist && <span>·</span>}
+          <div className="flex items-center gap-1">
+            <span className="text-xs font-semibold text-accent-text">🎤</span>
+            <select
+              value={item.singer}
+              draggable={false}
+              onDragStart={(e) => e.stopPropagation()}
+              onChange={(e) => setSingerOf(item.uid, e.target.value)}
+              className="max-w-full rounded bg-transparent text-sm font-semibold text-accent-text outline-none hover:underline"
+            >
+              <option value="" className="bg-panel text-muted">— assegna cantante —</option>
+              {singers.map((n) => (
+                <option key={n} value={n} className="bg-panel text-text">
+                  {n}
+                </option>
+              ))}
+              {item.singer && !singers.includes(item.singer) && (
+                <option value={item.singer} className="bg-panel text-text">{item.singer}</option>
+              )}
+            </select>
+          </div>
+        </div>
+
         {item.song.yt === 'downloading' && (
-          <div className="text-base text-muted">Scarico da YouTube…</div>
+          <div className="mt-1 text-xs font-semibold text-accent-text">Scarico video da YouTube…</div>
         )}
         {item.song.yt === 'error' && (
-          <div className="text-base text-danger">Download non riuscito</div>
+          <div className="mt-1 text-xs font-semibold text-danger">Download non riuscito</div>
         )}
-        <select
-          value={item.singer}
-          draggable={false}
-          onDragStart={(e) => e.stopPropagation()}
-          onChange={(e) => setSingerOf(item.uid, e.target.value)}
-          className="mt-0.5 max-w-full rounded bg-transparent text-base text-muted outline-none"
-        >
-          <option value="">— cantante —</option>
-          {singers.map((n) => (
-            <option key={n} value={n}>
-              {n}
-            </option>
-          ))}
-          {item.singer && !singers.includes(item.singer) && (
-            <option value={item.singer}>{item.singer}</option>
-          )}
-        </select>
       </div>
+
       <div
-        className="flex items-center gap-0.5"
+        className="flex shrink-0 items-center gap-1 opacity-90 group-hover:opacity-100"
         draggable={false}
         onDragStart={(e) => e.stopPropagation()}
       >
-        <Btn variant="ghost" title="Riproduci ora" onClick={() => void startPlayback(item)}>
-          <Play />
+        <Btn variant="ghost" className="h-9 w-9 p-0" title="Riproduci ora" onClick={() => void startPlayback(item)}>
+          <Play size={16} className="text-accent-text" />
         </Btn>
-        <Btn variant="ghost" title="Su" onClick={() => moveInQueue(item.uid, -1)}>
-          <ChevronUp />
+        <Btn variant="ghost" className="h-9 w-9 p-0" title="Su" onClick={() => moveInQueue(item.uid, -1)}>
+          <ChevronUp size={16} />
         </Btn>
-        <Btn variant="ghost" title="Giù" onClick={() => moveInQueue(item.uid, 1)}>
-          <ChevronDown />
+        <Btn variant="ghost" className="h-9 w-9 p-0" title="Giù" onClick={() => moveInQueue(item.uid, 1)}>
+          <ChevronDown size={16} />
         </Btn>
         <Btn
           variant="ghost"
+          className="h-9 w-9 p-0"
           title={which === 'A' ? 'Sposta nella riserva' : 'Sposta nella scaletta'}
           onClick={() => transfer(item.uid)}
         >
-          <ArrowLeftRight />
+          <ArrowLeftRight size={15} />
         </Btn>
-        <Btn variant="ghost" title="Togli" onClick={() => removeFromQueue(item.uid)}>
-          <Trash2 />
+        <Btn variant="ghost" className="h-9 w-9 p-0 text-muted hover:text-danger" title="Togli" onClick={() => removeFromQueue(item.uid)}>
+          <Trash2 size={15} />
         </Btn>
       </div>
     </li>
@@ -138,356 +186,255 @@ export function Playlists() {
   const patch = useStore((s) => s.patch)
 
   const [name, setName] = useState('')
-  const [showSave, setShowSave] = useState(false)
-  const [saveName, setSaveName] = useState('')
-  const [showSavedList, setShowSavedList] = useState(false)
+  const [playlistName, setPlaylistName] = useState('')
+  const [activeTab, setActiveTab] = useState<'A' | 'B' | 'singers' | 'saved'>('A')
+  const [dragUid, setDragUid] = useState<string | null>(null)
+  const [overIndex, setOverIndex] = useState<number | null>(null)
 
-  const [draggingUid, setDraggingUid] = useState<string | null>(null)
-  const [dragOverUid, setDragOverUid] = useState<string | null>(null)
-  const [dragOverList, setDragOverList] = useState<'A' | 'B' | null>(null)
-
-  const add = () => {
-    addSinger(name)
+  const onAddSinger = () => {
+    const trimmed = name.trim()
+    if (!trimmed) return
+    addSinger(trimmed)
     setName('')
   }
 
-  const doSave = () => {
-    if (!saveName.trim()) return
-    savePlaylist(saveName.trim(), 'A')
-    setSaveName('')
-    setShowSave(false)
+  const onSave = () => {
+    const trimmed = playlistName.trim()
+    if (!trimmed) return
+    savePlaylist(trimmed, activeTab === 'B' ? 'B' : 'A')
+    setPlaylistName('')
+  }
+
+  const list = activeTab === 'A' ? queueA : queueB
+
+  const handleDragStart = (uid: string) => setDragUid(uid)
+  const handleDragEnd = () => {
+    setDragUid(null)
+    setOverIndex(null)
+  }
+  const handleDragOver = (e: React.DragEvent, idx: number) => {
+    e.preventDefault()
+    setOverIndex(idx)
+  }
+  const handleDrop = (toIdx: number) => {
+    if (!dragUid) return
+    reorderQueue(dragUid, activeTab === 'B' ? 'B' : 'A', toIdx)
+    setDragUid(null)
+    setOverIndex(null)
   }
 
   return (
-    <div className="space-y-3">
-      <Panel title="Cantanti">
-        <div className="flex gap-2">
-          <input
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && add()}
-            placeholder="Nome del cantante…"
-            className="min-w-0 flex-1 rounded-lg border-2 border-line bg-inset px-3 py-2 text-base outline-none focus:border-accent"
-          />
-          <Btn onClick={add} disabled={!name.trim()}>
-            <UserPlus />
-          </Btn>
-        </div>
-        {singers.length > 0 && (
-          <div className="mt-2 flex flex-wrap gap-1.5">
-            {singers.map((n) => (
-              <span
-                key={n}
-                className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-base ${
-                  n === active ? 'bg-accent text-on-accent' : 'bg-btn text-text'
-                }`}
-              >
-                <button
-                  onClick={() => patch({ activeSinger: n })}
-                  title="Usa per i prossimi brani"
-                >
-                  {n}
-                </button>
-                <button
-                  onClick={() => removeSinger(n)}
-                  title="Elimina"
-                  className="opacity-60 hover:opacity-100"
-                >
-                  <X />
-                </button>
+    <Panel className="border-line/70">
+      {/* SELETTORE A SCHEDE DELLA CODA */}
+      <div className="-mx-5 -mt-5 mb-4 border-b border-line bg-header/40 p-2">
+        <div className="flex flex-wrap items-center justify-between gap-2 px-3">
+          <div className="flex items-center gap-1.5">
+            <button
+              onClick={() => setActiveTab('A')}
+              className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-bold transition-all ${
+                activeTab === 'A'
+                  ? 'bg-accent text-on-accent shadow-xs'
+                  : 'text-muted hover:bg-btn hover:text-text'
+              }`}
+            >
+              <ListMusic size={15} />
+              <span>Scaletta</span>
+              <span className={`ml-1 rounded-full px-1.5 py-0.2 text-xs ${activeTab === 'A' ? 'bg-white/20' : 'bg-inset text-muted'}`}>
+                {queueA.length}
               </span>
-            ))}
-          </div>
-        )}
-        <p className="mt-2 text-base text-muted">
-          Il cantante evidenziato viene assegnato ai brani che aggiungi.
-        </p>
-      </Panel>
+            </button>
 
-      <Panel
-        title={`Scaletta (${queueA.length})`}
-        right={
-          <div className="flex items-center gap-1">
+            <button
+              onClick={() => setActiveTab('B')}
+              className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-bold transition-all ${
+                activeTab === 'B'
+                  ? 'bg-accent text-on-accent shadow-xs'
+                  : 'text-muted hover:bg-btn hover:text-text'
+              }`}
+            >
+              <span>Riserva</span>
+              <span className={`ml-1 rounded-full px-1.5 py-0.2 text-xs ${activeTab === 'B' ? 'bg-white/20' : 'bg-inset text-muted'}`}>
+                {queueB.length}
+              </span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('singers')}
+              className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-bold transition-all ${
+                activeTab === 'singers'
+                  ? 'bg-accent text-on-accent shadow-xs'
+                  : 'text-muted hover:bg-btn hover:text-text'
+              }`}
+            >
+              <Users size={15} />
+              <span>Cantanti</span>
+              <span className={`ml-1 rounded-full px-1.5 py-0.2 text-xs ${activeTab === 'singers' ? 'bg-white/20' : 'bg-inset text-muted'}`}>
+                {singers.length}
+              </span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('saved')}
+              className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-bold transition-all ${
+                activeTab === 'saved'
+                  ? 'bg-accent text-on-accent shadow-xs'
+                  : 'text-muted hover:bg-btn hover:text-text'
+              }`}
+            >
+              <Save size={15} />
+              <span>Salvate</span>
+            </button>
+          </div>
+
+          {(activeTab === 'A' || activeTab === 'B') && list.length > 0 && (
             <Btn
               variant="ghost"
-              title="Salva scaletta"
-              onClick={() => {
-                setShowSave(!showSave)
-                setShowSavedList(false)
-              }}
-              disabled={queueA.length === 0}
+              className="h-8 px-2 text-xs text-muted hover:text-danger"
+              onClick={() => clearQueue(activeTab)}
+              title="Svuota questa coda"
             >
-              <Save /> Salva
+              <Trash2 size={13} className="mr-1" /> Svuota
             </Btn>
-            <Btn
-              variant="ghost"
-              title="Playlist salvate"
-              onClick={() => {
-                setShowSavedList(!showSavedList)
-                setShowSave(false)
-              }}
-            >
-              <FolderOpen /> Playlist ({savedPlaylists.length})
-            </Btn>
-            {queueA.length > 0 && (
-              <Btn
-                variant="ghost"
-                title="Svuota scaletta"
-                onClick={() => clearQueue('A')}
-              >
-                <Trash2 />
-              </Btn>
-            )}
-          </div>
-        }
-      >
-        {showSave && (
-          <div className="mb-2.5 flex items-center gap-2 rounded-lg bg-inset p-2">
-            <input
-              value={saveName}
-              onChange={(e) => setSaveName(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && doSave()}
-              placeholder="Nome playlist (es. Serata di sabato)…"
-              className="min-w-0 flex-1 rounded border border-line bg-transparent px-2.5 py-1 text-base outline-none focus:border-accent"
-              autoFocus
-            />
-            <Btn variant="primary" onClick={doSave} disabled={!saveName.trim()}>
-              Salva
-            </Btn>
-            <Btn variant="ghost" onClick={() => setShowSave(false)}>
-              Annulla
-            </Btn>
-          </div>
-        )}
+          )}
+        </div>
+      </div>
 
-        {showSavedList && (
-          <div className="mb-3 space-y-1.5 rounded-lg border border-line bg-panel p-2">
-            <div className="flex items-center justify-between text-base font-bold">
-              <span>Playlist salvate</span>
-              <Btn variant="ghost" onClick={() => setShowSavedList(false)} title="Chiudi">
-                <X size={16} />
+      {/* VISTA SCALETTA A O RISERVA B */}
+      {(activeTab === 'A' || activeTab === 'B') && (
+        <div className="space-y-3">
+          {list.length === 0 ? (
+            <div className="rounded-xl border border-dashed border-line p-6 text-center text-sm font-medium text-muted">
+              {activeTab === 'A'
+                ? 'La scaletta è vuota. Cerca un brano nella Libreria o su YouTube e premi "+ Accoda".'
+                : 'La riserva è vuota. Puoi parcheggiare qui i brani di scorta.'}
+            </div>
+          ) : (
+            <ul className="space-y-2">
+              {list.map((item, idx) => (
+                <QueueRow
+                  key={item.uid}
+                  item={item}
+                  index={idx}
+                  which={activeTab}
+                  isDragging={dragUid === item.uid}
+                  isDragOver={overIndex === idx}
+                  onDragStart={() => handleDragStart(item.uid)}
+                  onDragEnd={handleDragEnd}
+                  onDragOver={(e) => handleDragOver(e, idx)}
+                  onDragLeave={() => setOverIndex(null)}
+                  onDrop={() => handleDrop(idx)}
+                />
+              ))}
+            </ul>
+          )}
+
+          {list.length > 0 && (
+            <div className="flex gap-2 pt-2 border-t border-line/40">
+              <input
+                value={playlistName}
+                onChange={(e) => setPlaylistName(e.target.value)}
+                placeholder="Salva scaletta con nome…"
+                className="min-w-0 flex-1 rounded-xl border border-line bg-inset px-3 py-1.5 text-sm outline-none focus:border-accent"
+              />
+              <Btn onClick={onSave} disabled={!playlistName.trim()} className="text-sm">
+                Salva
               </Btn>
             </div>
-            {savedPlaylists.length === 0 ? (
-              <p className="py-2 text-base text-muted">Nessuna playlist salvata.</p>
+          )}
+        </div>
+      )}
+
+      {/* VISTA CANTANTI */}
+      {activeTab === 'singers' && (
+        <div className="space-y-3">
+          <div className="flex gap-2">
+            <input
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && onAddSinger()}
+              placeholder="Nome del cantante o del tavolo…"
+              className="min-w-0 flex-1 rounded-xl border border-line bg-inset px-3.5 py-2 text-base outline-none focus:border-accent"
+            />
+            <Btn onClick={onAddSinger} variant="primary">
+              Aggiungi
+            </Btn>
+          </div>
+
+          <div className="space-y-1.5">
+            <div className="text-xs font-bold uppercase tracking-wider text-muted">Cantante al microfono attivo</div>
+            <select
+              value={active}
+              onChange={(e) => patch({ activeSinger: e.target.value })}
+              className="w-full rounded-xl border border-line bg-inset px-3 py-2 text-base font-semibold text-text outline-none"
+            >
+              <option value="">— Nessun cantante selezionato —</option>
+              {singers.map((s) => (
+                <option key={s} value={s}>
+                  {s}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="mt-3 space-y-1.5">
+            <div className="text-xs font-bold uppercase tracking-wider text-muted">Lista partecipanti</div>
+            {singers.length === 0 ? (
+              <div className="text-sm text-muted">Nessun cantante registrato.</div>
             ) : (
-              <ul className="max-h-48 space-y-1 overflow-y-auto">
-                {savedPlaylists.map((pl) => (
-                  <li
-                    key={pl.id}
-                    className="flex items-center justify-between gap-1.5 rounded bg-row px-2.5 py-1.5 text-base"
-                  >
-                    <div className="min-w-0 flex-1 truncate">
-                      <span className="font-semibold">{pl.name}</span>
-                      <span className="ml-2 text-sm text-muted">({pl.items.length} brani)</span>
-                    </div>
-                    <Btn
-                      variant="ghost"
-                      title="Carica in scaletta"
-                      onClick={() => loadPlaylist(pl.id, 'replace', 'A')}
-                    >
-                      <Upload size={16} /> Carica
-                    </Btn>
-                    <Btn
-                      variant="ghost"
-                      title="+ Aggiungi"
-                      onClick={() => loadPlaylist(pl.id, 'append', 'A')}
-                    >
-                      + Aggiungi
-                    </Btn>
-                    <Btn
-                      variant="ghost"
-                      title="Elimina playlist"
-                      onClick={() => deletePlaylist(pl.id)}
+              <ul className="divide-y divide-line/40 rounded-xl border border-line bg-inset">
+                {singers.map((s) => (
+                  <li key={s} className="flex items-center justify-between px-3 py-2 text-base">
+                    <span className="font-medium text-text">{s}</span>
+                    <button
+                      onClick={() => removeSinger(s)}
+                      className="p-1 text-muted hover:text-danger"
+                      title="Elimina cantante"
                     >
                       <Trash2 size={16} />
-                    </Btn>
+                    </button>
                   </li>
                 ))}
               </ul>
             )}
           </div>
-        )}
+        </div>
+      )}
 
-        {queueA.length === 0 ? (
-          <div
-            onDragOver={(e) => {
-              e.preventDefault()
-              e.dataTransfer.dropEffect = 'move'
-              setDragOverList('A')
-            }}
-            onDragLeave={() => setDragOverList(null)}
-            onDrop={(e) => {
-              e.preventDefault()
-              setDragOverList(null)
-              try {
-                const data = JSON.parse(e.dataTransfer.getData('text/plain'))
-                if (data?.uid) reorderQueue(data.uid, 'A')
-              } catch {}
-            }}
-            className={`rounded-lg border-2 border-dashed p-4 text-center text-base transition-colors ${
-              dragOverList === 'A' ? 'border-accent bg-accent/10' : 'border-line text-muted'
-            }`}
-          >
-            Scaletta vuota. Trascina qui un brano o aggiungilo dalla libreria.
-          </div>
-        ) : (
-          <ul
-            onDragOver={(e) => {
-              e.preventDefault()
-              e.dataTransfer.dropEffect = 'move'
-            }}
-            onDrop={(e) => {
-              e.preventDefault()
-              try {
-                const data = JSON.parse(e.dataTransfer.getData('text/plain'))
-                if (data?.uid) reorderQueue(data.uid, 'A')
-              } catch {}
-            }}
-            className="max-h-72 space-y-1 overflow-y-auto pr-1"
-          >
-            {queueA.map((q, i) => (
-              <Row
-                key={q.uid}
-                item={q}
-                index={i}
-                which="A"
-                isDragging={draggingUid === q.uid}
-                isDragOver={dragOverUid === q.uid}
-                onDragStart={(e) => {
-                  e.dataTransfer.setData(
-                    'text/plain',
-                    JSON.stringify({ uid: q.uid, source: 'A' }),
-                  )
-                  e.dataTransfer.effectAllowed = 'move'
-                  setDraggingUid(q.uid)
-                }}
-                onDragEnd={() => {
-                  setDraggingUid(null)
-                  setDragOverUid(null)
-                  setDragOverList(null)
-                }}
-                onDragOver={(e) => {
-                  e.preventDefault()
-                  e.stopPropagation()
-                  e.dataTransfer.dropEffect = 'move'
-                  if (dragOverUid !== q.uid) setDragOverUid(q.uid)
-                }}
-                onDragLeave={() => {
-                  if (dragOverUid === q.uid) setDragOverUid(null)
-                }}
-                onDrop={(e) => {
-                  e.preventDefault()
-                  e.stopPropagation()
-                  setDragOverUid(null)
-                  setDraggingUid(null)
-                  try {
-                    const data = JSON.parse(e.dataTransfer.getData('text/plain'))
-                    if (data?.uid) reorderQueue(data.uid, 'A', i)
-                  } catch {}
-                }}
-              />
-            ))}
-          </ul>
-        )}
-      </Panel>
-
-      <Panel
-        title={`Riserva (${queueB.length})`}
-        right={
-          queueB.length > 0 ? (
-            <Btn
-              variant="ghost"
-              title="Svuota riserva"
-              onClick={() => clearQueue('B')}
-            >
-              <Trash2 />
-            </Btn>
-          ) : undefined
-        }
-      >
-        {queueB.length === 0 ? (
-          <div
-            onDragOver={(e) => {
-              e.preventDefault()
-              e.dataTransfer.dropEffect = 'move'
-              setDragOverList('B')
-            }}
-            onDragLeave={() => setDragOverList(null)}
-            onDrop={(e) => {
-              e.preventDefault()
-              setDragOverList(null)
-              try {
-                const data = JSON.parse(e.dataTransfer.getData('text/plain'))
-                if (data?.uid) reorderQueue(data.uid, 'B')
-              } catch {}
-            }}
-            className={`rounded-lg border-2 border-dashed p-4 text-center text-base transition-colors ${
-              dragOverList === 'B' ? 'border-accent bg-accent/10' : 'border-line text-muted'
-            }`}
-          >
-            Una seconda lista per i brani da tenere pronti. Puoi trascinare qui i brani.
-          </div>
-        ) : (
-          <ul
-            onDragOver={(e) => {
-              e.preventDefault()
-              e.dataTransfer.dropEffect = 'move'
-            }}
-            onDrop={(e) => {
-              e.preventDefault()
-              try {
-                const data = JSON.parse(e.dataTransfer.getData('text/plain'))
-                if (data?.uid) reorderQueue(data.uid, 'B')
-              } catch {}
-            }}
-            className="max-h-72 space-y-1 overflow-y-auto pr-1"
-          >
-            {queueB.map((q, i) => (
-              <Row
-                key={q.uid}
-                item={q}
-                index={i}
-                which="B"
-                isDragging={draggingUid === q.uid}
-                isDragOver={dragOverUid === q.uid}
-                onDragStart={(e) => {
-                  e.dataTransfer.setData(
-                    'text/plain',
-                    JSON.stringify({ uid: q.uid, source: 'B' }),
-                  )
-                  e.dataTransfer.effectAllowed = 'move'
-                  setDraggingUid(q.uid)
-                }}
-                onDragEnd={() => {
-                  setDraggingUid(null)
-                  setDragOverUid(null)
-                  setDragOverList(null)
-                }}
-                onDragOver={(e) => {
-                  e.preventDefault()
-                  e.stopPropagation()
-                  e.dataTransfer.dropEffect = 'move'
-                  if (dragOverUid !== q.uid) setDragOverUid(q.uid)
-                }}
-                onDragLeave={() => {
-                  if (dragOverUid === q.uid) setDragOverUid(null)
-                }}
-                onDrop={(e) => {
-                  e.preventDefault()
-                  e.stopPropagation()
-                  setDragOverUid(null)
-                  setDraggingUid(null)
-                  try {
-                    const data = JSON.parse(e.dataTransfer.getData('text/plain'))
-                    if (data?.uid) reorderQueue(data.uid, 'B', i)
-                  } catch {}
-                }}
-              />
-            ))}
-          </ul>
-        )}
-      </Panel>
-    </div>
+      {/* VISTA PLAYLIST SALVATE */}
+      {activeTab === 'saved' && (
+        <div className="space-y-3">
+          {savedPlaylists.length === 0 ? (
+            <div className="text-sm text-muted">Nessuna scaletta salvata finora.</div>
+          ) : (
+            <ul className="divide-y divide-line/40 rounded-xl border border-line bg-inset">
+              {savedPlaylists.map((pl) => (
+                <li key={pl.name} className="flex items-center justify-between p-3">
+                  <div>
+                    <div className="text-base font-bold text-text">{pl.name}</div>
+                    <div className="text-xs text-muted">{pl.items.length} brani</div>
+                  </div>
+                  <div className="flex gap-2">
+                    <Btn
+                      onClick={() => loadPlaylist(pl.name, 'replace', 'A')}
+                      className="text-xs"
+                      title="Carica nella scaletta A"
+                    >
+                      Carica in A
+                    </Btn>
+                    <Btn
+                      variant="ghost"
+                      onClick={() => deletePlaylist(pl.name)}
+                      className="text-muted hover:text-danger"
+                    >
+                      <Trash2 size={16} />
+                    </Btn>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
+    </Panel>
   )
 }

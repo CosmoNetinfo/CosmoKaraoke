@@ -12,23 +12,23 @@
 :root,
 html[data-theme='scuro'] {
   color-scheme: dark;
-  --bg: #0e1224;
-  --header: #151a33;
-  --panel: #171c38;
-  --row: #1d2346;
-  --row-hover: #283060;
-  --inset: #0a0e1d;
-  --btn: #2b3263;
-  --btn-hover: #37407a;
-  --line: #4a5391;
-  --text: #f4f5fa;
-  --muted: #c9cde3;
-  --accent: #5b5fe0;
-  --accent-hover: #6e72ee;
-  --accent-text: #b4bdff;
+  --bg: #090c15;
+  --header: #0e1322;
+  --panel: #11172a;
+  --row: #161e36;
+  --row-hover: #1e2848;
+  --inset: #070910;
+  --btn: #1b233d;
+  --btn-hover: #263156;
+  --line: #2d3b66;
+  --text: #f8fafc;
+  --muted: #94a3b8;
+  --accent: #2563eb;
+  --accent-hover: #3b82f6;
+  --accent-text: #38bdf8;
   --on-accent: #ffffff;
-  --danger: #c2255c;
-  --danger-hover: #d63a70;
+  --danger: #e11d48;
+  --danger-hover: #f43f5e;
   --on-danger: #ffffff;
 }
 

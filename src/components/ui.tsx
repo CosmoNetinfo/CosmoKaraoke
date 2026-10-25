@@ -17,16 +17,21 @@ export function Btn({
   variant?: 'default' | 'primary' | 'danger' | 'ghost'
 }) {
   const styles = {
-    default: 'bg-btn hover:bg-btn-hover text-text border border-line',
-    primary: 'bg-accent hover:bg-accent-hover text-on-accent border border-transparent',
-    danger: 'bg-danger hover:bg-danger-hover text-on-danger border border-transparent',
-    ghost: 'bg-transparent hover:bg-btn text-text border border-transparent',
+    default:
+      'bg-btn hover:bg-btn-hover text-text border border-line shadow-xs transition-all active:scale-[0.98]',
+    primary:
+      'bg-accent hover:bg-accent-hover text-on-accent border border-accent/40 shadow-sm shadow-accent/20 transition-all font-semibold active:scale-[0.98]',
+    danger:
+      'bg-danger hover:bg-danger-hover text-on-danger border border-danger/40 shadow-xs transition-all font-semibold active:scale-[0.98]',
+    ghost:
+      'bg-transparent hover:bg-btn text-muted hover:text-text border border-transparent transition-all',
   }[variant]
+
   return (
     <button
       aria-label={rest['aria-label'] ?? rest.title}
       {...rest}
-      className={`inline-flex min-h-11 min-w-11 items-center justify-center gap-2 rounded-lg px-3 py-1.5 text-base font-medium disabled:cursor-not-allowed disabled:opacity-40 ${styles} ${className}`}
+      className={`inline-flex min-h-11 min-w-11 items-center justify-center gap-2 rounded-xl px-3.5 py-1.5 text-base font-medium disabled:cursor-not-allowed disabled:opacity-35 ${styles} ${className}`}
     >
       {children}
     </button>
@@ -45,14 +50,14 @@ export function Panel({
   className?: string
 }) {
   return (
-    <section className={`rounded-xl border border-line bg-panel shadow-sm ${className}`}>
+    <section className={`rounded-2xl border border-line bg-panel shadow-md overflow-hidden ${className}`}>
       {title && (
-        <header className="flex flex-wrap items-center justify-between gap-2 border-b border-line px-4 py-2.5">
-          <h2 className="text-lg font-bold text-text">{title}</h2>
+        <header className="flex flex-wrap items-center justify-between gap-2 border-b border-line bg-header/60 px-5 py-3">
+          <h2 className="text-lg font-bold tracking-tight text-text">{title}</h2>
           {right}
         </header>
       )}
-      <div className="p-4">{children}</div>
+      <div className="p-4 sm:p-5">{children}</div>
     </section>
   )
 }
@@ -84,14 +89,14 @@ export function Slider({
         step={step}
         value={value}
         onChange={(e) => onChange(Number(e.target.value))}
-        className="h-8 min-w-32 flex-1"
+        className="h-8 min-w-32 flex-1 accent-accent"
       />
       <span className="w-16 text-right font-bold tabular-nums text-text">{display}</span>
     </label>
   )
 }
 
-/** Schede secondarie: una sezione alla volta, così tutto sta in una schermata senza scorrere. */
+/** Schede secondarie: una sezione alla volta, con pillole sagomate moderne. */
 export function SubTabs<T extends string>({
   tabs,
   value,
@@ -99,21 +104,26 @@ export function SubTabs<T extends string>({
 }: {
   tabs: { id: T; label: string }[]
   value: T
-  onChange: (id: T) => void
+  onChange: (tab: T) => void
 }) {
   return (
-    <div role="tablist" className="flex flex-wrap gap-2">
-      {tabs.map((t) => (
-        <Btn
-          key={t.id}
-          role="tab"
-          aria-selected={value === t.id}
-          variant={value === t.id ? 'primary' : 'default'}
-          onClick={() => onChange(t.id)}
-        >
-          {t.label}
-        </Btn>
-      ))}
-    </div>
+    <nav className="inline-flex flex-wrap gap-1 rounded-xl border border-line bg-inset p-1">
+      {tabs.map((t) => {
+        const active = t.id === value
+        return (
+          <button
+            key={t.id}
+            onClick={() => onChange(t.id)}
+            className={`min-h-11 rounded-lg px-3.5 py-1 text-base font-semibold transition-all ${
+              active
+                ? 'bg-accent text-on-accent shadow-xs'
+                : 'text-muted hover:bg-btn hover:text-text'
+            }`}
+          >
+            {t.label}
+          </button>
+        )
+      })}
+    </nav>
   )
 }
