@@ -50,6 +50,7 @@ export function applySettingsToEngine(): void {
   engine.setPitch(st.pitch)
   engine.setVolume(st.volume)
   engine.setVocalRemoval(st.vocalOff)
+  engine.setOutputMono(st.outputMono)
   st.eq.forEach((db, i) => engine.setEq(i, db))
   engine.setMicVolume(st.micVol)
   engine.setEcho(st.echo)

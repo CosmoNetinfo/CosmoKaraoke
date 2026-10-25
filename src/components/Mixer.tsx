@@ -97,6 +97,23 @@ export function Mixer() {
               engine.setTempo(v)
             }}
           />
+          <div className="flex flex-wrap items-center gap-2 text-base">
+            <span className="w-32 shrink-0 text-text">Uscita audio</span>
+            {([false, true] as const).map((mono) => (
+              <Btn
+                key={String(mono)}
+                variant={st.outputMono === mono ? 'primary' : 'default'}
+                aria-pressed={st.outputMono === mono}
+                onClick={() => {
+                  patch({ outputMono: mono })
+                  engine.setOutputMono(mono)
+                }}
+              >
+                {mono ? 'Mono' : 'Stereo'}
+              </Btn>
+            ))}
+            <span className="text-muted">— Mono se l'impianto ha un solo altoparlante</span>
+          </div>
           <label className="flex items-center gap-2 text-base">
             <input
               type="checkbox"

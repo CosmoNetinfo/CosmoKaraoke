@@ -12,6 +12,7 @@ export const DEFAULT_SETTINGS: Settings = {
   pitch: 0,
   tempo: 1,
   vocalOff: false,
+  outputMono: false,
   volume: 0.9,
   micOn: false,
   micVol: 1,

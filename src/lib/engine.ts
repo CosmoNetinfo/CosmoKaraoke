@@ -24,6 +24,7 @@ class Engine {
   private st!: SoundTouchNode
   private eq: BiquadFilterNode[] = []
   private master!: GainNode
+  private outBus!: GainNode
 
   private micStream: MediaStream | null = null
   private micSrc: MediaStreamAudioSourceNode | null = null
@@ -77,12 +78,17 @@ class Engine {
       return b
     })
     this.master = ctx.createGain()
+    // ultimo anello: voce e musica passano di qui, così «Mono» le somma per tutti gli altoparlanti
+    this.outBus = ctx.createGain()
+    this.outBus.channelCountMode = 'explicit'
+    this.outBus.channelCount = 2
+    this.outBus.connect(ctx.destination)
 
     // catena principale
     this.st.connect(this.eq[0])
     for (let i = 0; i < this.eq.length - 1; i++) this.eq[i].connect(this.eq[i + 1])
     this.eq[this.eq.length - 1].connect(this.master)
-    this.master.connect(ctx.destination)
+    this.master.connect(this.outBus)
 
     // microfono + eco (collegato solo quando il microfono è acceso)
     this.micGain = ctx.createGain()
@@ -93,12 +99,12 @@ class Engine {
     this.echoFeedback.gain.value = 0.3
     this.echoSend = ctx.createGain()
     this.echoSend.gain.value = 0
-    this.micGain.connect(ctx.destination)
+    this.micGain.connect(this.outBus)
     this.micGain.connect(this.echoDelay)
     this.echoDelay.connect(this.echoFeedback)
     this.echoFeedback.connect(this.echoDelay)
     this.echoDelay.connect(this.echoSend)
-    this.echoSend.connect(ctx.destination)
+    this.echoSend.connect(this.outBus)
 
     this.rewire()
   }
@@ -209,6 +215,12 @@ class Engine {
 
   setEq(index: number, db: number): void {
     if (this.eq[index]) this.eq[index].gain.value = db
+  }
+
+  /** Mono: musica e voce vengono sommate su un solo canale e uscono uguali da sinistra e destra. */
+  setOutputMono(mono: boolean): void {
+    if (!this.outBus) return
+    this.outBus.channelCount = mono ? 1 : 2
   }
 
   setVocalRemoval(on: boolean): void {
