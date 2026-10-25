@@ -2,23 +2,29 @@
 
 App desktop karaoke per **Windows e macOS**, uso personale, con le stesse funzioni di Karaoke 5 (karaoke5.it) ad eccezione di quelle indicate in "Esclusioni". Tutta l'interfaccia è **in italiano**.
 
-## STATO DEL PROGETTO (aggiornato al 25 ottobre 2026)
+## STATO DEL PROGETTO (aggiornato al 25 ottobre 2026, versione 0.1.13)
 
-Le fasi 0, 1 (in parte), 2, 3, 4 e 5 sono già state realizzate da Claude e caricate su `main`. Leggi il codice esistente prima di scrivere altro e mantieni lo stile.
+Le fasi 0, 2, 3, 4 e 5 sono già state realizzate da Claude e caricate su `main`; la fase 1 è in parte fatta. Leggi il codice esistente prima di scrivere altro e mantieni lo stile (niente punto e virgola, apici singoli, 2 spazi).
+
+**Come verrà usato:** su un **Mac** collegato a un **mixer esterno**. Il microfono va nel mixer, non nel computer: gli effetti voce del programma (riverbero ecc.) sono spenti di default (Impostazioni → Audio → «Usa il microfono dentro il programma»). L'audio esce dall'uscita scelta nel sistema; c'è la scelta Mono/Stereo. Chi lo usa ogni sera è **dislessica e vede poco**.
 
 **Già fatto**
-- Tauri 2 + React + TypeScript + Tailwind, compilazione Windows e Mac con GitHub Actions, **aggiornamenti automatici** (plugin updater, firma, avviso nell'app, `npm run bump`)
-- Libreria da cartelle (MP3+CDG, audio, video; i MIDI/KAR sono elencati ma non riproducibili), ricerca, lettore con decoder CD+G (`src/lib/cdg.ts`)
-- Scaletta + riserva, cantanti, anteprima in cuffia, schermo testi su secondo monitor (finestra `display`), messaggi a schermo
-- Mixer: tonalità/velocità (`@soundtouchjs/audio-worklet`), equalizzatore, devocalizzatore semplice, microfono con eco, jingle, Mix con dissolvenza
-- YouTube con yt-dlp esterno (ricerca, anteprima, download)
+- Tauri 2 + React + TypeScript + Tailwind, compilazione Windows e Mac con GitHub Actions (Windows e Mac in sequenza), **aggiornamenti automatici** firmati, scheda Impostazioni → Aggiornamenti con «Cerca aggiornamenti», `npm run bump`
+- Libreria da cartelle (MP3+CDG, audio, video; i MIDI/KAR sono elencati), ricerca veloce, lettore con decoder CD+G (`src/lib/cdg.ts`)
+- Scaletta + riserva, cantanti, anteprima in cuffia, schermo testi su secondo monitor, messaggi a schermo, **immagine di sfondo** per la TV
+- Scheda **Audio**: tonalità/velocità, equalizzatore, devocalizzatore, uscita Mono/Stereo, Mix con dissolvenza; effetti per il microfono (opzionali)
+- Scheda **Effetti**: 10 effetti sonori creati dal programma (applausi, fischio, rullo…) che si possono togliere e rimettere, file propri, **stacchetti automatici** tra i brani, **musica di sottofondo**, sfondo TV
+- Striscia «Sta suonando» con pulsanti per fermare ogni effetto; tasto Esc
+- YouTube con yt-dlp (pulsante «Scarica yt-dlp» nell'app), ricerca, anteprima, **«In scaletta» / «In riserva»** con download in sottofondo
+- Interfaccia a schede (Impostazioni, Audio, Effetti) pensata per stare in una schermata
 - **Accessibilità** (vedi sotto)
 
 **Ancora da fare** (in quest'ordine)
-1. Riproduzione **MIDI/KAR** con testi sincronizzati (`src/lib/kar.ts`) — fase 1
+1. Riproduzione **MIDI/KAR** con testi sincronizzati (`src/lib/kar.ts`) — fase 1, **in corso da parte di Antigravity**
 2. Libreria su **SQLite + FTS5** al posto del file JSON, lettura dei tag con `lofty`, supporto ai file `.zip` con MP3+G — fase 1
 3. Riordino della scaletta con trascinamento, salvataggio/caricamento di playlist con nome — fase 2
 4. **Prenotazioni da telefono** con QR code (fase 6), **quiz** (fase 7), **sincronizzatore di testi** (fase 8), **assistente vocale IA** (fase 9)
+5. **Grafica professionale (fase 10):** nuovo nome (quello attuale è provvisorio), logo e icona dell'app con la mascotte di Cosmonet, restyling di tutte le schermate e della schermata TV, nuove icone, schermata iniziale. Regole: mantieni caratteri per la dislessia, testo ingrandibile e i tre temi (Scuro, Crema, Alto contrasto) funzionanti; ogni schermata deve stare in una finestra senza scorrere; pulsanti almeno 44 px; niente colori fissi nel codice (solo i token del tema). Prima si approvano i bozzetti, poi si scrive il codice.
 
 ## REQUISITI DI ACCESSIBILITÀ (valgono per ogni nuova schermata)
 
