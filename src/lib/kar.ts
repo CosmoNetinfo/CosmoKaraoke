@@ -365,7 +365,7 @@ class KarEngine {
 
     this.initPromise = (async () => {
       await context.audioWorklet.addModule(spessaProcessorUrl)
-      const synth = new WorkletSynthesizer(context, { oneOutput: true })
+      const synth = new WorkletSynthesizer(context)
       synth.connect(destination)
 
       // Carica il SoundFont compatto incluso localmente (TimGM6mb.sf2, 5.7 MB)
