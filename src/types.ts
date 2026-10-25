@@ -88,7 +88,7 @@ export interface Settings {
 
 /** Stato inviato dalla finestra di controllo allo schermo testi. */
 export interface DisplayState {
-  kind: 'idle' | 'cdg' | 'video' | 'audio'
+  kind: 'idle' | 'cdg' | 'video' | 'audio' | 'kar'
   mediaUrl: string | null
   cdgUrl: string | null
   title: string

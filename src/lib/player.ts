@@ -3,6 +3,7 @@ import { emit, listen } from '@tauri-apps/api/event'
 import type { DisplayMessage, DisplayState, QueueItem, Settings } from '../types'
 import { BUILTIN_EFFECTS, playBuiltinEffect } from './effects'
 import { engine } from './engine'
+import { karEngine } from './kar'
 import { useStore } from './store'
 import { ensureDownloaded, resumeYoutubeDownloads } from './youtube'
 
@@ -15,7 +16,10 @@ function buildDisplayState(): DisplayState {
   const next = s.queueA[0]
   let kind: DisplayState['kind'] = 'idle'
   if (cur) {
-    kind = cur.song.format === 'cdg' ? 'cdg' : cur.song.format === 'video' ? 'video' : 'audio'
+    if (cur.song.format === 'cdg') kind = 'cdg'
+    else if (cur.song.format === 'video') kind = 'video'
+    else if (cur.song.format === 'kar') kind = 'kar'
+    else kind = 'audio'
   }
   return {
     kind,
@@ -26,8 +30,8 @@ function buildDisplayState(): DisplayState {
     singer: cur?.singer ?? '',
     next: next ? `${next.singer ? next.singer + ' - ' : ''}${next.song.title}` : '',
     playing: s.playing,
-    position: engine.position,
-    duration: engine.duration,
+    position: cur?.song.format === 'kar' ? karEngine.position : engine.position,
+    duration: cur?.song.format === 'kar' ? karEngine.duration : engine.duration,
     tempo: s.settings.tempo,
     black: s.displayBlack,
     bg: s.settings.displayBg,
@@ -69,6 +73,27 @@ export function applySettingsToEngine(): void {
   engine.setMicVolume(st.micVol)
   engine.setEcho(st.echo)
   applyMicFx(st)
+  const cur = useStore.getState().current
+  if (cur?.song.format === 'kar') {
+    karEngine.setTempo(cur.interlude ? 1 : st.tempo)
+    karEngine.setPitch(cur.interlude ? 0 : st.pitch)
+  }
+}
+
+export function setPitch(semitones: number): void {
+  engine.setPitch(semitones)
+  const cur = useStore.getState().current
+  if (cur?.song.format === 'kar') {
+    karEngine.setPitch(semitones)
+  }
+}
+
+export function setTempo(tempo: number): void {
+  engine.setTempo(tempo)
+  const cur = useStore.getState().current
+  if (cur?.song.format === 'kar') {
+    karEngine.setTempo(tempo)
+  }
 }
 
 /** Da chiamare una sola volta all'avvio della finestra di controllo. */
@@ -79,6 +104,9 @@ export async function initPlayer(): Promise<void> {
   applySettingsToEngine()
 
   engine.media.addEventListener('ended', () => {
+    void onSongEnded()
+  })
+  karEngine.onEnded(() => {
     void onSongEnded()
   })
 
@@ -106,23 +134,63 @@ export async function initPlayer(): Promise<void> {
 
   let n = 0
   setInterval(() => {
-    useStore.getState().patch({ position: engine.position, duration: engine.duration })
-    if (engine.isPlaying && ++n % 3 === 0) pushDisplay()
+    const cur = useStore.getState().current
+    const isKar = cur?.song.format === 'kar'
+    const pos = isKar ? karEngine.position : engine.position
+    const dur = isKar ? karEngine.duration : engine.duration
+    const isPlaying = isKar ? karEngine.isPlaying : engine.isPlaying
+    useStore.getState().patch({ position: pos, duration: dur, playing: isPlaying })
+    if (isPlaying && ++n % 3 === 0) pushDisplay()
   }, 100)
 
   resumeYoutubeDownloads()
 
   // lo schermo testi, appena aperto, chiede lo stato corrente
-  await listen('display:ready', () => pushDisplay())
+  await listen('display:ready', () => {
+    const cur = useStore.getState().current
+    if (cur?.song.format === 'kar') {
+      void emit('display:kar', karEngine.lines)
+    }
+    pushDisplay()
+  })
 }
 
 export async function startPlayback(item: QueueItem): Promise<void> {
   const store = useStore.getState()
   if (item.song.format === 'kar') {
-    store.notify('I file MIDI/KAR non sono ancora supportati in questa versione.')
+    engine.stop()
+    karEngine.stop()
     store.removeFromQueue(item.uid)
+    store.patch({ current: item, position: 0, playing: true, karLines: [] })
+    const { settings } = store
+    try {
+      const res = await fetch(convertFileSrc(item.song.path))
+      const buf = await res.arrayBuffer()
+      const ctx = engine.audioContext!
+      const dst = engine.inputNode!
+      await karEngine.init(ctx, dst)
+      await karEngine.load(
+        buf,
+        item.interlude ? 0 : settings.pitch,
+        item.interlude ? 1 : settings.tempo,
+      )
+      const lines = karEngine.lines
+      useStore.getState().patch({ duration: karEngine.duration, karLines: lines })
+      void emit('display:kar', lines)
+      pushDisplay()
+      await karEngine.play()
+      pushDisplay()
+    } catch (e) {
+      useStore.getState().notify(String(e instanceof Error ? e.message : e))
+      useStore.getState().patch({ current: null, playing: false, karLines: [] })
+      void emit('display:kar', [])
+      pushDisplay()
+    }
     return
   }
+  karEngine.stop()
+  store.patch({ karLines: [] })
+  void emit('display:kar', [])
   store.removeFromQueue(item.uid)
   if (item.song.ytId && !item.song.path) {
     // brano di YouTube non ancora scaricato: lo finisco di scaricare e poi parte
@@ -204,7 +272,15 @@ export async function playNext(): Promise<void> {
   const next = useStore.getState().queueA[0]
   if (!next) {
     engine.stop()
-    useStore.getState().patch({ current: null, playing: false, position: 0, duration: 0 })
+    karEngine.stop()
+    useStore.getState().patch({
+      current: null,
+      playing: false,
+      position: 0,
+      duration: 0,
+      karLines: [],
+    })
+    void emit('display:kar', [])
     pushDisplay()
     return
   }
@@ -218,25 +294,52 @@ export async function mixNext(): Promise<void> {
     useStore.getState().notify("La scaletta è vuota: non c'è un brano successivo.")
     return
   }
-  if (engine.isPlaying) await engine.fadeOut(settings.fadeSec)
+  const cur = useStore.getState().current
+  const isPlaying = cur?.song.format === 'kar' ? karEngine.isPlaying : engine.isPlaying
+  if (isPlaying) await engine.fadeOut(settings.fadeSec)
+  if (cur?.song.format === 'kar') karEngine.stop()
   await playNext()
   engine.fadeIn(0.6)
 }
 
 export async function togglePause(): Promise<void> {
-  if (engine.isPlaying) engine.pause()
-  else if (useStore.getState().current) await engine.play()
-  else await playNext()
+  const cur = useStore.getState().current
+  const isKar = cur?.song.format === 'kar'
+  if (isKar) {
+    if (karEngine.isPlaying) karEngine.pause()
+    else if (cur) await karEngine.play()
+    else await playNext()
+    useStore.getState().patch({ playing: karEngine.isPlaying })
+  } else {
+    if (engine.isPlaying) engine.pause()
+    else if (cur) await engine.play()
+    else await playNext()
+    useStore.getState().patch({ playing: engine.isPlaying })
+  }
+  pushDisplay()
 }
 
 export function stopAll(): void {
   engine.stop()
-  useStore.getState().patch({ current: null, playing: false, position: 0, duration: 0 })
+  karEngine.stop()
+  useStore.getState().patch({
+    current: null,
+    playing: false,
+    position: 0,
+    duration: 0,
+    karLines: [],
+  })
+  void emit('display:kar', [])
   pushDisplay()
 }
 
 export function seekTo(seconds: number): void {
-  engine.seek(seconds)
+  const cur = useStore.getState().current
+  if (cur?.song.format === 'kar') {
+    karEngine.seek(seconds)
+  } else {
+    engine.seek(seconds)
+  }
   useStore.getState().patch({ position: seconds })
   pushDisplay()
 }

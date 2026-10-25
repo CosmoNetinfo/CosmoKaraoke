@@ -1,7 +1,7 @@
 {
   "name": "cosmokaraoke",
   "private": true,
-  "version": "0.1.13",
+  "version": "0.1.14",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -24,6 +24,7 @@
     "lucide-react": "^1.61.0",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
+    "spessasynth_lib": "^4.3.14",
     "tailwindcss": "^4.3.3",
     "zustand": "^5.0.16"
   },

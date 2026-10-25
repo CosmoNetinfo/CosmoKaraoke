@@ -1,6 +1,6 @@
 import { Mic, MicOff, RotateCcw } from 'lucide-react'
 import { engine, EQ_FREQS } from '../lib/engine'
-import { applyMicFx, applySettingsToEngine } from '../lib/player'
+import { applyMicFx, applySettingsToEngine, setPitch, setTempo } from '../lib/player'
 import { DEFAULT_SETTINGS, useStore } from '../lib/store'
 import type { Settings } from '../types'
 import { useState } from 'react'
@@ -92,6 +92,8 @@ export function Mixer() {
   const [section, setSection] = useState<Section>('brano')
   const st = useStore((s) => s.settings)
   const patch = useStore((s) => s.patchSettings)
+  const current = useStore((s) => s.current)
+  const isKar = current?.song.format === 'kar'
   const notify = useStore((s) => s.notify)
 
   const setFx = (fx: Partial<Settings>) => {
@@ -163,7 +165,7 @@ export function Mixer() {
                 display={`${st.pitch > 0 ? '+' : ''}${st.pitch}`}
                 onChange={(v) => {
                   patch({ pitch: v })
-                  engine.setPitch(v)
+                  setPitch(v)
                 }}
               />
               <Slider
@@ -175,7 +177,7 @@ export function Mixer() {
                 display={`${Math.round(st.tempo * 100)}%`}
                 onChange={(v) => {
                   patch({ tempo: v })
-                  engine.setTempo(v)
+                  setTempo(v)
                 }}
               />
               <div className="flex flex-wrap items-center gap-2 text-base">
@@ -195,10 +197,11 @@ export function Mixer() {
                 ))}
                 <span className="text-muted">— Mono se l'impianto ha un solo altoparlante</span>
               </div>
-              <label className="flex items-center gap-2 text-base">
+              <label className={`flex items-center gap-2 text-base ${isKar ? 'cursor-not-allowed opacity-50' : ''}`}>
                 <input
                   type="checkbox"
                   checked={st.vocalOff}
+                  disabled={isKar}
                   onChange={(e) => {
                     patch({ vocalOff: e.target.checked })
                     engine.setVocalRemoval(e.target.checked)
@@ -206,7 +209,9 @@ export function Mixer() {
                 />
                 Togli la voce (devocalizzatore)
                 <span className="text-base text-muted">
-                  — funziona meglio sui brani in stereo con la voce al centro
+                  {isKar
+                    ? '— non disponibile per i file MIDI/KAR (senza traccia vocale registrata)'
+                    : '— funziona meglio sui brani in stereo con la voce al centro'}
                 </span>
               </label>
               <Slider

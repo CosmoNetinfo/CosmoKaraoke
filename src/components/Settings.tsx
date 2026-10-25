@@ -93,9 +93,8 @@ export function Settings() {
               </ul>
             )}
             <p className="mt-2 text-base text-muted">
-              Formati letti: MP3/WMA con file .cdg dallo stesso nome, video (MP4, MKV, AVI, FLV…) e
-              audio semplice. I file MIDI/KAR compaiono in elenco ma la riproduzione arriverà in una
-              versione successiva.
+              Formati letti: MP3/WMA con file .cdg dallo stesso nome, video (MP4, MKV, AVI, FLV…),
+              MIDI/KAR (con testi sincronizzati) e audio semplice.
             </p>
           </Panel>
         )}

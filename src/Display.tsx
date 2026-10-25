@@ -1,12 +1,15 @@
 import { emit, listen } from '@tauri-apps/api/event'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { CdgCanvas } from './components/CdgCanvas'
+import { KarDisplay } from './components/KarDisplay'
+import type { KarLine } from './lib/kar'
 import type { DisplayMessage, DisplayState } from './types'
 
 /** Finestra a schermo intero per la TV / il secondo monitor: mostra solo testi e messaggi. */
 export function Display() {
   const [st, setSt] = useState<DisplayState | null>(null)
   const [message, setMessage] = useState('')
+  const [karLines, setKarLines] = useState<KarLine[]>([])
   const [, tick] = useState(0)
   const base = useRef({ pos: 0, at: performance.now(), playing: false, tempo: 1 })
   const videoRef = useRef<HTMLVideoElement>(null)
@@ -32,6 +35,7 @@ export function Display() {
           playing: p.playing,
           tempo: p.tempo,
         }
+        if (p.kind !== 'kar') setKarLines([])
         setSt(p)
       })
       const u2 = await listen<DisplayMessage>('display:message', (e) => {
@@ -41,12 +45,16 @@ export function Display() {
           msgTimer.current = setTimeout(() => setMessage(''), e.payload.seconds * 1000)
         }
       })
+      const u3 = await listen<KarLine[]>('display:kar', (e) => {
+        setKarLines(e.payload ?? [])
+      })
       if (!alive) {
         u1()
         u2()
+        u3()
         return
       }
-      unlisten.push(u1, u2)
+      unlisten.push(u1, u2, u3)
       await emit('display:ready')
     }
     void setup()
@@ -79,7 +87,8 @@ export function Display() {
   const kind = st?.kind ?? 'idle'
   const remaining = st && st.duration > 0 ? st.duration - pos : Infinity
   const showSinger = !!st?.singer && kind !== 'idle' && pos < 12
-  const showNext = !!st?.next && (kind === 'idle' || kind === 'audio' || remaining < 25)
+  const isNoLyricsKar = kind === 'kar' && karLines.length === 0
+  const showNext = !!st?.next && (kind === 'idle' || kind === 'audio' || isNoLyricsKar || remaining < 25)
 
   if (st?.black) return <div style={{ position: 'fixed', inset: 0, background: '#000' }} />
 
@@ -89,7 +98,7 @@ export function Display() {
         position: 'fixed',
         inset: 0,
         background:
-          st?.bgImage && (kind === 'idle' || kind === 'audio')
+          st?.bgImage && (kind === 'idle' || kind === 'audio' || isNoLyricsKar)
             ? `center / cover no-repeat url("${st.bgImage}"), ${st?.bg ?? '#0b1020'}`
             : (st?.bg ?? '#0b1020'),
         color: '#fff',
@@ -112,7 +121,15 @@ export function Display() {
           style={{ width: '100%', height: '100%', objectFit: 'contain', background: '#000' }}
         />
       )}
-      {(kind === 'idle' || kind === 'audio') && (
+      {kind === 'kar' && karLines.length > 0 && (
+        <KarDisplay
+          lines={karLines}
+          getPosition={getPos}
+          textScale={k}
+          className="h-full w-full"
+        />
+      )}
+      {(kind === 'idle' || kind === 'audio' || isNoLyricsKar) && (
         <div
           style={{
             position: 'absolute',
@@ -130,7 +147,7 @@ export function Display() {
           <div style={{ fontSize: `${5 * k}vw`, fontWeight: 700, lineHeight: 1.2 }}>
             {kind === 'idle' ? 'CosmoKaraoke' : st?.title}
           </div>
-          {kind === 'audio' && st?.artist && (
+          {(kind === 'audio' || kind === 'kar') && st?.artist && (
             <div style={{ fontSize: `${3 * k}vw`, opacity: 0.95 }}>{st.artist}</div>
           )}
           {kind === 'idle' && (

@@ -409,7 +409,7 @@ dependencies = [
 
 [[package]]
 name = "cosmokaraoke"
-version = "0.1.1"
+version = "0.1.13"
 dependencies = [
  "serde",
  "serde_json",

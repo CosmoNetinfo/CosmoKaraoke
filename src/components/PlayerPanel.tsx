@@ -1,9 +1,11 @@
-import { Disc3, Pause, Play, Send, SkipForward, Square, Waves } from 'lucide-react'
+import { Disc3, Music, Pause, Play, Send, SkipForward, Square, Waves } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { engine } from '../lib/engine'
 import { mixNext, playNext, seekTo, sendDisplayMessage, stopAll, togglePause } from '../lib/player'
 import { useStore } from '../lib/store'
 import { CdgCanvas } from './CdgCanvas'
+import { KarDisplay } from './KarDisplay'
+import { karEngine } from '../lib/kar'
 import { Btn, fmtTime } from './ui'
 import { convertFileSrc } from '@tauri-apps/api/core'
 
@@ -12,6 +14,7 @@ export function PlayerPanel() {
   const playing = useStore((s) => s.playing)
   const position = useStore((s) => s.position)
   const duration = useStore((s) => s.duration)
+  const karLines = useStore((s) => s.karLines)
   const hasNext = useStore((s) => s.queueA.length > 0)
   const [text, setText] = useState('')
   const [seconds, setSeconds] = useState(10)
@@ -27,7 +30,7 @@ export function PlayerPanel() {
     }
   }, [])
 
-  const getPos = useCallback(() => engine.position, [])
+  const getPos = useCallback(() => (current?.song.format === 'kar' ? karEngine.position : engine.position), [current])
   const format = current?.song.format
   const cdgUrl = current?.song.cdg ? convertFileSrc(current.song.cdg) : null
 
@@ -44,14 +47,25 @@ export function PlayerPanel() {
         {format === 'cdg' && (
           <CdgCanvas url={cdgUrl} getPosition={getPos} className="absolute inset-0 h-full w-full object-contain" />
         )}
-        {format !== 'cdg' && format !== 'video' && (
+        {format === 'kar' && karLines.length > 0 && (
+          <KarDisplay lines={karLines} getPosition={getPos} textScale={0.8} className="absolute inset-0 h-full w-full" />
+        )}
+        {format !== 'cdg' && format !== 'video' && (format !== 'kar' || karLines.length === 0) && (
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-muted">
             {format === 'audio' ? (
               <Waves style={{ width: '3.5rem', height: '3.5rem' }} />
+            ) : format === 'kar' ? (
+              <Music style={{ width: '3.5rem', height: '3.5rem' }} />
             ) : (
               <Disc3 style={{ width: '3.5rem', height: '3.5rem' }} />
             )}
-            <span className="text-base">{current ? 'Solo audio' : 'Nessun brano in riproduzione'}</span>
+            <span className="text-base">
+              {current
+                ? format === 'kar'
+                  ? 'MIDI strumentale (senza testo)'
+                  : 'Solo audio'
+                : 'Nessun brano in riproduzione'}
+            </span>
           </div>
         )}
       </div>

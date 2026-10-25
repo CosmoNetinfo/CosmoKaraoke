@@ -30,3 +30,6 @@ src-tauri/gen
 # Chiavi: non vanno mai caricate
 *.key
 *.key.pub.bak
+
+# Backup locali temporanei
+_local_backup/

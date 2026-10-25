@@ -19,7 +19,7 @@ Programma karaoke per **Windows e Mac**, pensato per essere facile da leggere: c
    - MP3/WMA con il file `.cdg` dallo stesso nome (CD+G)
    - video (MP4, MKV, AVI, FLV…)
    - audio semplice (senza testo)
-   - MIDI/KAR: compaiono in elenco, ma la riproduzione non c'è ancora
+   - MIDI/KAR: con testi sincronizzati e sintetizzatore integrato
 2. **Impostazioni → Schermo testi**: scegli la TV o il secondo monitor, poi in alto premi **Apri schermo testi**.
 3. **Libreria**: cerca un brano e usa **Riproduci subito**, **Aggiungi alla scaletta** o **Aggiungi alla riserva**.
 4. **Cantanti**: aggiungi i nomi e assegna ogni brano a chi canta. Il nome compare sulla TV.
@@ -82,4 +82,4 @@ Struttura: interfaccia in `src/` (React + TypeScript + Tailwind), parte nativa i
 
 ## Licenze
 
-Codice del progetto: uso personale. Componenti di terzi: Tauri (MIT/Apache-2.0), React (MIT), SoundTouchJS (MPL-2.0), lucide (ISC), caratteri Atkinson Hyperlegible, Lexend e OpenDyslexic (SIL Open Font License 1.1).
+Codice del progetto: uso personale. Componenti di terzi: Tauri (MIT/Apache-2.0), React (MIT), SoundTouchJS (MPL-2.0), spessasynth_lib (Apache-2.0), SoundFont TimGM6mb (GPL, 5,7 MB in public/soundfont/TimGM6mb.sf2), lucide (ISC), caratteri Atkinson Hyperlegible, Lexend e OpenDyslexic (SIL Open Font License 1.1).

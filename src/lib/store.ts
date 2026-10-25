@@ -1,6 +1,7 @@
 import { invoke } from '@tauri-apps/api/core'
 import { create } from 'zustand'
 import type { Jingle, QueueItem, Settings, Song } from '../types'
+import type { KarLine } from './kar'
 
 export const DEFAULT_SETTINGS: Settings = {
   fadeSec: 3,
@@ -66,6 +67,7 @@ interface AppState {
   playing: boolean
   position: number
   duration: number
+  karLines: KarLine[]
   displayBlack: boolean
   displayOpen: boolean
   jingles: Jingle[]
@@ -118,6 +120,7 @@ export const useStore = create<AppState>((set, get) => ({
   playing: false,
   position: 0,
   duration: 0,
+  karLines: [],
   displayBlack: false,
   displayOpen: false,
   jingles: [],

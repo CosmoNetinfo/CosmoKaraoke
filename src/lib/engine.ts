@@ -62,6 +62,14 @@ class Engine {
     return this.ready
   }
 
+  get audioContext(): AudioContext | null {
+    return this.ctx
+  }
+
+  get inputNode(): AudioNode | null {
+    return this.eq[0] ?? this.outBus ?? null
+  }
+
   private async build(): Promise<void> {
     const ctx = new AudioContext({ latencyHint: 'interactive' })
     this.ctx = ctx
