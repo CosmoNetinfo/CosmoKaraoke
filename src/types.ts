@@ -8,6 +8,9 @@ export interface Song {
   format: Format
   ext: string
   cdg: string | null
+  /** brano preso da YouTube: finché non è scaricato il file non c'è */
+  ytId?: string
+  yt?: 'downloading' | 'error'
 }
 
 export interface QueueItem {

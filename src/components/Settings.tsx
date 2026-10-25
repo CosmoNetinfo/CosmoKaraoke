@@ -1,9 +1,9 @@
 import { invoke } from '@tauri-apps/api/core'
 import { open } from '@tauri-apps/plugin-dialog'
-import { FolderPlus, RefreshCw, Trash2 } from 'lucide-react'
+import { FolderPlus, ImagePlus, RefreshCw, Trash2 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { engine } from '../lib/engine'
-import { previewSupported } from '../lib/player'
+import { previewSupported, pushDisplay } from '../lib/player'
 import { useStore } from '../lib/store'
 import type { MonitorInfo } from '../types'
 import { Btn, Panel, Slider, SubTabs } from './ui'
@@ -127,6 +127,40 @@ export function Settings() {
                   className="h-10 w-16 rounded border-2 border-line bg-transparent"
                 />
               </label>
+              <div className="flex flex-wrap items-center gap-3">
+                <span className="w-32 shrink-0 text-text">Immagine di sfondo</span>
+                <Btn
+                  onClick={() =>
+                    void open({
+                      multiple: false,
+                      filters: [
+                        {
+                          name: 'Immagini',
+                          extensions: ['png', 'jpg', 'jpeg', 'webp', 'gif', 'bmp'],
+                        },
+                      ],
+                    }).then((f) => {
+                      if (typeof f === 'string') {
+                        patch({ displayImage: f })
+                        queueMicrotask(pushDisplay)
+                      }
+                    })
+                  }
+                >
+                  <ImagePlus /> {st.displayImage ? 'Cambia immagine' : 'Scegli immagine'}
+                </Btn>
+                {st.displayImage && (
+                  <Btn
+                    variant="ghost"
+                    onClick={() => {
+                      patch({ displayImage: '' })
+                      queueMicrotask(pushDisplay)
+                    }}
+                  >
+                    <Trash2 /> Togli
+                  </Btn>
+                )}
+              </div>
               <Slider
                 label="Grandezza testi"
                 min={1}

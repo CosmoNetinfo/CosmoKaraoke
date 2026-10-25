@@ -1,7 +1,8 @@
 import { invoke } from '@tauri-apps/api/core'
-import { Download, Eye, Loader2, Search, X } from 'lucide-react'
+import { Download, Eye, ListPlus, Loader2, Plus, Search, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useStore } from '../lib/store'
+import { queueYoutube } from '../lib/youtube'
 import type { Song, YtItem } from '../types'
 import { Btn, fmtTime } from './ui'
 
@@ -14,7 +15,6 @@ function fileStem(path: string): string {
 export function YouTube() {
   const settings = useStore((s) => s.settings)
   const notify = useStore((s) => s.notify)
-  const enqueue = useStore((s) => s.enqueue)
   const [version, setVersion] = useState<string | null>(null)
   const [missing, setMissing] = useState('')
   const [installing, setInstalling] = useState(false)
@@ -72,8 +72,7 @@ export function YouTube() {
         ext: 'mp4',
         cdg: null,
       }
-      enqueue(song, 'A')
-      notify(`Scaricato e messo in scaletta: ${song.title}`)
+      notify(`Scaricato: ${song.title}`)
     } catch (e) {
       notify(String(e))
     } finally {
@@ -139,15 +138,20 @@ export function YouTube() {
             </Btn>
             <Btn
               variant="primary"
-              title="Scarica e metti in scaletta"
+              title="Metti in scaletta (si scarica da solo)"
+              onClick={() => queueYoutube(r, 'A')}
+            >
+              <ListPlus /> In scaletta
+            </Btn>
+            <Btn title="Metti in riserva" onClick={() => queueYoutube(r, 'B')}>
+              <Plus />
+            </Btn>
+            <Btn
+              title="Solo scarica il video"
               disabled={downloading[r.id]}
               onClick={() => void download(r)}
             >
-              {downloading[r.id] ? (
-                <Loader2 className="animate-spin" />
-              ) : (
-                <Download />
-              )}
+              {downloading[r.id] ? <Loader2 className="animate-spin" /> : <Download />}
             </Btn>
           </li>
         ))}

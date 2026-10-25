@@ -17,6 +17,12 @@ function Row({ item, index, which }: { item: QueueItem; index: number; which: 'A
       <span className="w-5 text-center text-base tabular-nums text-muted">{index + 1}</span>
       <div className="min-w-0 flex-1">
         <div className="truncate text-base font-medium">{item.song.title}</div>
+        {item.song.yt === 'downloading' && (
+          <div className="text-base text-muted">Scarico da YouTube…</div>
+        )}
+        {item.song.yt === 'error' && (
+          <div className="text-base text-danger">Download non riuscito</div>
+        )}
         <select
           value={item.singer}
           onChange={(e) => setSingerOf(item.uid, e.target.value)}
@@ -98,7 +104,11 @@ export function Playlists() {
                 <button onClick={() => patch({ activeSinger: n })} title="Usa per i prossimi brani">
                   {n}
                 </button>
-                <button onClick={() => removeSinger(n)} title="Elimina" className="opacity-60 hover:opacity-100">
+                <button
+                  onClick={() => removeSinger(n)}
+                  title="Elimina"
+                  className="opacity-60 hover:opacity-100"
+                >
                   <X />
                 </button>
               </span>

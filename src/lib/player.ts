@@ -4,6 +4,7 @@ import type { DisplayMessage, DisplayState, QueueItem, Settings } from '../types
 import { BUILTIN_EFFECTS, playBuiltinEffect } from './effects'
 import { engine } from './engine'
 import { useStore } from './store'
+import { ensureDownloaded, resumeYoutubeDownloads } from './youtube'
 
 let started = false
 
@@ -109,6 +110,8 @@ export async function initPlayer(): Promise<void> {
     if (engine.isPlaying && ++n % 3 === 0) pushDisplay()
   }, 100)
 
+  resumeYoutubeDownloads()
+
   // lo schermo testi, appena aperto, chiede lo stato corrente
   await listen('display:ready', () => pushDisplay())
 }
@@ -121,6 +124,20 @@ export async function startPlayback(item: QueueItem): Promise<void> {
     return
   }
   store.removeFromQueue(item.uid)
+  if (item.song.ytId && !item.song.path) {
+    // brano di YouTube non ancora scaricato: lo finisco di scaricare e poi parte
+    store.notify('Sto scaricando il brano da YouTube: parte appena è pronto…')
+    store.patch({ current: item, position: 0 })
+    try {
+      const path = await ensureDownloaded(item.song.ytId)
+      item = { ...item, song: { ...item.song, path, id: path, yt: undefined } }
+      store.patch({ current: item })
+    } catch {
+      useStore.getState().patch({ current: null })
+      void playNext()
+      return
+    }
+  }
   store.patch({ current: item, position: 0 })
   try {
     await engine.load(convertFileSrc(item.song.path))
