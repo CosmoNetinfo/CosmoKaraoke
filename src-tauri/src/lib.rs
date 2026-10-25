@@ -1,12 +1,18 @@
 use serde::Serialize;
 mod db;
+mod server;
 
 use db::{
     extract_zip_song, load_songs_from_db, open_db, save_songs_to_db, scan_directories,
     search_songs_fts, ExtractedZipSong, Song,
 };
+use server::{
+    get_lan_ip, BookingRequest, LiveMessage, LiveServerConfig, LiveServerController,
+    NowPlayingInfo, SingerScore,
+};
 use std::path::PathBuf;
 use std::process::Command;
+use std::sync::Arc;
 use tauri::{Manager, WebviewUrl, WebviewWindowBuilder};
 
 // ---------------------------------------------------------------------------
@@ -373,6 +379,198 @@ async fn close_display(app: tauri::AppHandle) -> Result<(), String> {
 }
 
 // ---------------------------------------------------------------------------
+// Server LAN per prenotazioni da telefono (Fase 6)
+// ---------------------------------------------------------------------------
+
+#[derive(Serialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct LiveServerInfo {
+    pub running: bool,
+    pub ip: String,
+    pub port: u16,
+    pub url: String,
+    pub config: LiveServerConfig,
+    pub pending_count: usize,
+    pub message_count: usize,
+}
+
+#[tauri::command]
+async fn start_live_server(
+    server: tauri::State<'_, Arc<tokio::sync::Mutex<LiveServerController>>>,
+    port: Option<u16>,
+) -> Result<LiveServerInfo, String> {
+    let mut c = server.lock().await;
+    let target_port = port.unwrap_or(c.port);
+    let url = c.start(target_port).await?;
+    let ip = get_lan_ip();
+    let s = c.state.lock().await;
+    Ok(LiveServerInfo {
+        running: true,
+        ip,
+        port: target_port,
+        url,
+        config: s.config.clone(),
+        pending_count: s.pending_bookings.len(),
+        message_count: s.messages.len(),
+    })
+}
+
+#[tauri::command]
+async fn stop_live_server(
+    server: tauri::State<'_, Arc<tokio::sync::Mutex<LiveServerController>>>,
+) -> Result<(), String> {
+    let mut c = server.lock().await;
+    c.stop().await;
+    Ok(())
+}
+
+#[tauri::command]
+async fn get_live_server_info(
+    server: tauri::State<'_, Arc<tokio::sync::Mutex<LiveServerController>>>,
+) -> Result<LiveServerInfo, String> {
+    let c = server.lock().await;
+    let s = c.state.lock().await;
+    let ip = get_lan_ip();
+    let port = c.port;
+    let url = format!("http://{ip}:{port}");
+    Ok(LiveServerInfo {
+        running: c.running,
+        ip,
+        port,
+        url,
+        config: s.config.clone(),
+        pending_count: s.pending_bookings.len(),
+        message_count: s.messages.len(),
+    })
+}
+
+#[tauri::command]
+async fn update_live_config(
+    server: tauri::State<'_, Arc<tokio::sync::Mutex<LiveServerController>>>,
+    config: LiveServerConfig,
+) -> Result<(), String> {
+    let c = server.lock().await;
+    let mut s = c.state.lock().await;
+    s.config = config.clone();
+    let _ = s.tx_ws.send(serde_json::to_string(&serde_json::json!({
+        "type": "status",
+        "payload": {
+            "roomName": config.room_name,
+            "allowBookings": config.allow_bookings,
+        }
+    })).unwrap_or_default());
+    Ok(())
+}
+
+#[tauri::command]
+async fn get_live_pending_bookings(
+    server: tauri::State<'_, Arc<tokio::sync::Mutex<LiveServerController>>>,
+) -> Result<Vec<BookingRequest>, String> {
+    let c = server.lock().await;
+    let s = c.state.lock().await;
+    Ok(s.pending_bookings.clone())
+}
+
+#[tauri::command]
+async fn approve_booking(
+    server: tauri::State<'_, Arc<tokio::sync::Mutex<LiveServerController>>>,
+    id: String,
+) -> Result<Option<BookingRequest>, String> {
+    let c = server.lock().await;
+    let mut s = c.state.lock().await;
+    if let Some(pos) = s.pending_bookings.iter().position(|b| b.id == id) {
+        let req = s.pending_bookings.remove(pos);
+        let _ = s.tx_ws.send(serde_json::to_string(&serde_json::json!({
+            "type": "booking_approved",
+            "payload": { "id": id, "singer": req.singer, "title": req.title }
+        })).unwrap_or_default());
+        Ok(Some(req))
+    } else {
+        Ok(None)
+    }
+}
+
+#[tauri::command]
+async fn reject_booking(
+    server: tauri::State<'_, Arc<tokio::sync::Mutex<LiveServerController>>>,
+    id: String,
+) -> Result<(), String> {
+    let c = server.lock().await;
+    let mut s = c.state.lock().await;
+    s.pending_bookings.retain(|b| b.id != id);
+    let _ = s.tx_ws.send(serde_json::to_string(&serde_json::json!({
+        "type": "booking_rejected",
+        "payload": { "id": id }
+    })).unwrap_or_default());
+    Ok(())
+}
+
+#[tauri::command]
+async fn get_live_messages(
+    server: tauri::State<'_, Arc<tokio::sync::Mutex<LiveServerController>>>,
+) -> Result<Vec<LiveMessage>, String> {
+    let c = server.lock().await;
+    let s = c.state.lock().await;
+    Ok(s.messages.clone())
+}
+
+#[tauri::command]
+async fn delete_live_message(
+    server: tauri::State<'_, Arc<tokio::sync::Mutex<LiveServerController>>>,
+    id: String,
+) -> Result<(), String> {
+    let c = server.lock().await;
+    let mut s = c.state.lock().await;
+    s.messages.retain(|m| m.id != id);
+    Ok(())
+}
+
+#[tauri::command]
+async fn get_live_scores(
+    server: tauri::State<'_, Arc<tokio::sync::Mutex<LiveServerController>>>,
+) -> Result<Vec<SingerScore>, String> {
+    let c = server.lock().await;
+    let s = c.state.lock().await;
+    let mut by_singer: std::collections::HashMap<String, Vec<u8>> = std::collections::HashMap::new();
+    for v in &s.votes {
+        by_singer.entry(v.singer.clone()).or_default().push(v.rating);
+    }
+    let mut scores: Vec<SingerScore> = by_singer
+        .into_iter()
+        .map(|(singer, ratings)| {
+            let count = ratings.len();
+            let sum: u32 = ratings.iter().map(|&r| r as u32).sum();
+            let average = if count > 0 { sum as f32 / count as f32 } else { 0.0 };
+            SingerScore { singer, count, average }
+        })
+        .collect();
+    scores.sort_by(|a, b| b.average.partial_cmp(&a.average).unwrap_or(std::cmp::Ordering::Equal).then(b.count.cmp(&a.count)));
+    Ok(scores)
+}
+
+#[tauri::command]
+async fn sync_live_now_playing(
+    server: tauri::State<'_, Arc<tokio::sync::Mutex<LiveServerController>>>,
+    title: String,
+    artist: String,
+    singer: String,
+) -> Result<(), String> {
+    let c = server.lock().await;
+    let mut s = c.state.lock().await;
+    let np = NowPlayingInfo {
+        title,
+        artist,
+        singer,
+    };
+    s.now_playing = Some(np.clone());
+    let _ = s.tx_ws.send(serde_json::to_string(&serde_json::json!({
+        "type": "now_playing",
+        "payload": np
+    })).unwrap_or_default());
+    Ok(())
+}
+
+// ---------------------------------------------------------------------------
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -380,6 +578,12 @@ pub fn run() {
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_process::init())
+        .setup(|app| {
+            let handle = app.handle().clone();
+            let controller = Arc::new(tokio::sync::Mutex::new(LiveServerController::new(handle)));
+            app.manage(controller);
+            Ok(())
+        })
         .invoke_handler(tauri::generate_handler![
             scan_library,
             search_library,
@@ -394,6 +598,17 @@ pub fn run() {
             list_monitors,
             open_display,
             close_display,
+            start_live_server,
+            stop_live_server,
+            get_live_server_info,
+            update_live_config,
+            get_live_pending_bookings,
+            approve_booking,
+            reject_booking,
+            get_live_messages,
+            delete_live_message,
+            get_live_scores,
+            sync_live_now_playing,
         ])
         .run(tauri::generate_context!())
         .expect("errore durante l'avvio di CosmoKaraoke");

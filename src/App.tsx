@@ -8,6 +8,7 @@ import {
   Settings as SettingsIcon,
   Film,
   Sparkles,
+  QrCode,
 } from 'lucide-react'
 import { useEffect } from 'react'
 import { Library } from './components/Library'
@@ -18,6 +19,7 @@ import { Mixer } from './components/Mixer'
 import { PlayerPanel } from './components/PlayerPanel'
 import { Playlists } from './components/Playlists'
 import { Settings } from './components/Settings'
+import { LivePanel } from './components/LivePanel'
 import { UpdateBanner } from './components/UpdateBanner'
 import { AccessibilityMenu } from './components/AccessibilityMenu'
 import { Btn } from './components/ui'
@@ -38,12 +40,14 @@ const TABS: Array<{ id: Tab; label: string; icon: typeof LibraryIcon }> = [
   { id: 'youtube', label: 'YouTube', icon: Film },
   { id: 'mixer', label: 'Audio', icon: SlidersHorizontal },
   { id: 'effects', label: 'Effetti', icon: Sparkles },
+  { id: 'live', label: 'Live', icon: QrCode },
   { id: 'settings', label: 'Impostazioni', icon: SettingsIcon },
 ]
 
 export default function App() {
   const tab = useStore((s) => s.tab)
   const hydrated = useStore((s) => s.hydrated)
+  const livePendingCount = useStore((s) => s.livePendingCount)
   const toast = useStore((s) => s.toast)
   const displayOpen = useStore((s) => s.displayOpen)
   const displayBlack = useStore((s) => s.displayBlack)
@@ -148,6 +152,11 @@ export default function App() {
               }`}
             >
               <t.icon size={15} /> {t.label}
+              {t.id === 'live' && livePendingCount > 0 && (
+                <span className="ml-1 rounded-full bg-accent px-1.5 py-0.5 text-xs font-bold text-on-accent">
+                  {livePendingCount}
+                </span>
+              )}
             </button>
           ))}
         </nav>
@@ -173,6 +182,7 @@ export default function App() {
           {tab === 'youtube' && <YouTube />}
           {tab === 'mixer' && <Mixer />}
           {tab === 'effects' && <Effetti />}
+          {tab === 'live' && <LivePanel />}
           {tab === 'settings' && <Settings />}
         </div>
         <aside className="min-h-0 space-y-4 xl:overflow-y-auto xl:pr-2">

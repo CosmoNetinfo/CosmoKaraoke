@@ -52,6 +52,15 @@ Serve il programma gratuito **yt-dlp**. Nella scheda *YouTube*, se manca, compar
 
 È una funzione **per uso personale**: scaricare i video può violare i termini di YouTube e il diritto d'autore.
 
+### Server Live: prenotazioni e voti da smartphone
+
+Nella scheda **Live**:
+- **Punto di accesso e QR Code:** avvia il server locale con un clic. Gli ospiti inquadrano il QR code con la fotocamera del telefono: si apre subito l'interfaccia web leggera, senza installare nessuna app.
+- **Prenotazioni dal cellulare:** il pubblico cerca i brani nel catalogo del locale e prenota con il proprio nome e un'eventuale dedica. Dalla regia puoi approvare in scaletta, in riserva o rifiutare (o attivare l'accettazione automatica).
+- **Dediche sulla TV:** i messaggi inviati dagli smartphone arrivano in tempo reale e puoi proiettarli sulla TV per 10 secondi con un clic.
+- **Voti e classifica cantanti:** il pubblico vota l'esibizione in corso da 1 a 5 stelle; la scheda Live mostra la classifica aggiornata in tempo reale.
+- **Sicurezza della sala:** PIN di sala opzionale, limite di prenotazioni per persona e filtro per bloccare parole vietate.
+
 ## Pubblicare una nuova versione (per chi sviluppa)
 
 1. Fai le modifiche.
@@ -84,4 +93,4 @@ Struttura: interfaccia in `src/` (React + TypeScript + Tailwind), parte nativa i
 
 ## Licenze
 
-Codice del progetto: uso personale. Componenti di terzi: Tauri (MIT/Apache-2.0), React (MIT), SoundTouchJS (MPL-2.0), spessasynth_lib (Apache-2.0), SoundFont TimGM6mb (GPL, 5,7 MB in public/soundfont/TimGM6mb.sf2), rusqlite (MIT), lofty (MIT/Apache-2.0), zip (MIT), lucide (ISC), caratteri Atkinson Hyperlegible, Lexend e OpenDyslexic (SIL Open Font License 1.1).
+Codice del progetto: uso personale. Componenti di terzi: Tauri (MIT/Apache-2.0), React (MIT), SoundTouchJS (MPL-2.0), spessasynth_lib (Apache-2.0), SoundFont TimGM6mb (GPL, 5,7 MB in public/soundfont/TimGM6mb.sf2), rusqlite (MIT), lofty (MIT/Apache-2.0), zip (MIT), axum (MIT), tokio (MIT), qrcode (MIT), lucide (ISC), caratteri Atkinson Hyperlegible, Lexend e OpenDyslexic (SIL Open Font License 1.1).

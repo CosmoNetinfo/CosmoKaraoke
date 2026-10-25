@@ -9,6 +9,7 @@ export const HINTS: Record<string, string> = {
   youtube: 'Cerca basi karaoke su YouTube e mettile in scaletta. Serve il programma yt-dlp.',
   audio: 'Tonalità, velocità, equalizzatore e uscita audio (Mono o Stereo).',
   effetti: 'Applausi, fischi, stacchetti tra i brani, musica di sottofondo e sfondo della TV.',
+  live: 'Server per prenotazioni da smartphone, dediche sulla TV e voti del pubblico.',
   impostazioni: 'Cartelle dei brani, schermo TV, aggiornamenti e guida del programma.',
   // intestazione
   aa: "Cambia la grandezza delle scritte, il carattere e i colori dell'app.",
@@ -133,6 +134,15 @@ export const HINTS: Record<string, string> = {
   'cerca aggiornamenti': 'Controlla se esiste una versione nuova del programma.',
   'aggiorna e riavvia': 'Scarica la versione nuova e riapre il programma. Non succede mai da solo.',
   'mostra i suggerimenti': 'Questi fumetti di aiuto. Spuntato: compaiono quando passi il mouse.',
+  // live server
+  'accendi server': 'Avvia il server Wi-Fi per consentire agli ospiti di prenotare brani dal cellulare.',
+  'spegni server': 'Disattiva il server Wi-Fi e blocca le connessioni dal cellulare.',
+  'qr code': 'Mostra il codice QR da inquadrare con la fotocamera dello smartphone.',
+  'copia indirizzo': 'Copia il link del server Live negli appunti.',
+  'apri interfaccia mobile': 'Apre la pagina per gli smartphone nel browser del computer per provarla.',
+  rifiuta: 'Rifiuta questa richiesta di prenotazione inviata dal cellulare.',
+  'mostra sulla tv': 'Mostra questa dedica o messaggio per 10 secondi sul maxi-schermo della TV.',
+  'salva regole': 'Salva le impostazioni e i filtri di sicurezza della sala.',
 }
 
 const KEYS = Object.keys(HINTS).sort((a, b) => b.length - a.length)

@@ -51,6 +51,50 @@ export interface SavedPlaylist {
   items: QueueItem[]
 }
 
+export interface LiveConfig {
+  port: number
+  pin: string | null
+  roomName: string
+  allowBookings: boolean
+  autoApprove: boolean
+  maxPerSinger: number
+  blockedWords: string[]
+}
+
+export interface LiveBookingRequest {
+  id: string
+  singer: string
+  songId: string
+  title: string
+  artist: string
+  format: string
+  note?: string
+  createdAt: number
+}
+
+export interface LiveMessage {
+  id: string
+  singer: string
+  text: string
+  createdAt: number
+}
+
+export interface LiveSingerScore {
+  singer: string
+  count: number
+  average: number
+}
+
+export interface LiveServerInfo {
+  running: boolean
+  ip: string
+  port: number
+  url: string
+  config: LiveConfig
+  pendingCount: number
+  messageCount: number
+}
+
 export interface Settings {
   fadeSec: number
   downloadDir: string

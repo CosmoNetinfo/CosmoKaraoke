@@ -203,6 +203,11 @@ export async function startPlayback(item: QueueItem): Promise<void> {
       void emit('display:kar', lines)
       pushDisplay()
       await karEngine.play()
+      void invoke('sync_live_now_playing', {
+        title: item.song.title,
+        artist: item.song.artist,
+        singer: item.singer,
+      }).catch(() => {})
       pushDisplay()
     } catch (e) {
       useStore.getState().notify(String(e instanceof Error ? e.message : e))
@@ -241,6 +246,11 @@ export async function startPlayback(item: QueueItem): Promise<void> {
     }
     pushDisplay()
     await engine.play()
+    void invoke('sync_live_now_playing', {
+      title: item.song.title,
+      artist: item.song.artist,
+      singer: item.singer,
+    }).catch(() => {})
     pushDisplay()
   } catch (e) {
     useStore.getState().notify(String(e instanceof Error ? e.message : e))
@@ -297,6 +307,7 @@ export async function playNext(): Promise<void> {
   if (!next) {
     engine.stop()
     karEngine.stop()
+    void invoke('sync_live_now_playing', { title: '', artist: '', singer: '' }).catch(() => {})
     useStore.getState().patch({
       current: null,
       playing: false,

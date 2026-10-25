@@ -52,11 +52,13 @@ export interface ActiveSound {
   name: string
 }
 
-export type Tab = 'library' | 'youtube' | 'mixer' | 'effects' | 'settings'
+export type Tab = 'library' | 'youtube' | 'mixer' | 'effects' | 'live' | 'settings'
 
 interface AppState {
   hydrated: boolean
   tab: Tab
+  livePendingCount: number
+  liveMessageCount: number
   songs: Song[]
   libraryPaths: string[]
   scanning: boolean
@@ -116,6 +118,8 @@ function listOf(s: AppState, uid: string): 'A' | 'B' | null {
 export const useStore = create<AppState>((set, get) => ({
   hydrated: false,
   tab: 'library',
+  livePendingCount: 0,
+  liveMessageCount: 0,
   songs: [],
   libraryPaths: [],
   scanning: false,
