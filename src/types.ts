@@ -53,6 +53,14 @@ export interface Settings {
   micOn: boolean
   micVol: number
   echo: number
+  echoTime: number
+  echoFb: number
+  reverb: number
+  reverbSize: number
+  chorus: number
+  micBass: number
+  micTreble: number
+  micComp: number
   fontFamily: 'atkinson' | 'lexend' | 'opendyslexic' | 'sistema'
   theme: 'scuro' | 'crema' | 'contrasto'
   uiScale: number
