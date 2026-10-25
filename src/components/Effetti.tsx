@@ -200,7 +200,7 @@ export function Effetti() {
                 onRemove={(id) =>
                   useStore.setState((s) => ({ jingles: s.jingles.filter((j) => j.id !== id) }))
                 }
-                onTest={(j) => playJingle(j.path)}
+                onTest={(j) => playJingle(j.path, j.name)}
               />
             </Panel>
           </>
@@ -247,7 +247,7 @@ export function Effetti() {
                     interludes: s.interludes.filter((j) => j.id !== id),
                   }))
                 }
-                onTest={(j) => playJingle(j.path)}
+                onTest={(j) => playJingle(j.path, j.name)}
               />
               <p className="text-muted">
                 Lo stacchetto parte da solo quando un brano finisce e ce n'è un altro in scaletta.

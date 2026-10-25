@@ -292,26 +292,37 @@ export const BUILTIN_EFFECTS: BuiltinEffect[] = [
 
 let ctx: AudioContext | null = null
 
-/** Suona un effetto interno. `volume` va da 0 a 1. */
-export function playBuiltinEffect(id: string, volume: number): void {
+/** Suona un effetto interno. Restituisce il modo per fermarlo e la durata. */
+export function playBuiltinEffect(
+  id: string,
+  volume: number,
+): { stop: () => void; seconds: number } | null {
   const fx = BUILTIN_EFFECTS.find((e) => e.id === id)
-  if (!fx) return
+  if (!fx) return null
   ctx ??= new AudioContext({ latencyHint: 'interactive' })
-  void ctx.resume()
-  const master = ctx.createGain()
+  const c = ctx
+  void c.resume()
+  const master = c.createGain()
   master.gain.value = volume
   // limitatore: gli effetti più forti (rullo, piatti) non devono saturare
-  const limiter = ctx.createDynamicsCompressor()
+  const limiter = c.createDynamicsCompressor()
   limiter.threshold.value = -8
   limiter.ratio.value = 12
   limiter.knee.value = 4
-  master.connect(limiter).connect(ctx.destination)
-  fx.play(ctx, master, ctx.currentTime + 0.02)
-  setTimeout(
-    () => {
-      master.disconnect()
-      limiter.disconnect()
+  master.connect(limiter).connect(c.destination)
+  fx.play(c, master, c.currentTime + 0.02)
+  const cleanup = () => {
+    master.disconnect()
+    limiter.disconnect()
+  }
+  const timer = setTimeout(cleanup, (fx.seconds + 1) * 1000)
+  return {
+    seconds: fx.seconds,
+    stop: () => {
+      master.gain.cancelScheduledValues(c.currentTime)
+      master.gain.setTargetAtTime(0, c.currentTime, 0.02)
+      clearTimeout(timer)
+      setTimeout(cleanup, 200)
     },
-    (fx.seconds + 1) * 1000,
-  )
+  }
 }

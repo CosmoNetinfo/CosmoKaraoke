@@ -45,6 +45,11 @@ export const DEFAULT_SETTINGS: Settings = {
   displayStretch: false,
 }
 
+export interface ActiveSound {
+  id: string
+  name: string
+}
+
 export type Tab = 'library' | 'youtube' | 'mixer' | 'effects' | 'settings'
 
 interface AppState {
@@ -70,6 +75,8 @@ interface AppState {
   bgTracks: Jingle[]
   bgOn: boolean
   bgTitle: string
+  /** effetti e anteprime che stanno suonando adesso (per poterli fermare) */
+  activeFx: ActiveSound[]
   settings: Settings
   toast: string
 
@@ -118,6 +125,7 @@ export const useStore = create<AppState>((set, get) => ({
   bgTracks: [],
   bgOn: false,
   bgTitle: '',
+  activeFx: [],
   settings: DEFAULT_SETTINGS,
   toast: '',
 

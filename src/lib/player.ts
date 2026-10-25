@@ -282,10 +282,51 @@ export async function togglePreview(path: string): Promise<void> {
 
 // --- jingle -------------------------------------------------------------------
 
-export function playJingle(path: string): void {
+// --- suoni in corso: ognuno si può fermare ---------------------------------
+
+const activeStops = new Map<string, () => void>()
+
+function track(name: string, stop: () => void): string {
+  const id = crypto.randomUUID()
+  activeStops.set(id, stop)
+  useStore.setState((s) => ({ activeFx: [...s.activeFx, { id, name }] }))
+  return id
+}
+
+function untrack(id: string): void {
+  activeStops.delete(id)
+  useStore.setState((s) => ({ activeFx: s.activeFx.filter((x) => x.id !== id) }))
+}
+
+/** Ferma un effetto che sta suonando. */
+export function stopSound(id: string): void {
+  activeStops.get(id)?.()
+  untrack(id)
+}
+
+/** Ferma tutti gli effetti e salta lo stacchetto in corso (non tocca il brano che si canta). */
+export function stopAllSounds(): void {
+  for (const id of [...activeStops.keys()]) stopSound(id)
+  if (useStore.getState().current?.interlude) void playNext()
+}
+
+export function playJingle(path: string, name?: string): void {
   const a = new Audio(convertFileSrc(path))
   a.volume = useStore.getState().settings.fxVolume
-  void a.play().catch(() => useStore.getState().notify('Effetto non riproducibile'))
+  const label = name ?? (path.split(/[\\/]/).pop() ?? path).replace(/\.[^.]+$/, '')
+  const id = track(label, () => a.pause())
+  a.addEventListener('ended', () => untrack(id))
+  void a.play().catch(() => {
+    untrack(id)
+    useStore.getState().notify('Effetto non riproducibile')
+  })
+}
+
+function playBuiltin(id: string, name: string): void {
+  const h = playBuiltinEffect(id, useStore.getState().settings.fxVolume)
+  if (!h) return
+  const tid = track(name, h.stop)
+  setTimeout(() => untrack(tid), (h.seconds + 0.3) * 1000)
 }
 
 export interface EffectSlot {
@@ -303,7 +344,7 @@ export function effectList(): EffectSlot[] {
     key: j.id,
     name: j.name,
     builtin: false,
-    run: () => playJingle(j.path),
+    run: () => playJingle(j.path, j.name),
   }))
   const builtin: EffectSlot[] = BUILTIN_EFFECTS.filter(
     (e) => !s.settings.hiddenEffects.includes(e.id),
@@ -311,7 +352,7 @@ export function effectList(): EffectSlot[] {
     key: e.id,
     name: e.name,
     builtin: true,
-    run: () => playBuiltinEffect(e.id, useStore.getState().settings.fxVolume),
+    run: () => playBuiltin(e.id, e.name),
   }))
   return [...mine, ...builtin]
 }

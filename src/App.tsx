@@ -12,6 +12,7 @@ import {
 import { useEffect } from 'react'
 import { Library } from './components/Library'
 import { Effetti } from './components/Effetti'
+import { NowPlaying } from './components/NowPlaying'
 import { Mixer } from './components/Mixer'
 import { PlayerPanel } from './components/PlayerPanel'
 import { Playlists } from './components/Playlists'
@@ -21,7 +22,14 @@ import { AccessibilityMenu } from './components/AccessibilityMenu'
 import { Btn } from './components/ui'
 import { YouTube } from './components/YouTube'
 import { applyAppearance } from './lib/appearance'
-import { effectList, initPlayer, mixNext, pushDisplay, togglePause } from './lib/player'
+import {
+  effectList,
+  initPlayer,
+  mixNext,
+  pushDisplay,
+  stopAllSounds,
+  togglePause,
+} from './lib/player'
 import { useStore, type Tab } from './lib/store'
 
 const TABS: Array<{ id: Tab; label: string; icon: typeof LibraryIcon }> = [
@@ -85,6 +93,8 @@ export default function App() {
         void togglePause()
       } else if (e.key === 'm') {
         void mixNext()
+      } else if (e.key === 'Escape') {
+        stopAllSounds()
       } else if (/^[1-9]$/.test(e.key)) {
         effectList()[Number(e.key) - 1]?.run()
       }
@@ -120,6 +130,7 @@ export default function App() {
   return (
     <div className="flex h-full flex-col">
       <UpdateBanner />
+      <NowPlaying />
 
       <header className="flex flex-wrap items-center gap-3 border-b-2 border-line bg-header px-4 py-2">
         <h1 className="text-2xl font-bold">
