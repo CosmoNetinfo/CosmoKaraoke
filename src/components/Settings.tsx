@@ -40,7 +40,7 @@ export function Settings() {
   };
 
   return (
-    <div className="space-y-3 overflow-y-auto pr-1">
+    <div className="h-full space-y-3 overflow-y-auto pr-2">
       <Panel
         title="Cartelle della libreria"
         right={

@@ -146,7 +146,7 @@ export default function App() {
           {tab === 'mixer' && <Mixer />}
           {tab === 'settings' && <Settings />}
         </div>
-        <aside className="min-h-0 space-y-4 xl:overflow-y-auto xl:pr-1">
+        <aside className="min-h-0 space-y-4 xl:overflow-y-auto xl:pr-2">
           <PlayerPanel />
           <Playlists />
         </aside>
