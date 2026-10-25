@@ -1,6 +1,17 @@
 import { convertFileSrc } from '@tauri-apps/api/core'
 import { open } from '@tauri-apps/plugin-dialog'
-import { ImagePlus, Music, Pause, Play, Plus, SkipForward, Trash2, Volume2 } from 'lucide-react'
+import {
+  ImagePlus,
+  Music,
+  Pause,
+  Pencil,
+  Play,
+  Plus,
+  RotateCcw,
+  SkipForward,
+  Trash2,
+  Volume2,
+} from 'lucide-react'
 import { useState } from 'react'
 import {
   bgNextTrack,
@@ -92,7 +103,13 @@ export function Effetti() {
   const bgOn = useStore((s) => s.bgOn)
   const bgTitle = useStore((s) => s.bgTitle)
 
+  const [edit, setEdit] = useState(false)
   const slots = effectList()
+
+  const removeSlot = (e: { key: string; builtin: boolean }) => {
+    if (e.builtin) patch({ hiddenEffects: [...st.hiddenEffects, e.key] })
+    else useStore.setState((s) => ({ jingles: s.jingles.filter((j) => j.id !== e.key) }))
+  }
 
   const pickImage = async () => {
     const f = await open({
@@ -122,20 +139,52 @@ export function Effetti() {
                   display={`${Math.round(st.fxVolume * 100)}%`}
                   onChange={(v) => patch({ fxVolume: v })}
                 />
+                <div className="flex flex-wrap items-center gap-2">
+                  <Btn variant={edit ? 'primary' : 'default'} onClick={() => setEdit((v) => !v)}>
+                    <Pencil /> {edit ? 'Fatto' : 'Togli effetti'}
+                  </Btn>
+                  {st.hiddenEffects.length > 0 && (
+                    <Btn onClick={() => patch({ hiddenEffects: [] })}>
+                      <RotateCcw /> Rimetti quelli tolti ({st.hiddenEffects.length})
+                    </Btn>
+                  )}
+                  {edit && (
+                    <span className="text-base text-muted">
+                      Premi il cestino rosso accanto a un effetto per toglierlo.
+                    </span>
+                  )}
+                </div>
                 <div className="grid grid-cols-2 gap-2 md:grid-cols-3 xl:grid-cols-4">
                   {slots.map((e, i) => (
-                    <Btn key={e.key} className="min-h-16 justify-start text-lg" onClick={e.run}>
-                      <Volume2 className="shrink-0" />
-                      <span className="min-w-0 flex-1 truncate text-left">{e.name}</span>
-                      {i < 9 && (
-                        <kbd className="rounded bg-inset px-1.5 text-base text-muted">{i + 1}</kbd>
+                    <div key={e.key} className="flex gap-1">
+                      <Btn
+                        className="min-h-16 min-w-0 flex-1 justify-start text-lg"
+                        onClick={e.run}
+                      >
+                        <Volume2 className="shrink-0" />
+                        <span className="min-w-0 flex-1 truncate text-left">{e.name}</span>
+                        {i < 9 && (
+                          <kbd className="rounded bg-inset px-1.5 text-base text-muted">
+                            {i + 1}
+                          </kbd>
+                        )}
+                      </Btn>
+                      {edit && (
+                        <Btn
+                          variant="danger"
+                          className="min-h-16"
+                          title={`Togli «${e.name}»`}
+                          onClick={() => removeSlot(e)}
+                        >
+                          <Trash2 />
+                        </Btn>
                       )}
-                    </Btn>
+                    </div>
                   ))}
                 </div>
                 <p className="text-base text-muted">
                   I tasti da 1 a 9 della tastiera fanno partire i primi nove effetti. Gli effetti
-                  qui sopra sono creati dal programma: non servono file.
+                  del programma si possono togliere e rimettere quando vuoi.
                 </p>
               </div>
             </Panel>

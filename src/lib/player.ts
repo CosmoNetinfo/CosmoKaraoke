@@ -291,6 +291,8 @@ export function playJingle(path: string): void {
 export interface EffectSlot {
   key: string
   name: string
+  /** true = effetto creato dal programma (si può nascondere), false = file tuo (si può togliere) */
+  builtin: boolean
   run: () => void
 }
 
@@ -300,11 +302,15 @@ export function effectList(): EffectSlot[] {
   const mine: EffectSlot[] = s.jingles.map((j) => ({
     key: j.id,
     name: j.name,
+    builtin: false,
     run: () => playJingle(j.path),
   }))
-  const builtin: EffectSlot[] = BUILTIN_EFFECTS.map((e) => ({
+  const builtin: EffectSlot[] = BUILTIN_EFFECTS.filter(
+    (e) => !s.settings.hiddenEffects.includes(e.id),
+  ).map((e) => ({
     key: e.id,
     name: e.name,
+    builtin: true,
     run: () => playBuiltinEffect(e.id, useStore.getState().settings.fxVolume),
   }))
   return [...mine, ...builtin]

@@ -56,6 +56,8 @@ export interface Settings {
   outputMono: boolean
   micInApp: boolean
   fxVolume: number
+  /** effetti interni nascosti dall'utente (id) */
+  hiddenEffects: string[]
   interludeOn: boolean
   interludeEvery: number
   interludeRandom: boolean
