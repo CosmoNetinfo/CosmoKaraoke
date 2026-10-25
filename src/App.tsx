@@ -13,6 +13,7 @@ import { useEffect } from 'react'
 import { Library } from './components/Library'
 import { Effetti } from './components/Effetti'
 import { NowPlaying } from './components/NowPlaying'
+import { Tooltips } from './components/Tooltips'
 import { Mixer } from './components/Mixer'
 import { PlayerPanel } from './components/PlayerPanel'
 import { Playlists } from './components/Playlists'
@@ -131,6 +132,7 @@ export default function App() {
     <div className="flex h-full flex-col">
       <UpdateBanner />
       <NowPlaying />
+      <Tooltips />
 
       <header className="flex flex-wrap items-center gap-3 border-b-2 border-line bg-header px-4 py-2">
         <h1 className="text-2xl font-bold">

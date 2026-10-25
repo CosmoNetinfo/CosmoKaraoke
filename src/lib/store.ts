@@ -17,6 +17,7 @@ export const DEFAULT_SETTINGS: Settings = {
   // il microfono di solito va nel mixer esterno, non nel programma
   micInApp: false,
   fxVolume: 0.9,
+  showHints: true,
   hiddenEffects: [],
   interludeOn: false,
   interludeEvery: 1,

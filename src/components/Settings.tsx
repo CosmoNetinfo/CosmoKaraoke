@@ -6,10 +6,11 @@ import { engine } from '../lib/engine'
 import { previewSupported, pushDisplay } from '../lib/player'
 import { useStore } from '../lib/store'
 import type { MonitorInfo } from '../types'
+import { Guida } from './Guida'
 import { Btn, Panel, Slider, SubTabs } from './ui'
 import { UpdatesPanel, YtdlpPanel } from './UpdatesPanel'
 
-type Section = 'cartelle' | 'schermo' | 'audio' | 'cuffie' | 'youtube' | 'aggiornamenti'
+type Section = 'cartelle' | 'schermo' | 'audio' | 'cuffie' | 'youtube' | 'aggiornamenti' | 'guida'
 const SECTIONS: { id: Section; label: string }[] = [
   { id: 'cartelle', label: 'Cartelle' },
   { id: 'schermo', label: 'Schermo TV' },
@@ -17,6 +18,7 @@ const SECTIONS: { id: Section; label: string }[] = [
   { id: 'cuffie', label: 'Cuffie' },
   { id: 'youtube', label: 'YouTube' },
   { id: 'aggiornamenti', label: 'Aggiornamenti' },
+  { id: 'guida', label: 'Guida' },
 ]
 
 export function Settings() {
@@ -55,6 +57,7 @@ export function Settings() {
     <div className="flex h-full flex-col gap-3">
       <SubTabs tabs={SECTIONS} value={section} onChange={setSection} />
       <div className="min-h-0 flex-1 space-y-3 overflow-y-auto pr-2">
+        {section === 'guida' && <Guida />}
         {section === 'cartelle' && (
           <Panel
             title="Cartelle della libreria"
