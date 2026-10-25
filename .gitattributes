@@ -1,0 +1,8 @@
+# Fine riga sempre uguale (LF) su Windows e Mac, così i commit non riscrivono interi file
+* text=auto eol=lf
+*.png binary
+*.ico binary
+*.icns binary
+*.sf2 binary
+*.woff binary
+*.woff2 binary
