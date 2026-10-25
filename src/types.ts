@@ -43,6 +43,13 @@ export interface Jingle {
   path: string
 }
 
+export interface SavedPlaylist {
+  id: string
+  name: string
+  createdAt: number
+  items: QueueItem[]
+}
+
 export interface Settings {
   fadeSec: number
   downloadDir: string

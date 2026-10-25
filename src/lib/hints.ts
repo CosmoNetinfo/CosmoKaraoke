@@ -47,6 +47,15 @@ export const HINTS: Record<string, string> = {
   'sposta nella riserva': 'Toglie il brano dalla scaletta e lo mette nella riserva.',
   'sposta nella scaletta': 'Toglie il brano dalla riserva e lo mette nella scaletta.',
   togli: 'Toglie questo elemento (non cancella nessun file dal computer).',
+  'salva scaletta': 'Salva la scaletta attuale con un nome per riusarla quando vuoi.',
+  'playlist salvate': 'Mostra le playlist salvate per ricaricarle o cancellarle.',
+  'carica in scaletta': 'Carica questa playlist e sostituisce i brani in scaletta.',
+  '+ aggiungi': 'Aggiunge i brani di questa playlist in fondo alla scaletta.',
+  'elimina playlist': 'Elimina questa playlist salvata (i brani restano sul computer).',
+  'svuota scaletta': 'Toglie tutti i brani dalla scaletta.',
+  'svuota riserva': 'Toglie tutti i brani dalla riserva.',
+  'trascina per spostare':
+    'Tieni premuto e trascina per cambiare ordine o spostare nell’altra lista.',
   // YouTube
   cerca: 'Cerca su YouTube quello che hai scritto.',
   anteprima: 'Guarda il video prima di decidere (si sente anche l’audio).',

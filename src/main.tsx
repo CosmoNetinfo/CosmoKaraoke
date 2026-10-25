@@ -5,7 +5,12 @@ import App from './App'
 import { Display } from './Display'
 import './index.css'
 
-const isDisplay = getCurrentWindow().label === 'display'
+let isDisplay = false
+try {
+  isDisplay = getCurrentWindow().label === 'display'
+} catch {
+  isDisplay = false
+}
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>{isDisplay ? <Display /> : <App />}</StrictMode>,

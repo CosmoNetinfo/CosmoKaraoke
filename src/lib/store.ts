@@ -1,6 +1,6 @@
 import { invoke } from '@tauri-apps/api/core'
 import { create } from 'zustand'
-import type { Jingle, QueueItem, Settings, Song } from '../types'
+import type { Jingle, QueueItem, SavedPlaylist, Settings, Song } from '../types'
 import type { KarLine } from './kar'
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -97,6 +97,12 @@ interface AppState {
   moveInQueue: (uid: string, dir: -1 | 1) => void
   transfer: (uid: string) => void
   setSingerOf: (uid: string, singer: string) => void
+  savedPlaylists: SavedPlaylist[]
+  reorderQueue: (sourceUid: string, targetWhich: 'A' | 'B', targetIndex?: number) => void
+  savePlaylist: (name: string, which?: 'A' | 'B') => void
+  loadPlaylist: (id: string, mode?: 'replace' | 'append', to?: 'A' | 'B') => void
+  deletePlaylist: (id: string) => void
+  clearQueue: (which: 'A' | 'B') => void
 }
 
 let toastTimer: ReturnType<typeof setTimeout> | undefined
@@ -130,6 +136,7 @@ export const useStore = create<AppState>((set, get) => ({
   bgOn: false,
   bgTitle: '',
   activeFx: [],
+  savedPlaylists: [],
   settings: DEFAULT_SETTINGS,
   toast: '',
 
@@ -156,6 +163,7 @@ export const useStore = create<AppState>((set, get) => ({
           jingles: d.jingles ?? [],
           interludes: d.interludes ?? [],
           bgTracks: d.bgTracks ?? [],
+          savedPlaylists: d.savedPlaylists ?? [],
           settings: { ...DEFAULT_SETTINGS, ...(d.settings ?? {}) },
         })
       }
@@ -259,6 +267,78 @@ export const useStore = create<AppState>((set, get) => ({
       queueA: s.queueA.map((q) => (q.uid === uid ? { ...q, singer } : q)),
       queueB: s.queueB.map((q) => (q.uid === uid ? { ...q, singer } : q)),
     })),
+
+  reorderQueue: (sourceUid, targetWhich, targetIndex) =>
+    set((s) => {
+      const sourceWhich = listOf(s, sourceUid)
+      if (!sourceWhich) return {}
+      const sourceList = sourceWhich === 'A' ? s.queueA : s.queueB
+      const item = sourceList.find((q) => q.uid === sourceUid)
+      if (!item) return {}
+
+      const newSource = sourceList.filter((q) => q.uid !== sourceUid)
+      if (sourceWhich === targetWhich) {
+        const list = [...newSource]
+        const idx =
+          targetIndex !== undefined
+            ? Math.max(0, Math.min(targetIndex, list.length))
+            : list.length
+        list.splice(idx, 0, item)
+        return targetWhich === 'A' ? { queueA: list } : { queueB: list }
+      } else {
+        const targetList = [...(targetWhich === 'A' ? s.queueA : s.queueB)]
+        const idx =
+          targetIndex !== undefined
+            ? Math.max(0, Math.min(targetIndex, targetList.length))
+            : targetList.length
+        targetList.splice(idx, 0, item)
+        return sourceWhich === 'A'
+          ? { queueA: newSource, queueB: targetList }
+          : { queueB: newSource, queueA: targetList }
+      }
+    }),
+
+  savePlaylist: (name, which = 'A') => {
+    const trimmed = name.trim()
+    if (!trimmed) return
+    const s = get()
+    const source = which === 'A' ? s.queueA : s.queueB
+    if (source.length === 0) {
+      s.notify('La scaletta da salvare è vuota.')
+      return
+    }
+    const pl: SavedPlaylist = {
+      id: crypto.randomUUID(),
+      name: trimmed,
+      createdAt: Date.now(),
+      items: source.map((item) => ({ ...item, uid: crypto.randomUUID() })),
+    }
+    set((state) => ({ savedPlaylists: [...state.savedPlaylists, pl] }))
+    s.notify(`Playlist «${trimmed}» salvata (${source.length} brani).`)
+  },
+
+  loadPlaylist: (id, mode = 'replace', to = 'A') => {
+    const s = get()
+    const pl = s.savedPlaylists.find((p) => p.id === id)
+    if (!pl) return
+    const newItems = pl.items.map((item) => ({ ...item, uid: crypto.randomUUID() }))
+    set((state) => {
+      if (to === 'A') {
+        return { queueA: mode === 'replace' ? newItems : [...state.queueA, ...newItems] }
+      } else {
+        return { queueB: mode === 'replace' ? newItems : [...state.queueB, ...newItems] }
+      }
+    })
+    s.notify(`Playlist «${pl.name}» caricata in ${to === 'A' ? 'scaletta' : 'riserva'}.`)
+  },
+
+  deletePlaylist: (id) =>
+    set((s) => ({
+      savedPlaylists: s.savedPlaylists.filter((p) => p.id !== id),
+    })),
+
+  clearQueue: (which) =>
+    set(() => (which === 'A' ? { queueA: [] } : { queueB: [] })),
 }))
 
 // Salvataggio automatico di impostazioni e code (con un breve ritardo)
@@ -274,11 +354,12 @@ useStore.subscribe((s, prev) => {
     s.jingles !== prev.jingles ||
     s.interludes !== prev.interludes ||
     s.bgTracks !== prev.bgTracks ||
+    s.savedPlaylists !== prev.savedPlaylists ||
     s.settings !== prev.settings
   if (!changed) return
   clearTimeout(saveTimer)
   saveTimer = setTimeout(() => {
-    const { libraryPaths, queueA, queueB, singers, activeSinger, jingles, interludes, bgTracks, settings } =
+    const { libraryPaths, queueA, queueB, singers, activeSinger, jingles, interludes, bgTracks, settings, savedPlaylists } =
       useStore.getState()
     const json = JSON.stringify({
       libraryPaths,
@@ -290,6 +371,7 @@ useStore.subscribe((s, prev) => {
       interludes,
       bgTracks,
       settings,
+      savedPlaylists,
     })
     invoke('save_blob', { name: 'state', json }).catch(() => {})
   }, 600)
