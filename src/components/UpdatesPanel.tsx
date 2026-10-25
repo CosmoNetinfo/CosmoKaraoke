@@ -33,12 +33,10 @@ export function UpdatesPanel() {
         setUpdate(u)
         setMessage(`È disponibile la versione ${u.version}.`)
       } else {
-        setMessage('Hai già l\'ultima versione. Non c\'è niente da aggiornare.')
+        setMessage("Hai già l'ultima versione. Non c'è niente da aggiornare.")
       }
     } catch {
-      setMessage(
-        'Non riesco a controllare. Verifica la connessione a internet e riprova tra poco.',
-      )
+      setMessage('Non riesco a controllare. Verifica la connessione a internet e riprova tra poco.')
     } finally {
       setChecking(false)
     }

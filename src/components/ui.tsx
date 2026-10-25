@@ -90,3 +90,30 @@ export function Slider({
     </label>
   )
 }
+
+/** Schede secondarie: una sezione alla volta, così tutto sta in una schermata senza scorrere. */
+export function SubTabs<T extends string>({
+  tabs,
+  value,
+  onChange,
+}: {
+  tabs: { id: T; label: string }[]
+  value: T
+  onChange: (id: T) => void
+}) {
+  return (
+    <div role="tablist" className="flex flex-wrap gap-2">
+      {tabs.map((t) => (
+        <Btn
+          key={t.id}
+          role="tab"
+          aria-selected={value === t.id}
+          variant={value === t.id ? 'primary' : 'default'}
+          onClick={() => onChange(t.id)}
+        >
+          {t.label}
+        </Btn>
+      ))}
+    </div>
+  )
+}
