@@ -11,6 +11,11 @@ on:
 permissions:
   contents: write
 
+# Una compilazione alla volta: due rilasci insieme si pestano i piedi.
+concurrency:
+  group: rilascio
+  cancel-in-progress: false
+
 jobs:
   versione:
     name: Controlla la versione
@@ -37,6 +42,9 @@ jobs:
     if: needs.versione.outputs.nuova == 'true' || github.event_name == 'workflow_dispatch'
     strategy:
       fail-fast: false
+      # Windows e Mac uno dopo l'altro: se partono insieme litigano per creare
+      # lo stesso rilascio e uno dei due perde i suoi file (errore «valid tag»).
+      max-parallel: 1
       matrix:
         include:
           - nome: Windows
