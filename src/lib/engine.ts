@@ -53,7 +53,7 @@ class Engine {
   }
 
   private async build(): Promise<void> {
-    const ctx = new AudioContext()
+    const ctx = new AudioContext({ latencyHint: 'interactive' })
     this.ctx = ctx
     await SoundTouchNode.register(ctx, processorUrl)
 
@@ -242,7 +242,14 @@ class Engine {
     if (!this.ctx) return
     if (on && !this.micStream) {
       this.micStream = await navigator.mediaDevices.getUserMedia({
-        audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false },
+        audio: {
+          echoCancellation: false,
+          noiseSuppression: false,
+          autoGainControl: false,
+          channelCount: 1,
+          // «latency» esiste nei browser ma non nei tipi di TypeScript
+          ...({ latency: 0 } as MediaTrackConstraints),
+        },
       })
       this.micSrc = this.ctx.createMediaStreamSource(this.micStream)
       this.micSrc.connect(this.micGain)

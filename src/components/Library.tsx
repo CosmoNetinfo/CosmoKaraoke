@@ -31,15 +31,17 @@ export function Library() {
   const [limit, setLimit] = useState(PAGE)
   const deferred = useDeferredValue(query)
 
+  // testo di ricerca già in minuscolo, calcolato una volta sola per libreria
+  const haystack = useMemo(() => songs.map((s) => `${s.artist} ${s.title}`.toLowerCase()), [songs])
+
   const filtered = useMemo(() => {
     const words = deferred.toLowerCase().split(/\s+/).filter(Boolean)
-    return songs.filter((s) => {
+    if (format === 'all' && words.length === 0) return songs
+    return songs.filter((s, i) => {
       if (format !== 'all' && s.format !== format) return false
-      if (words.length === 0) return true
-      const hay = `${s.artist} ${s.title}`.toLowerCase()
-      return words.every((w) => hay.includes(w))
+      return words.every((w) => haystack[i].includes(w))
     })
-  }, [songs, deferred, format])
+  }, [songs, haystack, deferred, format])
 
   const play = (song: Song) => {
     const s = useStore.getState()

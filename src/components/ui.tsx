@@ -26,7 +26,7 @@ export function Btn({
     <button
       aria-label={rest['aria-label'] ?? rest.title}
       {...rest}
-      className={`inline-flex min-h-11 min-w-11 items-center justify-center gap-2 rounded-lg px-3 py-1.5 text-base font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${styles} ${className}`}
+      className={`inline-flex min-h-11 min-w-11 items-center justify-center gap-2 rounded-lg px-3 py-1.5 text-base font-medium disabled:cursor-not-allowed disabled:opacity-40 ${styles} ${className}`}
     >
       {children}
     </button>

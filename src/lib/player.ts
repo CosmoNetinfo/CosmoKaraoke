@@ -75,10 +75,11 @@ export async function initPlayer(): Promise<void> {
   })
   engine.media.addEventListener('seeked', pushDisplay)
 
+  let n = 0
   setInterval(() => {
     useStore.getState().patch({ position: engine.position, duration: engine.duration })
-    if (engine.isPlaying) pushDisplay()
-  }, 250)
+    if (engine.isPlaying && ++n % 3 === 0) pushDisplay()
+  }, 100)
 
   // lo schermo testi, appena aperto, chiede lo stato corrente
   await listen('display:ready', () => pushDisplay())

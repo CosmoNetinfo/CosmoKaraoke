@@ -119,7 +119,7 @@ export default function App() {
             <button
               key={t.id}
               onClick={() => patch({ tab: t.id })}
-              className={`inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm transition-colors ${
+              className={`inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm ${
                 tab === t.id ? 'bg-accent text-on-accent' : 'text-text hover:bg-btn'
               }`}
             >

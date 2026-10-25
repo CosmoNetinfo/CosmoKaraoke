@@ -64,7 +64,7 @@ export function Display() {
     if (!v || !st || st.kind !== 'video') return
     v.muted = true
     v.playbackRate = st.tempo
-    if (Math.abs(v.currentTime - getPos()) > 0.4) v.currentTime = getPos()
+    if (Math.abs(v.currentTime - getPos()) > 0.25) v.currentTime = getPos()
     if (st.playing && v.paused) void v.play().catch(() => {})
     if (!st.playing && !v.paused) v.pause()
   }, [st, getPos])
