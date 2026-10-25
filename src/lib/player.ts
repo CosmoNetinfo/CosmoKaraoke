@@ -1,4 +1,4 @@
-import { convertFileSrc } from '@tauri-apps/api/core'
+import { convertFileSrc, invoke } from '@tauri-apps/api/core'
 import { emit, listen } from '@tauri-apps/api/event'
 import type { DisplayMessage, DisplayState, QueueItem, Settings } from '../types'
 import { BUILTIN_EFFECTS, playBuiltinEffect } from './effects'
@@ -157,6 +157,30 @@ export async function initPlayer(): Promise<void> {
 
 export async function startPlayback(item: QueueItem): Promise<void> {
   const store = useStore.getState()
+  if (item.song.zipEntry) {
+    try {
+      const extracted = await invoke<{ audioPath: string; cdgPath: string | null }>(
+        'prepare_zip_song',
+        {
+          zipPath: item.song.path,
+          audioEntry: item.song.zipEntry,
+          cdgEntry: item.song.cdg,
+        },
+      )
+      item = {
+        ...item,
+        song: {
+          ...item.song,
+          path: extracted.audioPath,
+          cdg: extracted.cdgPath,
+        },
+      }
+    } catch (e) {
+      store.notify(`Impossibile estrarre il brano dal file zip: ${String(e)}`)
+      store.patch({ current: null, playing: false })
+      return
+    }
+  }
   if (item.song.format === 'kar') {
     engine.stop()
     karEngine.stop()

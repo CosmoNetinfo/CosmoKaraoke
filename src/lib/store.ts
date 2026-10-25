@@ -167,8 +167,18 @@ export const useStore = create<AppState>((set, get) => ({
           settings: { ...DEFAULT_SETTINGS, ...(d.settings ?? {}) },
         })
       }
-      const rawLib = await invoke<string>('load_blob', { name: 'library' })
-      if (rawLib) set({ songs: JSON.parse(rawLib) as Song[] })
+      try {
+        const dbSongs = await invoke<Song[]>('load_library')
+        if (dbSongs && dbSongs.length > 0) {
+          set({ songs: dbSongs })
+        } else {
+          const rawLib = await invoke<string>('load_blob', { name: 'library' })
+          if (rawLib) set({ songs: JSON.parse(rawLib) as Song[] })
+        }
+      } catch {
+        const rawLib = await invoke<string>('load_blob', { name: 'library' })
+        if (rawLib) set({ songs: JSON.parse(rawLib) as Song[] })
+      }
     } catch (e) {
       get().notify(`Impossibile leggere i dati salvati: ${String(e)}`)
     }

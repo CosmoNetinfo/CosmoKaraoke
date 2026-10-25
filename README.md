@@ -17,9 +17,11 @@ Programma karaoke per **Windows e Mac**, pensato per essere facile da leggere: c
 
 1. **Impostazioni → Aggiungi cartella**: scegli la cartella con i tuoi brani. Vengono letti:
    - MP3/WMA con il file `.cdg` dallo stesso nome (CD+G)
+   - archivi `.zip` contenenti coppie MP3+CDG (estratti al volo in riproduzione)
    - video (MP4, MKV, AVI, FLV…)
-   - audio semplice (senza testo)
+   - audio semplice (senza testo, con lettura tag ID3/Vorbis/MP4)
    - MIDI/KAR: con testi sincronizzati e sintetizzatore integrato
+   La libreria è salvata in un database SQLite locale con ricerca veloce full-text FTS5 (insensibile ad accenti e maiuscole).
 2. **Impostazioni → Schermo testi**: scegli la TV o il secondo monitor, poi in alto premi **Apri schermo testi**.
 3. **Libreria**: cerca un brano e usa **Riproduci subito**, **Aggiungi alla scaletta** o **Aggiungi alla riserva**.
 4. **Cantanti**: aggiungi i nomi e assegna ogni brano a chi canta. Il nome compare sulla TV.
@@ -82,4 +84,4 @@ Struttura: interfaccia in `src/` (React + TypeScript + Tailwind), parte nativa i
 
 ## Licenze
 
-Codice del progetto: uso personale. Componenti di terzi: Tauri (MIT/Apache-2.0), React (MIT), SoundTouchJS (MPL-2.0), spessasynth_lib (Apache-2.0), SoundFont TimGM6mb (GPL, 5,7 MB in public/soundfont/TimGM6mb.sf2), lucide (ISC), caratteri Atkinson Hyperlegible, Lexend e OpenDyslexic (SIL Open Font License 1.1).
+Codice del progetto: uso personale. Componenti di terzi: Tauri (MIT/Apache-2.0), React (MIT), SoundTouchJS (MPL-2.0), spessasynth_lib (Apache-2.0), SoundFont TimGM6mb (GPL, 5,7 MB in public/soundfont/TimGM6mb.sf2), rusqlite (MIT), lofty (MIT/Apache-2.0), zip (MIT), lucide (ISC), caratteri Atkinson Hyperlegible, Lexend e OpenDyslexic (SIL Open Font License 1.1).

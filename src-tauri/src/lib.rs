@@ -1,102 +1,66 @@
 use serde::Serialize;
-use std::collections::HashSet;
+mod db;
+
+use db::{
+    extract_zip_song, load_songs_from_db, open_db, save_songs_to_db, scan_directories,
+    search_songs_fts, ExtractedZipSong, Song,
+};
 use std::path::PathBuf;
 use std::process::Command;
 use tauri::{Manager, WebviewUrl, WebviewWindowBuilder};
-use walkdir::WalkDir;
 
 // ---------------------------------------------------------------------------
-// Libreria
+// Libreria SQLite + FTS5
 // ---------------------------------------------------------------------------
 
-#[derive(Serialize, Clone)]
-#[serde(rename_all = "camelCase")]
-struct Song {
-    id: String,
-    path: String,
-    title: String,
-    artist: String,
-    /// "cdg" | "kar" | "video" | "audio"
-    format: String,
-    ext: String,
-    cdg: Option<String>,
+#[tauri::command]
+async fn scan_library(app: tauri::AppHandle, paths: Vec<String>) -> Result<Vec<Song>, String> {
+    tauri::async_runtime::spawn_blocking(move || {
+        let songs = scan_directories(&paths);
+        if let Ok(mut conn) = open_db(&app) {
+            let _ = save_songs_to_db(&mut conn, &songs);
+        }
+        Ok(songs)
+    })
+    .await
+    .map_err(|e| e.to_string())?
 }
 
-/// Scansiona le cartelle indicate e restituisce i brani riconosciuti.
-/// I file .cdg non compaiono da soli: vengono abbinati all'audio con lo stesso nome.
 #[tauri::command]
-async fn scan_library(paths: Vec<String>) -> Result<Vec<Song>, String> {
+async fn search_library(
+    app: tauri::AppHandle,
+    query: String,
+    format: Option<String>,
+    limit: Option<usize>,
+) -> Result<Vec<Song>, String> {
     tauri::async_runtime::spawn_blocking(move || {
-        let mut songs: Vec<Song> = Vec::new();
-        let mut seen: HashSet<String> = HashSet::new();
+        let conn = open_db(&app)?;
+        search_songs_fts(&conn, &query, format.as_deref(), limit.unwrap_or(200))
+    })
+    .await
+    .map_err(|e| e.to_string())?
+}
 
-        for root in paths {
-            for entry in WalkDir::new(&root)
-                .follow_links(false)
-                .into_iter()
-                .filter_map(|e| e.ok())
-            {
-                if !entry.file_type().is_file() {
-                    continue;
-                }
-                let p = entry.path();
-                let ext = match p.extension().and_then(|e| e.to_str()) {
-                    Some(e) => e.to_lowercase(),
-                    None => continue,
-                };
-                let base_format = match ext.as_str() {
-                    "mp3" | "wma" | "wav" | "ogg" | "m4a" | "flac" | "aac" => "audio",
-                    "kar" | "mid" | "midi" => "kar",
-                    "mp4" | "mkv" | "avi" | "flv" | "webm" | "mov" | "m4v" => "video",
-                    _ => continue,
-                };
+#[tauri::command]
+async fn load_library(app: tauri::AppHandle) -> Result<Vec<Song>, String> {
+    tauri::async_runtime::spawn_blocking(move || {
+        let conn = open_db(&app)?;
+        load_songs_from_db(&conn)
+    })
+    .await
+    .map_err(|e| e.to_string())?
+}
 
-                let path_str = p.to_string_lossy().to_string();
-                if !seen.insert(path_str.clone()) {
-                    continue;
-                }
-
-                let mut format = base_format.to_string();
-                let mut cdg: Option<String> = None;
-                if base_format == "audio" {
-                    for c in ["cdg", "CDG", "Cdg"] {
-                        let cp = p.with_extension(c);
-                        if cp.is_file() {
-                            cdg = Some(cp.to_string_lossy().to_string());
-                            format = "cdg".to_string();
-                            break;
-                        }
-                    }
-                }
-
-                let stem = p
-                    .file_stem()
-                    .map(|s| s.to_string_lossy().to_string())
-                    .unwrap_or_default();
-                let (artist, title) = match stem.split_once(" - ") {
-                    Some((a, t)) => (a.trim().to_string(), t.trim().to_string()),
-                    None => (String::new(), stem.trim().to_string()),
-                };
-
-                songs.push(Song {
-                    id: path_str.clone(),
-                    path: path_str,
-                    title,
-                    artist,
-                    format,
-                    ext,
-                    cdg,
-                });
-            }
-        }
-
-        songs.sort_by(|a, b| {
-            a.artist
-                .to_lowercase()
-                .cmp(&b.artist.to_lowercase())
-                .then(a.title.to_lowercase().cmp(&b.title.to_lowercase()))
-        });
-        Ok(songs)
+#[tauri::command]
+async fn prepare_zip_song(
+    app: tauri::AppHandle,
+    zip_path: String,
+    audio_entry: String,
+    cdg_entry: Option<String>,
+) -> Result<ExtractedZipSong, String> {
+    tauri::async_runtime::spawn_blocking(move || {
+        let cache_dir = app.path().app_cache_dir().map_err(|e| e.to_string())?;
+        extract_zip_song(&cache_dir, &zip_path, &audio_entry, cdg_entry.as_deref())
     })
     .await
     .map_err(|e| e.to_string())?
@@ -418,6 +382,9 @@ pub fn run() {
         .plugin(tauri_plugin_process::init())
         .invoke_handler(tauri::generate_handler![
             scan_library,
+            search_library,
+            load_library,
+            prepare_zip_song,
             load_blob,
             save_blob,
             ytdlp_check,

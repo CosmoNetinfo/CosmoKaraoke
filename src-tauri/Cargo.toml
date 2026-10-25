@@ -1,6 +1,6 @@
 [package]
 name = "cosmokaraoke"
-version = "0.1.17"
+version = "0.1.18"
 description = "CosmoKaraoke - lettore karaoke per Windows e macOS"
 authors = ["CosmoNet"]
 edition = "2021"
@@ -21,6 +21,9 @@ serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 walkdir = "2"
 ureq = "3"
+rusqlite = { version = "0.31", features = ["bundled"] }
+lofty = "0.21"
+zip = { version = "2.2", default-features = false, features = ["deflate"] }
 
 [profile.release]
 codegen-units = 1
