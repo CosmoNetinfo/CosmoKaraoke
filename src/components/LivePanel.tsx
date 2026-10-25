@@ -1,5 +1,6 @@
 import { invoke } from '@tauri-apps/api/core'
 import { listen } from '@tauri-apps/api/event'
+import { open as openUrl } from '@tauri-apps/plugin-shell'
 import {
   Check,
   Copy,
@@ -19,6 +20,7 @@ import QRCode from 'qrcode'
 import { useEffect, useState } from 'react'
 import { sendDisplayMessage } from '../lib/player'
 import { useStore } from '../lib/store'
+import { queueYoutube } from '../lib/youtube'
 import type {
   LiveBookingRequest,
   LiveConfig,
@@ -110,20 +112,28 @@ export function LivePanel() {
         const u2 = await listen<LiveBookingRequest>('live:auto_booking', (ev) => {
           if (!alive) return
           const req = ev.payload
-          const found = songs.find((s) => s.id === req.songId)
-          if (found) {
-            enqueue(found, 'A', req.singer)
+          if (req.format === 'youtube') {
+            queueYoutube(
+              { id: req.songId, title: req.title, channel: req.artist, duration: null },
+              'A',
+              req.singer,
+            )
           } else {
-            const fallbackSong: Song = {
-              id: req.songId,
-              path: req.songId,
-              title: req.title,
-              artist: req.artist,
-              format: 'cdg',
-              ext: 'mp3',
-              cdg: null,
+            const found = songs.find((s) => s.id === req.songId)
+            if (found) {
+              enqueue(found, 'A', req.singer)
+            } else {
+              const fallbackSong: Song = {
+                id: req.songId,
+                path: req.songId,
+                title: req.title,
+                artist: req.artist,
+                format: 'cdg',
+                ext: 'mp3',
+                cdg: null,
+              }
+              enqueue(fallbackSong, 'A', req.singer)
             }
-            enqueue(fallbackSong, 'A', req.singer)
           }
           notify(`Nuova prenotazione (automatica) da ${req.singer}: ${req.title}`)
         })
@@ -199,9 +209,13 @@ export function LivePanel() {
     }
   }
 
-  const openInBrowser = () => {
+  const openInBrowser = async () => {
     if (info?.url) {
-      window.open(info.url, '_blank')
+      try {
+        await openUrl(info.url)
+      } catch {
+        window.open(info.url, '_blank')
+      }
     }
   }
 
@@ -211,20 +225,28 @@ export function LivePanel() {
       setPendingBookings((prev) => prev.filter((b) => b.id !== req.id))
       patch({ livePendingCount: Math.max(0, livePendingCount - 1) })
 
-      const found = songs.find((s) => s.id === req.songId)
-      if (found) {
-        enqueue(found, to, req.singer)
+      if (req.format === 'youtube') {
+        queueYoutube(
+          { id: req.songId, title: req.title, channel: req.artist, duration: null },
+          to,
+          req.singer,
+        )
       } else {
-        const fallbackSong: Song = {
-          id: req.songId,
-          path: req.songId,
-          title: req.title,
-          artist: req.artist,
-          format: 'cdg',
-          ext: 'mp3',
-          cdg: null,
+        const found = songs.find((s) => s.id === req.songId)
+        if (found) {
+          enqueue(found, to, req.singer)
+        } else {
+          const fallbackSong: Song = {
+            id: req.songId,
+            path: req.songId,
+            title: req.title,
+            artist: req.artist,
+            format: 'cdg',
+            ext: 'mp3',
+            cdg: null,
+          }
+          enqueue(fallbackSong, to, req.singer)
         }
-        enqueue(fallbackSong, to, req.singer)
       }
       notify(`Prenotazione di ${req.singer} aggiunta in ${to === 'A' ? 'scaletta' : 'riserva'}`)
     } catch (e) {
@@ -484,6 +506,11 @@ export function LivePanel() {
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">
                         <span className="text-base font-extrabold text-accent">{b.singer}</span>
+                        {b.format === 'youtube' && (
+                          <span className="rounded bg-red-600 px-1.5 py-0.5 text-xs font-bold text-white uppercase">
+                            YouTube
+                          </span>
+                        )}
                         <span className="text-xs text-muted">
                           {new Date(b.createdAt).toLocaleTimeString([], {
                             hour: '2-digit',

@@ -1,4 +1,4 @@
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 mod db;
 mod server;
 
@@ -211,49 +211,53 @@ async fn ytdlp_check(app: tauri::AppHandle) -> Result<String, String> {
     .map_err(|e| e.to_string())?
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
-struct YtItem {
-    id: String,
-    title: String,
-    channel: String,
-    duration: Option<f64>,
+pub struct YtItem {
+    pub id: String,
+    pub title: String,
+    pub channel: String,
+    pub duration: Option<f64>,
+}
+
+pub fn search_youtube_raw(app: &tauri::AppHandle, query: &str) -> Result<Vec<YtItem>, String> {
+    let q = format!("ytsearch10:{} karaoke", query.trim());
+    let out = ytdlp_command(app)
+        .args(["--flat-playlist", "--dump-json", "--no-warnings", &q])
+        .output()
+        .map_err(|_| ytdlp_missing())?;
+    if !out.status.success() {
+        let err = String::from_utf8_lossy(&out.stderr).trim().to_string();
+        return Err(format!("Ricerca non riuscita: {err}"));
+    }
+    let mut items = Vec::new();
+    for line in String::from_utf8_lossy(&out.stdout).lines() {
+        let v: serde_json::Value = match serde_json::from_str(line) {
+            Ok(v) => v,
+            Err(_) => continue,
+        };
+        let id = v["id"].as_str().unwrap_or_default().to_string();
+        if id.is_empty() {
+            continue;
+        }
+        items.push(YtItem {
+            id,
+            title: v["title"].as_str().unwrap_or("(senza titolo)").to_string(),
+            channel: v["channel"]
+                .as_str()
+                .or_else(|| v["uploader"].as_str())
+                .unwrap_or_default()
+                .to_string(),
+            duration: v["duration"].as_f64(),
+        });
+    }
+    Ok(items)
 }
 
 #[tauri::command]
 async fn ytdlp_search(app: tauri::AppHandle, query: String) -> Result<Vec<YtItem>, String> {
     tauri::async_runtime::spawn_blocking(move || {
-        let q = format!("ytsearch10:{} karaoke", query.trim());
-        let out = ytdlp_command(&app)
-            .args(["--flat-playlist", "--dump-json", "--no-warnings", &q])
-            .output()
-            .map_err(|_| ytdlp_missing())?;
-        if !out.status.success() {
-            let err = String::from_utf8_lossy(&out.stderr).trim().to_string();
-            return Err(format!("Ricerca non riuscita: {err}"));
-        }
-        let mut items = Vec::new();
-        for line in String::from_utf8_lossy(&out.stdout).lines() {
-            let v: serde_json::Value = match serde_json::from_str(line) {
-                Ok(v) => v,
-                Err(_) => continue,
-            };
-            let id = v["id"].as_str().unwrap_or_default().to_string();
-            if id.is_empty() {
-                continue;
-            }
-            items.push(YtItem {
-                id,
-                title: v["title"].as_str().unwrap_or("(senza titolo)").to_string(),
-                channel: v["channel"]
-                    .as_str()
-                    .or_else(|| v["uploader"].as_str())
-                    .unwrap_or_default()
-                    .to_string(),
-                duration: v["duration"].as_f64(),
-            });
-        }
-        Ok(items)
+        search_youtube_raw(&app, &query)
     })
     .await
     .map_err(|e| e.to_string())?
@@ -578,6 +582,7 @@ pub fn run() {
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_process::init())
+        .plugin(tauri_plugin_shell::init())
         .setup(|app| {
             let handle = app.handle().clone();
             let controller = Arc::new(tokio::sync::Mutex::new(LiveServerController::new(handle)));

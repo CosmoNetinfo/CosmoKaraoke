@@ -39,7 +39,7 @@ export function ensureDownloaded(ytId: string): Promise<string> {
 }
 
 /** Mette il video in scaletta (o in riserva) e lo scarica in sottofondo. */
-export function queueYoutube(item: YtItem, to: 'A' | 'B'): void {
+export function queueYoutube(item: YtItem, to: 'A' | 'B', singer?: string): void {
   const song: Song = {
     id: `yt:${item.id}`,
     path: '',
@@ -51,7 +51,7 @@ export function queueYoutube(item: YtItem, to: 'A' | 'B'): void {
     ytId: item.id,
     yt: 'downloading',
   }
-  useStore.getState().enqueue(song, to)
+  useStore.getState().enqueue(song, to, singer)
   useStore.getState().notify(`In ${to === 'A' ? 'scaletta' : 'riserva'}: ${item.title}`)
   void ensureDownloaded(item.id).catch(() => {})
 }

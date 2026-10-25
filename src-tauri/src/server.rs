@@ -15,6 +15,7 @@ use std::sync::Arc;
 use tokio::sync::{broadcast, oneshot, Mutex};
 
 use crate::db::{open_db, search_songs_fts, Song};
+use crate::{search_youtube_raw, YtItem};
 
 pub fn get_lan_ip() -> String {
     if let Ok(socket) = std::net::UdpSocket::bind("0.0.0.0:0") {
@@ -228,7 +229,11 @@ const MOBILE_HTML: &str = r#"<!DOCTYPE html>
       </div>
 
       <div class="card">
-        <label for="search-input">Cerca nel catalogo del locale:</label>
+        <div style="display:flex; gap:0.5rem; margin-bottom: 0.8rem;">
+          <button id="src-local" class="btn btn-small" style="flex:1;" onclick="setSearchSource('local')">📁 Catalogo locale</button>
+          <button id="src-yt" class="btn btn-small btn-secondary" style="flex:1;" onclick="setSearchSource('youtube')">▶️ Cerca su YouTube</button>
+        </div>
+        <label for="search-input" id="search-label">Cerca nel catalogo del locale:</label>
         <input type="search" id="search-input" placeholder="Titolo o artista..." oninput="onSearch(this.value)">
         <div id="search-status" style="font-size: 0.9rem; color: var(--muted); margin-bottom: 0.5rem;"></div>
         <div id="songs-list"></div>
@@ -374,6 +379,16 @@ const MOBILE_HTML: &str = r#"<!DOCTYPE html>
       }
     }
 
+    let searchSource = 'local'
+    function setSearchSource(src) {
+      searchSource = src
+      document.getElementById('src-local').className = src === 'local' ? 'btn btn-small' : 'btn btn-small btn-secondary'
+      document.getElementById('src-yt').className = src === 'youtube' ? 'btn btn-small' : 'btn btn-small btn-secondary'
+      document.getElementById('search-label').textContent = src === 'local' ? 'Cerca nel catalogo del locale:' : 'Cerca basi karaoke su YouTube:'
+      document.getElementById('search-input').placeholder = src === 'local' ? 'Titolo o artista locale...' : 'Cerca canzone su YouTube...'
+      onSearch(document.getElementById('search-input').value)
+    }
+
     function onSearch(val) {
       clearTimeout(searchTimer)
       const q = val.trim()
@@ -385,16 +400,17 @@ const MOBILE_HTML: &str = r#"<!DOCTYPE html>
       document.getElementById('search-status').textContent = 'Ricerca in corso...'
       searchTimer = setTimeout(async () => {
         try {
-          const res = await fetch(`/api/songs?q=${encodeURIComponent(q)}`)
+          const url = searchSource === 'youtube' ? `/api/youtube?q=${encodeURIComponent(q)}` : `/api/songs?q=${encodeURIComponent(q)}`
+          const res = await fetch(url)
           const list = await res.json()
-          renderSongs(list)
+          renderSongs(list, searchSource === 'youtube')
         } catch (e) {
           document.getElementById('search-status').textContent = 'Errore di connessione'
         }
-      }, 300)
+      }, searchSource === 'youtube' ? 600 : 300)
     }
 
-    function renderSongs(songs) {
+    function renderSongs(songs, isYt = false) {
       const el = document.getElementById('songs-list')
       if (!songs || songs.length === 0) {
         document.getElementById('search-status').textContent = 'Nessun brano trovato'
@@ -402,19 +418,25 @@ const MOBILE_HTML: &str = r#"<!DOCTYPE html>
         return
       }
       document.getElementById('search-status').textContent = `Trovati ${songs.length} brani:`
-      el.innerHTML = songs.map(s => `
-        <div class="song-item">
-          <div class="song-info">
-            <div class="song-title">${escapeHtml(s.title)}</div>
-            <div class="song-artist">${escapeHtml(s.artist || 'Artista sconosciuto')}</div>
-            <div class="song-format">${s.format}</div>
+      el.innerHTML = songs.map(s => {
+        const id = s.id
+        const title = s.title
+        const artist = isYt ? (s.channel || 'YouTube') : (s.artist || 'Artista sconosciuto')
+        const fmt = isYt ? 'YouTube' : s.format
+        return `
+          <div class="song-item">
+            <div class="song-info">
+              <div class="song-title">${escapeHtml(title)}</div>
+              <div class="song-artist">${escapeHtml(artist)}</div>
+              <div class="song-format" style="${isYt ? 'color:#ef4444;' : ''}">${fmt}</div>
+            </div>
+            <button class="btn btn-small" onclick="bookSong('${id}', '${escapeAttr(title)}', '${escapeAttr(artist)}', '${isYt ? 'youtube' : 'local'}')">Prenota</button>
           </div>
-          <button class="btn btn-small" onclick="bookSong('${s.id}', '${escapeAttr(s.title)}', '${escapeAttr(s.artist)}')">Prenota</button>
-        </div>
-      `).join('')
+        `
+      }).join('')
     }
 
-    async function bookSong(id, title, artist) {
+    async function bookSong(id, title, artist, format = 'local') {
       if (!myName) {
         alert('Inserisci prima il tuo nome nel pannello Profilo!')
         switchTab('profilo')
@@ -433,6 +455,7 @@ const MOBILE_HTML: &str = r#"<!DOCTYPE html>
             songId: id,
             title,
             artist,
+            format,
             note: note.trim() || undefined
           })
         })
@@ -607,6 +630,30 @@ async fn handle_songs_search(
 }
 
 #[derive(Deserialize)]
+struct YtQuery {
+    q: String,
+}
+
+async fn handle_youtube_search(
+    State(state): State<SharedLiveState>,
+    Query(q): Query<YtQuery>,
+) -> Result<Json<Vec<YtItem>>, (StatusCode, Json<serde_json::Value>)> {
+    let app = {
+        let s = state.lock().await;
+        s.app_handle.clone()
+    };
+
+    let items = search_youtube_raw(&app, &q.q).map_err(|e| {
+        (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            Json(serde_json::json!({ "error": e })),
+        )
+    })?;
+
+    Ok(Json(items))
+}
+
+#[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
 struct BookPayload {
     singer: String,
@@ -614,6 +661,7 @@ struct BookPayload {
     song_id: String,
     title: String,
     artist: String,
+    format: Option<String>,
     note: Option<String>,
 }
 
@@ -673,7 +721,7 @@ async fn handle_book(
         song_id: payload.song_id,
         title: payload.title,
         artist: payload.artist,
-        format: "song".to_string(),
+        format: payload.format.unwrap_or_else(|| "song".to_string()),
         note: payload.note,
         created_at: (nanos / 1_000_000) as u64,
     };
@@ -896,6 +944,7 @@ impl LiveServerController {
             .route("/", get(handle_root))
             .route("/api/status", get(handle_status))
             .route("/api/songs", get(handle_songs_search))
+            .route("/api/youtube", get(handle_youtube_search))
             .route("/api/book", post(handle_book))
             .route("/api/message", post(handle_message))
             .route("/api/vote", post(handle_vote))
