@@ -166,9 +166,62 @@ fn ytdlp_command(app: &tauri::AppHandle) -> Command {
 }
 
 fn ytdlp_missing() -> String {
-    "yt-dlp non trovato. Installalo (Windows: winget install yt-dlp, Mac: brew install yt-dlp) \
-     oppure copia il programma nella cartella \"bin\" dei dati dell'app."
+    "yt-dlp non trovato. Premi il pulsante «Scarica yt-dlp» qui sotto: lo installa da solo."
         .to_string()
+}
+
+/// Scarica yt-dlp (ultima versione ufficiale) nella cartella dati dell'app.
+#[tauri::command]
+async fn ytdlp_install(app: tauri::AppHandle) -> Result<String, String> {
+    tauri::async_runtime::spawn_blocking(move || {
+        let (asset, exe_name) = if cfg!(windows) {
+            ("yt-dlp.exe", "yt-dlp.exe")
+        } else if cfg!(target_os = "macos") {
+            ("yt-dlp_macos", "yt-dlp")
+        } else {
+            ("yt-dlp", "yt-dlp")
+        };
+        let url = format!("https://github.com/yt-dlp/yt-dlp/releases/latest/download/{asset}");
+        let dir = app
+            .path()
+            .app_data_dir()
+            .map_err(|e| e.to_string())?
+            .join("bin");
+        std::fs::create_dir_all(&dir).map_err(|e| format!("Non riesco a creare la cartella: {e}"))?;
+        let tmp = dir.join(format!("{exe_name}.download"));
+        let dest = dir.join(exe_name);
+
+        let resp = ureq::get(&url)
+            .call()
+            .map_err(|e| format!("Download non riuscito (controlla la connessione): {e}"))?;
+        let mut reader = resp.into_body().into_reader();
+        let mut file = std::fs::File::create(&tmp).map_err(|e| e.to_string())?;
+        std::io::copy(&mut reader, &mut file).map_err(|e| format!("Download interrotto: {e}"))?;
+        drop(file);
+
+        #[cfg(unix)]
+        {
+            use std::os::unix::fs::PermissionsExt;
+            std::fs::set_permissions(&tmp, std::fs::Permissions::from_mode(0o755))
+                .map_err(|e| e.to_string())?;
+        }
+        if dest.exists() {
+            let _ = std::fs::remove_file(&dest);
+        }
+        std::fs::rename(&tmp, &dest).map_err(|e| e.to_string())?;
+
+        let out = ytdlp_command(&app)
+            .arg("--version")
+            .output()
+            .map_err(|_| "yt-dlp scaricato ma non parte su questo computer.".to_string())?;
+        if out.status.success() {
+            Ok(String::from_utf8_lossy(&out.stdout).trim().to_string())
+        } else {
+            Err("yt-dlp scaricato ma non parte su questo computer.".to_string())
+        }
+    })
+    .await
+    .map_err(|e| e.to_string())?
 }
 
 #[tauri::command]
@@ -368,6 +421,7 @@ pub fn run() {
             load_blob,
             save_blob,
             ytdlp_check,
+            ytdlp_install,
             ytdlp_search,
             ytdlp_download,
             list_monitors,

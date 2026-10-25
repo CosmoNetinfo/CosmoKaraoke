@@ -161,8 +161,7 @@ export function Settings() {
           )}
         </div>
         <p className="mt-2 text-base text-muted">
-          Serve il programma esterno <b>yt-dlp</b> (Windows: <code>winget install yt-dlp</code> — Mac:{' '}
-          <code>brew install yt-dlp</code>). Uso personale: rispetta i termini di YouTube e il diritto
+          Serve il programma esterno <b>yt-dlp</b>: si scarica con un pulsante nella scheda YouTube. Uso personale: rispetta i termini di YouTube e il diritto
           d'autore.
         </p>
       </Panel>

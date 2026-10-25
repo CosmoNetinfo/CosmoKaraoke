@@ -17,6 +17,7 @@ export function YouTube() {
   const enqueue = useStore((s) => s.enqueue)
   const [version, setVersion] = useState<string | null>(null)
   const [missing, setMissing] = useState('')
+  const [installing, setInstalling] = useState(false)
   const [query, setQuery] = useState('')
   const [busy, setBusy] = useState(false)
   const [results, setResults] = useState<YtItem[]>([])
@@ -28,6 +29,20 @@ export function YouTube() {
       .then((v) => setVersion(v))
       .catch((e) => setMissing(String(e)))
   }, [])
+
+  const install = async () => {
+    setInstalling(true)
+    try {
+      const v = await invoke<string>('ytdlp_install')
+      setVersion(v)
+      setMissing('')
+      notify(`yt-dlp installato (versione ${v})`)
+    } catch (e) {
+      notify(String(e))
+    } finally {
+      setInstalling(false)
+    }
+  }
 
   const search = async () => {
     if (!query.trim()) return
@@ -70,7 +85,13 @@ export function YouTube() {
     <div className="flex h-full flex-col gap-3">
       {missing && (
         <div className="rounded-md border border-accent bg-accent/15 p-3 text-base text-text">
-          {missing}
+          <p>{missing}</p>
+          <div className="mt-2">
+            <Btn variant="primary" disabled={installing} onClick={() => void install()}>
+              {installing ? <Loader2 className="animate-spin" /> : <Download />}
+              {installing ? 'Scarico yt-dlp…' : 'Scarica yt-dlp'}
+            </Btn>
+          </div>
         </div>
       )}
       {version && <div className="text-base text-muted">yt-dlp versione {version}</div>}

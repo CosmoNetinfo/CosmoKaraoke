@@ -34,9 +34,7 @@ In alto a destra: dimensione del testo (100–200%), tre combinazioni di colori 
 
 ### YouTube (facoltativo)
 
-Serve il programma gratuito **yt-dlp**:
-- Windows: `winget install yt-dlp`
-- Mac: `brew install yt-dlp`
+Serve il programma gratuito **yt-dlp**. Nella scheda *YouTube*, se manca, compare il pulsante **Scarica yt-dlp**: lo installa da solo, senza terminale.
 
 È una funzione **per uso personale**: scaricare i video può violare i termini di YouTube e il diritto d'autore.
 
