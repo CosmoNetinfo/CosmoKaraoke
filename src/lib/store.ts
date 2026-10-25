@@ -15,6 +15,14 @@ export const DEFAULT_SETTINGS: Settings = {
   outputMono: false,
   // il microfono di solito va nel mixer esterno, non nel programma
   micInApp: false,
+  fxVolume: 0.9,
+  interludeOn: false,
+  interludeEvery: 1,
+  interludeRandom: true,
+  bgVolume: 0.5,
+  bgAuto: true,
+  bgShuffle: true,
+  displayImage: '',
   volume: 0.9,
   micOn: false,
   micVol: 1,
@@ -36,7 +44,7 @@ export const DEFAULT_SETTINGS: Settings = {
   displayStretch: false,
 }
 
-export type Tab = 'library' | 'youtube' | 'mixer' | 'settings'
+export type Tab = 'library' | 'youtube' | 'mixer' | 'effects' | 'settings'
 
 interface AppState {
   hydrated: boolean
@@ -55,6 +63,12 @@ interface AppState {
   displayBlack: boolean
   displayOpen: boolean
   jingles: Jingle[]
+  /** stacchetti musicali che partono tra un brano e l'altro */
+  interludes: Jingle[]
+  /** musiche di sottofondo per quando non si canta */
+  bgTracks: Jingle[]
+  bgOn: boolean
+  bgTitle: string
   settings: Settings
   toast: string
 
@@ -99,6 +113,10 @@ export const useStore = create<AppState>((set, get) => ({
   displayBlack: false,
   displayOpen: false,
   jingles: [],
+  interludes: [],
+  bgTracks: [],
+  bgOn: false,
+  bgTitle: '',
   settings: DEFAULT_SETTINGS,
   toast: '',
 
@@ -123,6 +141,8 @@ export const useStore = create<AppState>((set, get) => ({
           singers: d.singers ?? [],
           activeSinger: d.activeSinger ?? '',
           jingles: d.jingles ?? [],
+          interludes: d.interludes ?? [],
+          bgTracks: d.bgTracks ?? [],
           settings: { ...DEFAULT_SETTINGS, ...(d.settings ?? {}) },
         })
       }
@@ -239,11 +259,13 @@ useStore.subscribe((s, prev) => {
     s.singers !== prev.singers ||
     s.activeSinger !== prev.activeSinger ||
     s.jingles !== prev.jingles ||
+    s.interludes !== prev.interludes ||
+    s.bgTracks !== prev.bgTracks ||
     s.settings !== prev.settings
   if (!changed) return
   clearTimeout(saveTimer)
   saveTimer = setTimeout(() => {
-    const { libraryPaths, queueA, queueB, singers, activeSinger, jingles, settings } =
+    const { libraryPaths, queueA, queueB, singers, activeSinger, jingles, interludes, bgTracks, settings } =
       useStore.getState()
     const json = JSON.stringify({
       libraryPaths,
@@ -252,6 +274,8 @@ useStore.subscribe((s, prev) => {
       singers,
       activeSinger,
       jingles,
+      interludes,
+      bgTracks,
       settings,
     })
     invoke('save_blob', { name: 'state', json }).catch(() => {})

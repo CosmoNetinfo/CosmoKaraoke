@@ -1,6 +1,7 @@
 import { convertFileSrc } from '@tauri-apps/api/core'
 import { emit, listen } from '@tauri-apps/api/event'
 import type { DisplayMessage, DisplayState, QueueItem, Settings } from '../types'
+import { BUILTIN_EFFECTS, playBuiltinEffect } from './effects'
 import { engine } from './engine'
 import { useStore } from './store'
 
@@ -29,6 +30,7 @@ function buildDisplayState(): DisplayState {
     tempo: s.settings.tempo,
     black: s.displayBlack,
     bg: s.settings.displayBg,
+    bgImage: s.settings.displayImage ? convertFileSrc(s.settings.displayImage) : null,
     textScale: s.settings.displayTextScale,
     stretch: s.settings.displayStretch,
   }
@@ -76,8 +78,21 @@ export async function initPlayer(): Promise<void> {
   applySettingsToEngine()
 
   engine.media.addEventListener('ended', () => {
-    void playNext()
+    void onSongEnded()
   })
+
+  // il sottofondo si abbassa quando parte un brano e riprende quando finisce la scaletta
+  useStore.subscribe((s, prev) => {
+    if (s.current && !prev.current && s.bgOn && !bgAudio.paused) {
+      bgSuspended = true
+      bgRamp(0, 800, () => bgAudio.pause())
+    }
+    if (!s.current && prev.current && s.bgOn && bgSuspended && s.settings.bgAuto) {
+      bgSuspended = false
+      void bgResume()
+    }
+  })
+  bgAudio.addEventListener('ended', () => bgNextTrack())
   engine.media.addEventListener('play', () => {
     useStore.getState().patch({ playing: true })
     pushDisplay()
@@ -110,6 +125,11 @@ export async function startPlayback(item: QueueItem): Promise<void> {
   try {
     await engine.load(convertFileSrc(item.song.path))
     applySettingsToEngine()
+    if (item.interlude) {
+      // gli stacchetti suonano sempre alla velocità e tonalità originali
+      engine.setTempo(1)
+      engine.setPitch(0)
+    }
     pushDisplay()
     await engine.play()
     pushDisplay()
@@ -118,6 +138,49 @@ export async function startPlayback(item: QueueItem): Promise<void> {
     useStore.getState().patch({ current: null, playing: false })
     pushDisplay()
   }
+}
+
+// --- stacchetti tra un brano e l'altro --------------------------------------
+
+let sinceInterlude = 0
+let interludeIdx = 0
+
+/** Quando un brano finisce da solo: se serve parte uno stacchetto, altrimenti il brano dopo. */
+async function onSongEnded(): Promise<void> {
+  const s = useStore.getState()
+  if (s.current?.interlude) {
+    await playNext()
+    return
+  }
+  sinceInterlude++
+  const { settings, interludes, queueA } = s
+  if (
+    settings.interludeOn &&
+    interludes.length > 0 &&
+    queueA.length > 0 &&
+    sinceInterlude >= settings.interludeEvery
+  ) {
+    sinceInterlude = 0
+    const j = settings.interludeRandom
+      ? interludes[Math.floor(Math.random() * interludes.length)]
+      : interludes[interludeIdx++ % interludes.length]
+    await startPlayback({
+      uid: crypto.randomUUID(),
+      singer: '',
+      interlude: true,
+      song: {
+        id: j.path,
+        path: j.path,
+        title: `Stacchetto: ${j.name}`,
+        artist: '',
+        format: 'audio',
+        ext: '',
+        cdg: null,
+      },
+    })
+    return
+  }
+  await playNext()
 }
 
 export async function playNext(): Promise<void> {
@@ -204,5 +267,120 @@ export async function togglePreview(path: string): Promise<void> {
 
 export function playJingle(path: string): void {
   const a = new Audio(convertFileSrc(path))
-  void a.play().catch(() => useStore.getState().notify('Jingle non riproducibile'))
+  a.volume = useStore.getState().settings.fxVolume
+  void a.play().catch(() => useStore.getState().notify('Effetto non riproducibile'))
+}
+
+export interface EffectSlot {
+  key: string
+  name: string
+  run: () => void
+}
+
+/** Tutti gli effetti, nell'ordine dei tasti 1–9: prima i tuoi file, poi quelli interni. */
+export function effectList(): EffectSlot[] {
+  const s = useStore.getState()
+  const mine: EffectSlot[] = s.jingles.map((j) => ({
+    key: j.id,
+    name: j.name,
+    run: () => playJingle(j.path),
+  }))
+  const builtin: EffectSlot[] = BUILTIN_EFFECTS.map((e) => ({
+    key: e.id,
+    name: e.name,
+    run: () => playBuiltinEffect(e.id, useStore.getState().settings.fxVolume),
+  }))
+  return [...mine, ...builtin]
+}
+
+// --- musica di sottofondo ----------------------------------------------------
+
+const bgAudio = new Audio()
+let bgFade: ReturnType<typeof setInterval> | undefined
+let bgIdx = -1
+let bgSuspended = false
+
+function bgRamp(to: number, ms: number, done?: () => void): void {
+  clearInterval(bgFade)
+  const from = bgAudio.volume
+  const steps = Math.max(1, Math.round(ms / 50))
+  let i = 0
+  bgFade = setInterval(() => {
+    i++
+    bgAudio.volume = Math.min(1, Math.max(0, from + ((to - from) * i) / steps))
+    if (i >= steps) {
+      clearInterval(bgFade)
+      done?.()
+    }
+  }, 50)
+}
+
+function bgLoad(index: number): boolean {
+  const { bgTracks } = useStore.getState()
+  if (bgTracks.length === 0) return false
+  bgIdx = ((index % bgTracks.length) + bgTracks.length) % bgTracks.length
+  bgAudio.src = convertFileSrc(bgTracks[bgIdx].path)
+  useStore.getState().patch({ bgTitle: bgTracks[bgIdx].name })
+  return true
+}
+
+function bgPick(): number {
+  const { bgTracks, settings } = useStore.getState()
+  if (settings.bgShuffle && bgTracks.length > 1) {
+    let n = bgIdx
+    while (n === bgIdx) n = Math.floor(Math.random() * bgTracks.length)
+    return n
+  }
+  return bgIdx + 1
+}
+
+async function bgResume(): Promise<void> {
+  bgAudio.volume = 0
+  try {
+    await bgAudio.play()
+    bgRamp(useStore.getState().settings.bgVolume, 1500)
+  } catch {
+    useStore.getState().notify('Non riesco a far partire il sottofondo.')
+  }
+}
+
+export async function bgPlay(): Promise<void> {
+  const st = useStore.getState()
+  if (st.bgTracks.length === 0) {
+    st.notify('Aggiungi prima qualche brano di sottofondo.')
+    return
+  }
+  st.patch({ bgOn: true })
+  if (st.current) {
+    bgSuspended = true // parte da solo quando il brano finisce
+    return
+  }
+  bgSuspended = false
+  if (bgIdx < 0 || !bgAudio.src)
+    bgLoad(st.settings.bgShuffle ? Math.floor(Math.random() * st.bgTracks.length) : 0)
+  await bgResume()
+}
+
+export function bgStop(): void {
+  useStore.getState().patch({ bgOn: false })
+  bgSuspended = false
+  bgRamp(0, 600, () => bgAudio.pause())
+}
+
+export function bgNextTrack(): void {
+  const st = useStore.getState()
+  if (!st.bgOn || !bgLoad(bgPick())) return
+  if (st.current) {
+    bgSuspended = true
+    return
+  }
+  void bgResume()
+}
+
+export function setBgVolume(v: number): void {
+  useStore.getState().patchSettings({ bgVolume: v })
+  if (!bgAudio.paused && !bgSuspended) {
+    clearInterval(bgFade)
+    bgAudio.volume = v
+  }
 }

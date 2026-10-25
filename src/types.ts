@@ -14,6 +14,8 @@ export interface QueueItem {
   uid: string
   song: Song
   singer: string
+  /** stacchetto musicale tra due brani: non è un brano da cantare */
+  interlude?: boolean
 }
 
 export interface YtItem {
@@ -50,6 +52,14 @@ export interface Settings {
   vocalOff: boolean
   outputMono: boolean
   micInApp: boolean
+  fxVolume: number
+  interludeOn: boolean
+  interludeEvery: number
+  interludeRandom: boolean
+  bgVolume: number
+  bgAuto: boolean
+  bgShuffle: boolean
+  displayImage: string
   volume: number
   micOn: boolean
   micVol: number
@@ -86,6 +96,7 @@ export interface DisplayState {
   tempo: number
   black: boolean
   bg: string
+  bgImage: string | null
   textScale: number
   stretch: boolean
 }

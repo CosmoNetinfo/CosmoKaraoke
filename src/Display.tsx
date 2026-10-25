@@ -26,7 +26,12 @@ export function Display() {
     const setup = async () => {
       const u1 = await listen<DisplayState>('display:state', (e) => {
         const p = e.payload
-        base.current = { pos: p.position, at: performance.now(), playing: p.playing, tempo: p.tempo }
+        base.current = {
+          pos: p.position,
+          at: performance.now(),
+          playing: p.playing,
+          tempo: p.tempo,
+        }
         setSt(p)
       })
       const u2 = await listen<DisplayMessage>('display:message', (e) => {
@@ -83,7 +88,10 @@ export function Display() {
       style={{
         position: 'fixed',
         inset: 0,
-        background: st?.bg ?? '#0b1020',
+        background:
+          st?.bgImage && (kind === 'idle' || kind === 'audio')
+            ? `center / cover no-repeat url("${st.bgImage}"), ${st?.bg ?? '#0b1020'}`
+            : (st?.bg ?? '#0b1020'),
         color: '#fff',
         fontFamily: 'system-ui, sans-serif',
       }}
@@ -116,6 +124,7 @@ export function Display() {
             textAlign: 'center',
             padding: '4vw',
             gap: '1.5vw',
+            textShadow: '0 0.3vw 1.2vw #000, 0 0 0.4vw #000',
           }}
         >
           <div style={{ fontSize: `${5 * k}vw`, fontWeight: 700, lineHeight: 1.2 }}>
@@ -124,7 +133,9 @@ export function Display() {
           {kind === 'audio' && st?.artist && (
             <div style={{ fontSize: `${3 * k}vw`, opacity: 0.95 }}>{st.artist}</div>
           )}
-          {kind === 'idle' && <div style={{ fontSize: `${2.2 * k}vw`, opacity: 0.85 }}>Scegli un brano e canta!</div>}
+          {kind === 'idle' && (
+            <div style={{ fontSize: `${2.2 * k}vw`, opacity: 0.85 }}>Scegli un brano e canta!</div>
+          )}
         </div>
       )}
 

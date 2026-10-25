@@ -1,8 +1,17 @@
 import { invoke } from '@tauri-apps/api/core'
 import { listen } from '@tauri-apps/api/event'
-import { Library as LibraryIcon, Monitor, MonitorOff, SlidersHorizontal, Settings as SettingsIcon, Film } from 'lucide-react'
+import {
+  Library as LibraryIcon,
+  Monitor,
+  MonitorOff,
+  SlidersHorizontal,
+  Settings as SettingsIcon,
+  Film,
+  Sparkles,
+} from 'lucide-react'
 import { useEffect } from 'react'
 import { Library } from './components/Library'
+import { Effetti } from './components/Effetti'
 import { Mixer } from './components/Mixer'
 import { PlayerPanel } from './components/PlayerPanel'
 import { Playlists } from './components/Playlists'
@@ -12,13 +21,14 @@ import { AccessibilityMenu } from './components/AccessibilityMenu'
 import { Btn } from './components/ui'
 import { YouTube } from './components/YouTube'
 import { applyAppearance } from './lib/appearance'
-import { initPlayer, mixNext, playJingle, pushDisplay, togglePause } from './lib/player'
+import { effectList, initPlayer, mixNext, pushDisplay, togglePause } from './lib/player'
 import { useStore, type Tab } from './lib/store'
 
 const TABS: Array<{ id: Tab; label: string; icon: typeof LibraryIcon }> = [
   { id: 'library', label: 'Libreria', icon: LibraryIcon },
   { id: 'youtube', label: 'YouTube', icon: Film },
   { id: 'mixer', label: 'Audio', icon: SlidersHorizontal },
+  { id: 'effects', label: 'Effetti', icon: Sparkles },
   { id: 'settings', label: 'Impostazioni', icon: SettingsIcon },
 ]
 
@@ -76,8 +86,7 @@ export default function App() {
       } else if (e.key === 'm') {
         void mixNext()
       } else if (/^[1-9]$/.test(e.key)) {
-        const j = useStore.getState().jingles[Number(e.key) - 1]
-        if (j) playJingle(j.path)
+        effectList()[Number(e.key) - 1]?.run()
       }
     }
     window.addEventListener('keydown', onKey)
@@ -103,7 +112,9 @@ export default function App() {
   }
 
   if (!hydrated) {
-    return <div className="flex h-full items-center justify-center text-lg text-muted">Caricamento…</div>
+    return (
+      <div className="flex h-full items-center justify-center text-lg text-muted">Caricamento…</div>
+    )
   }
 
   return (
@@ -129,7 +140,11 @@ export default function App() {
         </nav>
         <div className="ml-auto flex flex-wrap gap-2">
           <AccessibilityMenu />
-          <Btn variant={displayBlack ? 'danger' : 'default'} onClick={toggleBlack} disabled={!displayOpen}>
+          <Btn
+            variant={displayBlack ? 'danger' : 'default'}
+            onClick={toggleBlack}
+            disabled={!displayOpen}
+          >
             Schermo nero
           </Btn>
           <Btn variant={displayOpen ? 'danger' : 'primary'} onClick={() => void toggleDisplay()}>
@@ -144,6 +159,7 @@ export default function App() {
           {tab === 'library' && <Library />}
           {tab === 'youtube' && <YouTube />}
           {tab === 'mixer' && <Mixer />}
+          {tab === 'effects' && <Effetti />}
           {tab === 'settings' && <Settings />}
         </div>
         <aside className="min-h-0 space-y-4 xl:overflow-y-auto xl:pr-2">

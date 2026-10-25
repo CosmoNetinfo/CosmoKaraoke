@@ -1,7 +1,6 @@
-import { open } from '@tauri-apps/plugin-dialog'
-import { Mic, MicOff, Plus, RotateCcw, Trash2 } from 'lucide-react'
+import { Mic, MicOff, RotateCcw } from 'lucide-react'
 import { engine, EQ_FREQS } from '../lib/engine'
-import { applyMicFx, applySettingsToEngine, playJingle } from '../lib/player'
+import { applyMicFx, applySettingsToEngine } from '../lib/player'
 import { DEFAULT_SETTINGS, useStore } from '../lib/store'
 import type { Settings } from '../types'
 import { useState } from 'react'
@@ -81,20 +80,18 @@ function freqLabel(f: number): string {
   return f >= 1000 ? `${f / 1000}k` : `${f}`
 }
 
-type Section = 'brano' | 'eq' | 'voce' | 'effetti' | 'jingle'
+type Section = 'brano' | 'eq' | 'voce' | 'effetti'
 const SECTIONS: { id: Section; label: string }[] = [
   { id: 'brano', label: 'Brano' },
   { id: 'eq', label: 'Equalizzatore' },
   { id: 'voce', label: 'Microfono' },
   { id: 'effetti', label: 'Effetti voce' },
-  { id: 'jingle', label: 'Jingle' },
 ]
 
 export function Mixer() {
   const [section, setSection] = useState<Section>('brano')
   const st = useStore((s) => s.settings)
   const patch = useStore((s) => s.patchSettings)
-  const jingles = useStore((s) => s.jingles)
   const notify = useStore((s) => s.notify)
 
   const setFx = (fx: Partial<Settings>) => {
@@ -111,20 +108,6 @@ export function Mixer() {
       notify('Non riesco ad accendere il microfono: controlla i permessi del sistema.')
       patch({ micOn: false })
     }
-  }
-
-  const addJingles = async () => {
-    const files = await open({
-      multiple: true,
-      filters: [{ name: 'Audio', extensions: ['mp3', 'wav', 'ogg', 'm4a', 'flac'] }],
-    })
-    if (!files) return
-    const list = (Array.isArray(files) ? files : [files]).map((p) => ({
-      id: crypto.randomUUID(),
-      path: p,
-      name: (p.split(/[\\/]/).pop() ?? p).replace(/\.[^.]+$/, ''),
-    }))
-    useStore.setState((s) => ({ jingles: [...s.jingles, ...list] }))
   }
 
   const reset = () => {
@@ -407,50 +390,6 @@ export function Mixer() {
                 onChange={(v) => setFx({ micComp: v })}
               />
             </div>
-          </Panel>
-        )}
-
-        {section === 'jingle' && (
-          <Panel
-            title="Jingle e applausi"
-            right={
-              <Btn onClick={() => void addJingles()}>
-                <Plus /> Aggiungi
-              </Btn>
-            }
-          >
-            {jingles.length === 0 ? (
-              <p className="text-base text-muted">
-                Aggiungi dei suoni: li lanci con un clic o con i tasti 1–9.
-              </p>
-            ) : (
-              <div className="grid grid-cols-2 gap-2">
-                {jingles.map((j, i) => (
-                  <div key={j.id} className="flex gap-1">
-                    <Btn
-                      className="min-w-0 flex-1 justify-start"
-                      onClick={() => playJingle(j.path)}
-                    >
-                      <span className="rounded bg-inset px-1.5 text-base text-muted">
-                        {i < 9 ? i + 1 : '·'}
-                      </span>
-                      <span className="truncate">{j.name}</span>
-                    </Btn>
-                    <Btn
-                      variant="ghost"
-                      title="Rimuovi"
-                      onClick={() =>
-                        useStore.setState((s) => ({
-                          jingles: s.jingles.filter((x) => x.id !== j.id),
-                        }))
-                      }
-                    >
-                      <Trash2 />
-                    </Btn>
-                  </div>
-                ))}
-              </div>
-            )}
           </Panel>
         )}
       </div>

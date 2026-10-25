@@ -36,6 +36,14 @@ In alto a destra: dimensione del testo (100–200%), tre combinazioni di colori 
 
 Se il Mac è collegato a un mixer e il microfono è nel mixer, **non serve fare niente nel programma**: l'audio esce dall'uscita scelta in *Impostazioni di Sistema → Suono → Uscita*, e voce, riverbero ed effetti li gestisce il mixer. In *Impostazioni → Audio* l'opzione «Usa il microfono dentro il programma» resta spenta, così il Mac non chiede nemmeno il permesso del microfono. Nella scheda *Audio* puoi scegliere l'uscita **Mono** o **Stereo** a seconda del mixer.
 
+### Effetti, stacchetti, sottofondo e sfondo TV
+
+Nella scheda **Effetti**:
+- **Effetti sonori:** dieci pulsanti già pronti (applausi, ovazione, fischio, rullo di tamburi, ba-dum-tss, tromba, fanfara, campanello, trombone triste, errore), creati dal programma. Puoi aggiungere i tuoi file audio. I tasti **1–9** fanno partire i primi nove.
+- **Stacchetti:** musichette che partono da sole tra un brano e l'altro (ogni brano o ogni 2–5 brani, a caso o in ordine). Non partono se premi «Prossimo».
+- **Sottofondo:** qualsiasi canzone che suona mentre nessuno canta. Si abbassa e si ferma quando parte un brano e riprende da sola alla fine della scaletta.
+- **Sfondo TV:** un'immagine che si vede sulla TV quando non c'è un brano con i testi.
+
 ### YouTube (facoltativo)
 
 Serve il programma gratuito **yt-dlp**. Nella scheda *YouTube*, se manca, compare il pulsante **Scarica yt-dlp**: lo installa da solo, senza terminale.
