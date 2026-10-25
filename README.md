@@ -32,6 +32,10 @@ Tasti rapidi: **Spazio** pausa/riprendi · **M** mix · **1–9** jingle.
 
 In alto a destra: dimensione del testo (100–200%), tre combinazioni di colori (*Scuro*, *Crema*, *Alto contrasto giallo su nero*), quattro caratteri (*Atkinson Hyperlegible*, *Lexend*, *OpenDyslexic*, quello del computer) e spaziatura di lettere e righe. In **Impostazioni → Schermo testi** si ingrandiscono anche le scritte sulla TV.
 
+### Uso con un mixer esterno
+
+Se il Mac è collegato a un mixer e il microfono è nel mixer, **non serve fare niente nel programma**: l'audio esce dall'uscita scelta in *Impostazioni di Sistema → Suono → Uscita*, e voce, riverbero ed effetti li gestisce il mixer. In *Impostazioni → Audio* l'opzione «Usa il microfono dentro il programma» resta spenta, così il Mac non chiede nemmeno il permesso del microfono. Nella scheda *Audio* puoi scegliere l'uscita **Mono** o **Stereo** a seconda del mixer.
+
 ### YouTube (facoltativo)
 
 Serve il programma gratuito **yt-dlp**. Nella scheda *YouTube*, se manca, compare il pulsante **Scarica yt-dlp**: lo installa da solo, senza terminale.

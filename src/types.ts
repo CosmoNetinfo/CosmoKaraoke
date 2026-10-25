@@ -49,6 +49,7 @@ export interface Settings {
   tempo: number
   vocalOff: boolean
   outputMono: boolean
+  micInApp: boolean
   volume: number
   micOn: boolean
   micVol: number

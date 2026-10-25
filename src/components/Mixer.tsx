@@ -139,7 +139,11 @@ export function Mixer() {
 
   return (
     <div className="flex h-full flex-col gap-3">
-      <SubTabs tabs={SECTIONS} value={section} onChange={setSection} />
+      <SubTabs
+        tabs={SECTIONS.filter((s) => st.micInApp || (s.id !== 'voce' && s.id !== 'effetti'))}
+        value={section}
+        onChange={setSection}
+      />
       <div className="min-h-0 flex-1 space-y-3 overflow-y-auto pr-2">
         {section === 'brano' && (
           <Panel

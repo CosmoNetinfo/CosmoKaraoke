@@ -18,7 +18,7 @@ import { useStore, type Tab } from './lib/store'
 const TABS: Array<{ id: Tab; label: string; icon: typeof LibraryIcon }> = [
   { id: 'library', label: 'Libreria', icon: LibraryIcon },
   { id: 'youtube', label: 'YouTube', icon: Film },
-  { id: 'mixer', label: 'Mixer', icon: SlidersHorizontal },
+  { id: 'mixer', label: 'Audio', icon: SlidersHorizontal },
   { id: 'settings', label: 'Impostazioni', icon: SettingsIcon },
 ]
 

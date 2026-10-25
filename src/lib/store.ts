@@ -13,6 +13,8 @@ export const DEFAULT_SETTINGS: Settings = {
   tempo: 1,
   vocalOff: false,
   outputMono: false,
+  // il microfono di solito va nel mixer esterno, non nel programma
+  micInApp: false,
   volume: 0.9,
   micOn: false,
   micVol: 1,

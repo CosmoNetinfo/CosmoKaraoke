@@ -2,16 +2,18 @@ import { invoke } from '@tauri-apps/api/core'
 import { open } from '@tauri-apps/plugin-dialog'
 import { FolderPlus, RefreshCw, Trash2 } from 'lucide-react'
 import { useEffect, useState } from 'react'
+import { engine } from '../lib/engine'
 import { previewSupported } from '../lib/player'
 import { useStore } from '../lib/store'
 import type { MonitorInfo } from '../types'
 import { Btn, Panel, Slider, SubTabs } from './ui'
 import { UpdatesPanel, YtdlpPanel } from './UpdatesPanel'
 
-type Section = 'cartelle' | 'schermo' | 'cuffie' | 'youtube' | 'aggiornamenti'
+type Section = 'cartelle' | 'schermo' | 'audio' | 'cuffie' | 'youtube' | 'aggiornamenti'
 const SECTIONS: { id: Section; label: string }[] = [
   { id: 'cartelle', label: 'Cartelle' },
   { id: 'schermo', label: 'Schermo TV' },
+  { id: 'audio', label: 'Audio' },
   { id: 'cuffie', label: 'Cuffie' },
   { id: 'youtube', label: 'YouTube' },
   { id: 'aggiornamenti', label: 'Aggiornamenti' },
@@ -142,6 +144,36 @@ export function Settings() {
                 />
                 <span>Allarga i testi del karaoke fino ai bordi dello schermo</span>
               </label>
+            </div>
+          </Panel>
+        )}
+
+        {section === 'audio' && (
+          <Panel title="Audio e microfono">
+            <div className="space-y-3 text-base">
+              <p>
+                L'audio del programma esce dall'uscita scelta nelle impostazioni del computer (su
+                Mac: Impostazioni di Sistema → Suono → Uscita). Se hai un mixer collegato, scegli
+                quello.
+              </p>
+              <label className="flex items-center gap-3">
+                <input
+                  type="checkbox"
+                  checked={st.micInApp}
+                  onChange={(e) => {
+                    patch({ micInApp: e.target.checked })
+                    if (!e.target.checked && st.micOn) {
+                      void engine.setMic(false)
+                      patch({ micOn: false })
+                    }
+                  }}
+                />
+                <span>Usa il microfono dentro il programma (con riverbero ed effetti)</span>
+              </label>
+              <p className="text-muted">
+                Lascia spento se il microfono è collegato al mixer: gli effetti li fa il mixer e il
+                programma non chiederà il permesso del microfono.
+              </p>
             </div>
           </Panel>
         )}

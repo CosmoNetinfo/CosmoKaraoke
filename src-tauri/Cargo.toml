@@ -1,6 +1,6 @@
 [package]
 name = "cosmokaraoke"
-version = "0.1.8"
+version = "0.1.9"
 description = "CosmoKaraoke - lettore karaoke per Windows e macOS"
 authors = ["CosmoNet"]
 edition = "2021"
