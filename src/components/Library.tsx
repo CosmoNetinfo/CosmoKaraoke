@@ -8,6 +8,7 @@ import {
   Play,
   Plus,
   Search,
+  Settings as SettingsIcon,
   Sparkles,
 } from 'lucide-react'
 import { useDeferredValue, useMemo, useState } from 'react'
@@ -17,30 +18,31 @@ import type { Format, Song } from '../types'
 import { Btn } from './ui'
 
 function FormatBadge({ format }: { format: Format }) {
+  const badge = 'inline-flex items-center gap-1.5 rounded-md border border-line bg-inset px-2 py-1 text-base font-semibold text-text'
   if (format === 'cdg') {
     return (
-      <span className="inline-flex items-center gap-1 rounded-md border border-indigo-500/30 bg-indigo-950/40 px-2 py-0.5 text-xs font-bold text-indigo-300">
-        <Disc3 className="h-3 w-3" /> CD+G
+      <span className={badge}>
+        <Disc3 className="text-accent-text" /> CD+G
       </span>
     )
   }
   if (format === 'kar') {
     return (
-      <span className="inline-flex items-center gap-1 rounded-md border border-emerald-500/30 bg-emerald-950/40 px-2 py-0.5 text-xs font-bold text-emerald-300">
-        <Music className="h-3 w-3" /> KAR
+      <span className={badge}>
+        <Music className="text-accent-text" /> KAR
       </span>
     )
   }
   if (format === 'video') {
     return (
-      <span className="inline-flex items-center gap-1 rounded-md border border-amber-500/30 bg-amber-950/40 px-2 py-0.5 text-xs font-bold text-amber-300">
-        <Film className="h-3 w-3" /> Video
+      <span className={badge}>
+        <Film className="text-accent-text" /> Video
       </span>
     )
   }
   return (
-    <span className="inline-flex items-center gap-1 rounded-md border border-slate-700 bg-slate-900/60 px-2 py-0.5 text-xs font-bold text-slate-300">
-      <FileAudio className="h-3 w-3" /> Audio
+    <span className={badge}>
+      <FileAudio className="text-accent-text" /> Audio
     </span>
   )
 }
@@ -95,7 +97,8 @@ export function Library() {
           {query && (
             <button
               onClick={() => setQuery('')}
-              className="absolute right-3 top-3 text-xs font-bold text-muted hover:text-text"
+              className="absolute right-2 top-1.5 flex h-11 w-11 items-center justify-center rounded-lg text-base font-bold text-muted hover:bg-btn hover:text-text"
+              aria-label="Cancella la ricerca"
             >
               ✕
             </button>
@@ -106,7 +109,7 @@ export function Library() {
         <div className="flex shrink-0 items-center gap-1 rounded-xl border border-line bg-inset p-1">
           <button
             onClick={() => setFormat('all')}
-            className={`rounded-lg px-3 py-1.5 text-xs font-bold transition-all ${
+            className={`min-h-11 rounded-lg px-3 py-1.5 text-base font-bold transition-all ${
               format === 'all'
                 ? 'bg-accent text-on-accent shadow-xs'
                 : 'text-muted hover:bg-btn hover:text-text'
@@ -116,9 +119,9 @@ export function Library() {
           </button>
           <button
             onClick={() => setFormat('cdg')}
-            className={`rounded-lg px-3 py-1.5 text-xs font-bold transition-all ${
+            className={`min-h-11 rounded-lg px-3 py-1.5 text-base font-bold transition-all ${
               format === 'cdg'
-                ? 'bg-indigo-600 text-white shadow-xs'
+                ? 'bg-accent text-on-accent shadow-xs'
                 : 'text-muted hover:bg-btn hover:text-text'
             }`}
           >
@@ -126,9 +129,9 @@ export function Library() {
           </button>
           <button
             onClick={() => setFormat('kar')}
-            className={`rounded-lg px-3 py-1.5 text-xs font-bold transition-all ${
+            className={`min-h-11 rounded-lg px-3 py-1.5 text-base font-bold transition-all ${
               format === 'kar'
-                ? 'bg-emerald-600 text-white shadow-xs'
+                ? 'bg-accent text-on-accent shadow-xs'
                 : 'text-muted hover:bg-btn hover:text-text'
             }`}
           >
@@ -136,9 +139,9 @@ export function Library() {
           </button>
           <button
             onClick={() => setFormat('video')}
-            className={`rounded-lg px-3 py-1.5 text-xs font-bold transition-all ${
+            className={`min-h-11 rounded-lg px-3 py-1.5 text-base font-bold transition-all ${
               format === 'video'
-                ? 'bg-amber-600 text-white shadow-xs'
+                ? 'bg-accent text-on-accent shadow-xs'
                 : 'text-muted hover:bg-btn hover:text-text'
             }`}
           >
@@ -148,7 +151,7 @@ export function Library() {
       </div>
 
       {/* RIEPILOGO STATISTICHE */}
-      <div className="flex items-center justify-between text-xs font-bold uppercase tracking-wider text-muted">
+      <div className="flex items-center justify-between text-base font-semibold text-muted">
         <div>
           {scanning ? (
             <span className="flex items-center gap-1 text-accent-text">
@@ -168,11 +171,14 @@ export function Library() {
         <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-line p-10 text-center">
           <Music className="mb-2 h-10 w-10 text-muted/60" />
           <div className="text-base font-bold text-text">Libreria vuota</div>
-          <p className="mt-1 max-w-md text-sm text-muted">
+          <p className="mt-1 max-w-md text-base text-muted">
             {libraryPaths.length === 0
-              ? 'Non hai ancora collegato cartelle musicali. Apri la scheda "Impostazioni" e seleziona la cartella con i tuoi file MP3, CDG, KAR o Video.'
-              : 'Nessun brano trovato nelle cartelle selezionate.'}
+              ? 'Per iniziare, aggiungi la cartella in cui tieni i brani karaoke. La scansione include anche le sottocartelle.'
+              : 'Non sono stati trovati brani nelle cartelle scelte. Controlla la selezione o avvia una nuova scansione.'}
           </p>
+          <Btn className="mt-4" onClick={() => useStore.getState().patch({ tab: 'settings' })}>
+            <SettingsIcon /> {libraryPaths.length === 0 ? 'Aggiungi la cartella musicale' : 'Controlla le cartelle'}
+          </Btn>
         </div>
       )}
 
@@ -192,7 +198,7 @@ export function Library() {
                   <FormatBadge format={song.format} />
                 </div>
                 {song.artist && (
-                  <div className="truncate text-sm font-medium text-muted">{song.artist}</div>
+                  <div className="truncate text-base font-medium text-muted">{song.artist}</div>
                 )}
               </div>
 
@@ -200,7 +206,7 @@ export function Library() {
               <div className="flex shrink-0 items-center gap-1.5 opacity-90 transition-opacity group-hover:opacity-100">
                 <Btn
                   variant="ghost"
-                  className="h-9 w-9 p-0"
+                  className="p-0"
                   title="Ascolta anteprima in cuffia (regia)"
                   onClick={() => void togglePreview(song.path)}
                 >
@@ -208,7 +214,7 @@ export function Library() {
                 </Btn>
                 <Btn
                   variant="ghost"
-                  className="h-9 w-9 p-0"
+                  className="p-0"
                   title="Riproduci subito (salta la coda)"
                   onClick={() => play(song)}
                 >
@@ -216,7 +222,7 @@ export function Library() {
                 </Btn>
                 <Btn
                   variant="primary"
-                  className="h-9 px-3 text-xs font-bold"
+                  className="px-3 text-base font-bold"
                   title="Aggiungi in fondo alla scaletta attiva"
                   onClick={() => enqueue(song, 'A')}
                 >
@@ -225,7 +231,7 @@ export function Library() {
                 </Btn>
                 <Btn
                   variant="default"
-                  className="h-9 px-2 text-xs"
+                  className="px-3 text-base"
                   title="Metti nella scaletta di riserva"
                   onClick={() => enqueue(song, 'B')}
                 >
@@ -237,7 +243,7 @@ export function Library() {
 
           {filtered.length > limit && (
             <li className="p-4 text-center">
-              <Btn onClick={() => setLimit((l) => l + PAGE)} className="text-sm">
+              <Btn onClick={() => setLimit((l) => l + PAGE)} className="text-base">
                 Mostra altri {PAGE} brani
               </Btn>
             </li>

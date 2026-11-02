@@ -25,6 +25,9 @@ export function Settings() {
   const [section, setSection] = useState<Section>('cartelle')
   const libraryPaths = useStore((s) => s.libraryPaths)
   const scanning = useStore((s) => s.scanning)
+  const scanProgress = useStore((s) => s.scanProgress)
+  const scanSummary = useStore((s) => s.scanSummary)
+  const scanIssue = useStore((s) => s.scanIssue)
   const st = useStore((s) => s.settings)
   const patch = useStore((s) => s.patchSettings)
   const addLibraryPath = useStore((s) => s.addLibraryPath)
@@ -66,12 +69,41 @@ export function Settings() {
                 <Btn onClick={() => void rescan()} disabled={scanning}>
                   <RefreshCw className={scanning ? 'animate-spin' : ''} /> Riscansiona
                 </Btn>
-                <Btn variant="primary" onClick={() => void pickFolder()}>
+                <Btn variant="primary" onClick={() => void pickFolder()} disabled={scanning}>
                   <FolderPlus /> Aggiungi cartella
                 </Btn>
               </div>
             }
           >
+            {scanning && scanProgress && (
+              <div className="mb-4 rounded-xl border border-line bg-inset p-4" role="status" aria-live="polite">
+                <p className="text-base font-semibold text-text">
+                  Scansione in corso: {scanProgress.scannedFiles.toLocaleString('it-IT')} file analizzati,
+                  {' '}{scanProgress.foundSongs.toLocaleString('it-IT')} brani trovati.
+                </p>
+                <div
+                  className="mt-3 h-3 overflow-hidden rounded-full bg-row"
+                  role="progressbar"
+                  aria-label="Avanzamento della scansione della libreria"
+                  aria-valuetext={`${scanProgress.scannedFiles} file analizzati`}
+                >
+                  <div className="h-full w-1/3 animate-pulse rounded-full bg-accent" />
+                </div>
+                {scanProgress.unreadablePaths > 0 && (
+                  <p className="mt-2 text-base text-danger">
+                    {scanProgress.unreadablePaths} percorsi non accessibili. La libreria precedente sarà mantenuta.
+                  </p>
+                )}
+              </div>
+            )}
+            {!scanning && scanSummary && (
+              <p className="mb-3 text-base text-accent-text" role="status" aria-live="polite">{scanSummary}</p>
+            )}
+            {!scanning && scanIssue && (
+              <p className="mb-3 rounded-lg border border-danger bg-inset p-3 text-base text-danger" role="alert">
+                {scanIssue}
+              </p>
+            )}
             {libraryPaths.length === 0 ? (
               <p className="text-base text-muted">
                 Nessuna cartella. Aggiungi quella con i tuoi file MP3+CDG, video e MIDI/KAR.
@@ -87,6 +119,7 @@ export function Settings() {
                     <Btn
                       variant="ghost"
                       onClick={() => void removeLibraryPath(p)}
+                      disabled={scanning}
                       title="Togli dalla libreria"
                     >
                       <Trash2 />

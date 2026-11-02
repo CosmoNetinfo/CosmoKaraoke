@@ -33,30 +33,31 @@ interface RowProps {
 }
 
 function FormatBadge({ format, isYt }: { format: string; isYt?: boolean }) {
+  const badge = 'inline-flex items-center gap-1.5 rounded-md border border-line bg-inset px-2 py-1 text-base font-semibold text-text'
   if (isYt) {
     return (
-      <span className="inline-flex items-center gap-1 rounded-md border border-red-500/30 bg-red-950/40 px-1.5 py-0.5 text-xs font-bold text-red-400">
-        <Film className="h-3 w-3" /> YT
+      <span className={badge}>
+        <Film className="text-accent-text" /> YouTube
       </span>
     )
   }
   if (format === 'kar') {
     return (
-      <span className="inline-flex items-center gap-1 rounded-md border border-emerald-500/30 bg-emerald-950/40 px-1.5 py-0.5 text-xs font-bold text-emerald-400">
-        <Music className="h-3 w-3" /> KAR
+      <span className={badge}>
+        <Music className="text-accent-text" /> KAR
       </span>
     )
   }
   if (format === 'video') {
     return (
-      <span className="inline-flex items-center gap-1 rounded-md border border-amber-500/30 bg-amber-950/40 px-1.5 py-0.5 text-xs font-bold text-amber-400">
-        <Video className="h-3 w-3" /> Video
+      <span className={badge}>
+        <Video className="text-accent-text" /> Video
       </span>
     )
   }
   return (
-    <span className="inline-flex items-center gap-1 rounded-md border border-indigo-500/30 bg-indigo-950/40 px-1.5 py-0.5 text-xs font-bold text-indigo-300">
-      <Disc3 className="h-3 w-3" /> CD+G
+    <span className={badge}>
+      <Disc3 className="text-accent-text" /> CD+G
     </span>
   )
 }
@@ -78,6 +79,7 @@ function QueueRow({
   const transfer = useStore((s) => s.transfer)
   const removeFromQueue = useStore((s) => s.removeFromQueue)
   const setSingerOf = useStore((s) => s.setSingerOf)
+  const queueLength = useStore((s) => (which === 'A' ? s.queueA.length : s.queueB.length))
 
   const isYt = Boolean(item.song.yt || item.song.path.startsWith('https://'))
 
@@ -94,12 +96,12 @@ function QueueRow({
       } ${isDragOver ? 'border-t-2 border-accent shadow-sm' : ''}`}
     >
       <span
-        title="Trascina per riordinare"
+        title="Per riordinare, usa i pulsanti Sposta su e Sposta giù"
         className="cursor-grab text-muted/60 transition-colors hover:text-text active:cursor-grabbing"
       >
         <GripVertical size={16} />
       </span>
-      <span className="w-5 text-center text-sm font-bold tabular-nums text-muted/80">{index + 1}</span>
+      <span className="w-6 text-center text-base font-bold tabular-nums text-muted/80">{index + 1}</span>
       
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2 truncate">
@@ -107,17 +109,17 @@ function QueueRow({
           <FormatBadge format={item.song.format} isYt={isYt} />
         </div>
         
-        <div className="flex items-center gap-2 text-sm text-muted">
+        <div className="flex items-center gap-2 text-base text-muted">
           {item.song.artist && <span className="truncate">{item.song.artist}</span>}
           {item.song.artist && <span>·</span>}
           <div className="flex items-center gap-1">
-            <span className="text-xs font-semibold text-accent-text">🎤</span>
+            <span className="text-base font-semibold text-accent-text" aria-hidden="true">🎤</span>
             <select
               value={item.singer}
               draggable={false}
               onDragStart={(e) => e.stopPropagation()}
               onChange={(e) => setSingerOf(item.uid, e.target.value)}
-              className="max-w-full rounded bg-transparent text-sm font-semibold text-accent-text outline-none hover:underline"
+              className="max-w-full rounded bg-transparent px-1 py-1 text-base font-semibold text-accent-text outline-none hover:underline"
             >
               <option value="" className="bg-panel text-muted">— assegna cantante —</option>
               {singers.map((n) => (
@@ -133,10 +135,10 @@ function QueueRow({
         </div>
 
         {item.song.yt === 'downloading' && (
-          <div className="mt-1 text-xs font-semibold text-accent-text">Scarico video da YouTube…</div>
+          <div className="mt-1 text-base font-semibold text-accent-text">Scarico video da YouTube…</div>
         )}
         {item.song.yt === 'error' && (
-          <div className="mt-1 text-xs font-semibold text-danger">Download non riuscito</div>
+          <div className="mt-1 text-base font-semibold text-danger">Download non riuscito</div>
         )}
       </div>
 
@@ -145,24 +147,24 @@ function QueueRow({
         draggable={false}
         onDragStart={(e) => e.stopPropagation()}
       >
-        <Btn variant="ghost" className="h-9 w-9 p-0" title="Riproduci ora" onClick={() => void startPlayback(item)}>
+        <Btn variant="ghost" className="p-0" title={`Riproduci ora: ${item.song.title}`} onClick={() => void startPlayback(item)}>
           <Play size={16} className="text-accent-text" />
         </Btn>
-        <Btn variant="ghost" className="h-9 w-9 p-0" title="Su" onClick={() => moveInQueue(item.uid, -1)}>
+        <Btn variant="ghost" className="p-0" title={`Sposta ${item.song.title} più in alto`} onClick={() => moveInQueue(item.uid, -1)} disabled={index === 0}>
           <ChevronUp size={16} />
         </Btn>
-        <Btn variant="ghost" className="h-9 w-9 p-0" title="Giù" onClick={() => moveInQueue(item.uid, 1)}>
+        <Btn variant="ghost" className="p-0" title={`Sposta ${item.song.title} più in basso`} onClick={() => moveInQueue(item.uid, 1)} disabled={index === queueLength - 1}>
           <ChevronDown size={16} />
         </Btn>
         <Btn
           variant="ghost"
-          className="h-9 w-9 p-0"
-          title={which === 'A' ? 'Sposta nella riserva' : 'Sposta nella scaletta'}
+          className="p-0"
+          title={which === 'A' ? `Sposta ${item.song.title} nella riserva` : `Sposta ${item.song.title} nella scaletta`}
           onClick={() => transfer(item.uid)}
         >
           <ArrowLeftRight size={15} />
         </Btn>
-        <Btn variant="ghost" className="h-9 w-9 p-0 text-muted hover:text-danger" title="Togli" onClick={() => removeFromQueue(item.uid)}>
+        <Btn variant="ghost" className="p-0 text-muted hover:text-danger" title={`Togli ${item.song.title} dalla coda`} onClick={() => removeFromQueue(item.uid)}>
           <Trash2 size={15} />
         </Btn>
       </div>
@@ -231,7 +233,7 @@ export function Playlists() {
           <div className="flex items-center gap-1.5">
             <button
               onClick={() => setActiveTab('A')}
-              className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-bold transition-all ${
+              className={`flex min-h-11 items-center gap-1.5 rounded-lg px-3 py-1.5 text-base font-bold transition-all ${
                 activeTab === 'A'
                   ? 'bg-accent text-on-accent shadow-xs'
                   : 'text-muted hover:bg-btn hover:text-text'
@@ -239,28 +241,28 @@ export function Playlists() {
             >
               <ListMusic size={15} />
               <span>Scaletta</span>
-              <span className={`ml-1 rounded-full px-1.5 py-0.2 text-xs ${activeTab === 'A' ? 'bg-white/20' : 'bg-inset text-muted'}`}>
+              <span className={`ml-1 rounded-full px-2 py-0.5 text-base ${activeTab === 'A' ? 'bg-on-accent/20' : 'bg-inset text-muted'}`}>
                 {queueA.length}
               </span>
             </button>
 
             <button
               onClick={() => setActiveTab('B')}
-              className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-bold transition-all ${
+              className={`flex min-h-11 items-center gap-1.5 rounded-lg px-3 py-1.5 text-base font-bold transition-all ${
                 activeTab === 'B'
                   ? 'bg-accent text-on-accent shadow-xs'
                   : 'text-muted hover:bg-btn hover:text-text'
               }`}
             >
               <span>Riserva</span>
-              <span className={`ml-1 rounded-full px-1.5 py-0.2 text-xs ${activeTab === 'B' ? 'bg-white/20' : 'bg-inset text-muted'}`}>
+              <span className={`ml-1 rounded-full px-2 py-0.5 text-base ${activeTab === 'B' ? 'bg-on-accent/20' : 'bg-inset text-muted'}`}>
                 {queueB.length}
               </span>
             </button>
 
             <button
               onClick={() => setActiveTab('singers')}
-              className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-bold transition-all ${
+              className={`flex min-h-11 items-center gap-1.5 rounded-lg px-3 py-1.5 text-base font-bold transition-all ${
                 activeTab === 'singers'
                   ? 'bg-accent text-on-accent shadow-xs'
                   : 'text-muted hover:bg-btn hover:text-text'
@@ -268,14 +270,14 @@ export function Playlists() {
             >
               <Users size={15} />
               <span>Cantanti</span>
-              <span className={`ml-1 rounded-full px-1.5 py-0.2 text-xs ${activeTab === 'singers' ? 'bg-white/20' : 'bg-inset text-muted'}`}>
+              <span className={`ml-1 rounded-full px-2 py-0.5 text-base ${activeTab === 'singers' ? 'bg-on-accent/20' : 'bg-inset text-muted'}`}>
                 {singers.length}
               </span>
             </button>
 
             <button
               onClick={() => setActiveTab('saved')}
-              className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-bold transition-all ${
+              className={`flex min-h-11 items-center gap-1.5 rounded-lg px-3 py-1.5 text-base font-bold transition-all ${
                 activeTab === 'saved'
                   ? 'bg-accent text-on-accent shadow-xs'
                   : 'text-muted hover:bg-btn hover:text-text'
@@ -289,7 +291,7 @@ export function Playlists() {
           {(activeTab === 'A' || activeTab === 'B') && list.length > 0 && (
             <Btn
               variant="ghost"
-              className="h-8 px-2 text-xs text-muted hover:text-danger"
+              className="px-3 text-base text-muted hover:text-danger"
               onClick={() => clearQueue(activeTab)}
               title="Svuota questa coda"
             >
@@ -303,7 +305,7 @@ export function Playlists() {
       {(activeTab === 'A' || activeTab === 'B') && (
         <div className="space-y-3">
           {list.length === 0 ? (
-            <div className="rounded-xl border border-dashed border-line p-6 text-center text-sm font-medium text-muted">
+            <div className="rounded-xl border border-dashed border-line p-6 text-center text-base font-medium text-muted">
               {activeTab === 'A'
                 ? 'La scaletta è vuota. Cerca un brano nella Libreria o su YouTube e premi "+ Accoda".'
                 : 'La riserva è vuota. Puoi parcheggiare qui i brani di scorta.'}
@@ -334,9 +336,9 @@ export function Playlists() {
                 value={playlistName}
                 onChange={(e) => setPlaylistName(e.target.value)}
                 placeholder="Salva scaletta con nome…"
-                className="min-w-0 flex-1 rounded-xl border border-line bg-inset px-3 py-1.5 text-sm outline-none focus:border-accent"
+                className="min-w-0 flex-1 rounded-xl border border-line bg-inset px-3 py-2 text-base outline-none focus:border-accent"
               />
-              <Btn onClick={onSave} disabled={!playlistName.trim()} className="text-sm">
+              <Btn onClick={onSave} disabled={!playlistName.trim()} className="text-base">
                 Salva
               </Btn>
             </div>
@@ -361,7 +363,7 @@ export function Playlists() {
           </div>
 
           <div className="space-y-1.5">
-            <div className="text-xs font-bold uppercase tracking-wider text-muted">Cantante al microfono attivo</div>
+            <div className="text-base font-bold text-muted">Cantante al microfono attivo</div>
             <select
               value={active}
               onChange={(e) => patch({ activeSinger: e.target.value })}
@@ -377,9 +379,9 @@ export function Playlists() {
           </div>
 
           <div className="mt-3 space-y-1.5">
-            <div className="text-xs font-bold uppercase tracking-wider text-muted">Lista partecipanti</div>
+            <div className="text-base font-bold text-muted">Lista partecipanti</div>
             {singers.length === 0 ? (
-              <div className="text-sm text-muted">Nessun cantante registrato.</div>
+              <div className="text-base text-muted">Nessun cantante registrato.</div>
             ) : (
               <ul className="divide-y divide-line/40 rounded-xl border border-line bg-inset">
                 {singers.map((s) => (
@@ -404,19 +406,19 @@ export function Playlists() {
       {activeTab === 'saved' && (
         <div className="space-y-3">
           {savedPlaylists.length === 0 ? (
-            <div className="text-sm text-muted">Nessuna scaletta salvata finora.</div>
+            <div className="text-base text-muted">Nessuna scaletta salvata finora.</div>
           ) : (
             <ul className="divide-y divide-line/40 rounded-xl border border-line bg-inset">
               {savedPlaylists.map((pl) => (
                 <li key={pl.name} className="flex items-center justify-between p-3">
                   <div>
                     <div className="text-base font-bold text-text">{pl.name}</div>
-                    <div className="text-xs text-muted">{pl.items.length} brani</div>
+                    <div className="text-base text-muted">{pl.items.length} brani</div>
                   </div>
                   <div className="flex gap-2">
                     <Btn
                       onClick={() => loadPlaylist(pl.name, 'replace', 'A')}
-                      className="text-xs"
+                      className="text-base"
                       title="Carica nella scaletta A"
                     >
                       Carica in A

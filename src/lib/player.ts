@@ -36,6 +36,8 @@ function buildDisplayState(): DisplayState {
     black: s.displayBlack,
     bg: s.settings.displayBg,
     bgImage: s.settings.displayImage ? convertFileSrc(s.settings.displayImage) : null,
+    theme: s.settings.theme,
+    fontFamily: s.settings.fontFamily,
     textScale: s.settings.displayTextScale,
     stretch: s.settings.displayStretch,
   }

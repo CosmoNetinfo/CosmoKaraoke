@@ -6,17 +6,17 @@ const SEZIONI: { titolo: string; passi: string[] }[] = [
   {
     titolo: '1. Per cominciare',
     passi: [
-      'Vai in Impostazioni → Cartelle e premi «Aggiungi cartella»: scegli la cartella dove hai i brani karaoke.',
-      'Il programma legge tutte le sottocartelle da solo. Quando hai nuovi brani premi «Riscansiona».',
+      'Vai in Impostazioni → Cartelle e premi «Aggiungi cartella»: scegli la cartella dove hai i brani karaoke. La scansione mostra quanti file controlla e quanti brani trova.',
+      'Il programma legge anche le sottocartelle. Se trova un percorso non accessibile, mantiene la libreria precedente e ti avvisa.',
       'Sempre in Impostazioni → Schermo TV scegli su quale schermo vuoi vedere i testi, poi premi «Apri schermo testi» in alto.',
     ],
   },
   {
     titolo: '2. Mettere le canzoni in scaletta',
     passi: [
-      'Nella scheda Libreria scrivi il titolo (o il cantante) nella casella di ricerca.',
+      'Nella scheda Libreria scrivi il titolo (o il cantante) nella casella di ricerca. Premi «Accoda» per aggiungere un brano alla scaletta.',
       'Premi «+» accanto al brano per metterlo in scaletta. Con «Riserva» lo metti in una seconda lista, pronta per dopo.',
-      'Prima di scrivere il nome del cantante, mettilo nella casella «Nome del cantante»: verrà mostrato sulla TV.',
+      'Nella scheda Cantanti aggiungi i nomi e scegli chi canta. Il nome verrà mostrato sulla TV.',
       'Premi «Avvia scaletta» per far partire il primo brano. Con «Prossimo» passi al successivo.',
     ],
   },
@@ -32,7 +32,7 @@ const SEZIONI: { titolo: string; passi: string[] }[] = [
   {
     titolo: '4. Effetti, stacchetti e sottofondo',
     passi: [
-      'Nella scheda Effetti ci sono i pulsanti per applausi, fischi e altri suoni: basta un clic. Anche i tasti 1–9 della tastiera li fanno partire.',
+      'Nella scheda Effetti ci sono i pulsanti per applausi, fischi e altri suoni: basta un clic. I tasti 1–9 avviano i primi nove effetti disponibili.',
       'Se qualcosa suona troppo, guarda la striscia «Sta suonando» in basso: premi Ferma accanto al suono, oppure il tasto Esc per fermare tutto.',
       'Gli stacchetti sono musichette che partono tra una canzone e l’altra: scegli i file e ogni quanti brani devono partire.',
       'Il sottofondo è musica che suona mentre nessuno canta, e si ferma da sola quando parte un brano.',
@@ -75,7 +75,7 @@ const SEZIONI: { titolo: string; passi: string[] }[] = [
     passi: [
       'CD+G: il formato dei dischi karaoke classici, con musica e testo in due file (.cdg e .mp3).',
       'KAR / MIDI: brani fatti di note, non registrati: il programma li suona da sé e puoi cambiare tono e velocità senza perdere qualità.',
-      'Scaletta: l’elenco dei brani che verranno cantati, in ordine.',
+      'Scaletta: l’elenco dei brani che verranno cantati, in ordine. Si può riordinare trascinando o usando i pulsanti «Sposta più in alto» e «Sposta più in basso».',
       'Riserva: una seconda lista di brani pronti, se le richieste cambiano.',
       'Dissolvenza: quando un brano sfuma piano mentre parte il successivo.',
     ],

@@ -155,8 +155,17 @@ export interface DisplayState {
   black: boolean
   bg: string
   bgImage: string | null
+  theme: Settings['theme']
+  fontFamily: Settings['fontFamily']
   textScale: number
   stretch: boolean
+}
+
+/** Avanzamento locale della scansione della libreria. */
+export interface LibraryScanProgress {
+  scannedFiles: number
+  foundSongs: number
+  unreadablePaths: number
 }
 
 export interface DisplayMessage {

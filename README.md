@@ -1,96 +1,102 @@
 # CosmoKaraoke
 
-Programma karaoke per **Windows e Mac**, pensato per essere facile da leggere: caratteri per la dislessia, testo ingrandibile e colori ad alto contrasto. Uso personale.
+CosmoKaraoke è un programma karaoke per Windows e macOS. La versione attuale è destinata all'uso personale e non è in vendita.
 
-## Installare il programma
+L'interfaccia è in italiano e include caratteri leggibili, testo ingrandibile e temi ad alto contrasto. La libreria musicale e le impostazioni restano sul computer; non servono account o un server cloud. Internet serve per gli aggiornamenti e, se attivate, le funzioni YouTube.
 
-1. Apri la pagina **Releases** di questo repository e scarica l'ultima versione:
-   - **Windows:** il file `.exe`
-   - **Mac:** il file `.dmg` (trascina CosmoKaraoke nella cartella Applicazioni)
-2. Alla prima apertura il computer può mostrare un avviso, perché il programma non ha ancora la firma a pagamento di Microsoft/Apple:
-   - **Windows:** clicca *Ulteriori informazioni* e poi *Esegui comunque*.
-   - **Mac:** clicca con il tasto destro su CosmoKaraoke, scegli *Apri* e conferma. Se non basta, apri il Terminale e scrivi:
-     `xattr -dr com.apple.quarantine /Applications/CosmoKaraoke.app`
-3. Dopo la prima installazione **non serve più scaricare niente**: quando esce una versione nuova, in alto compare un avviso con il pulsante *Aggiorna e riavvia*. Il programma non si riavvia mai da solo.
+## Novità in v0.3.0
 
-## Come si usa
+- La scansione della libreria mostra l'avanzamento e il numero di brani trovati. Se alcuni percorsi non sono accessibili, segnala il problema e conserva la libreria precedente.
+- La schermata Libreria vuota offre un collegamento diretto alle impostazioni per aggiungere o controllare le cartelle.
+- La scaletta è più leggibile e può essere riordinata da tastiera con i pulsanti **Sposta più in alto** e **Sposta più in basso**.
+- I badge e gli elementi informativi della TV seguono i temi scelti; sullo schermo TV si applica anche il carattere selezionato.
+- I tasti da **1 a 9** avviano gli effetti disponibili, in linea con la guida e con i comandi mostrati nell'app.
+- README e guida sono stati aggiornati per descrivere i formati, i codec e i comandi correnti.
 
-1. **Impostazioni → Aggiungi cartella**: scegli la cartella con i tuoi brani. Vengono letti:
-   - MP3/WMA con il file `.cdg` dallo stesso nome (CD+G)
-   - archivi `.zip` contenenti coppie MP3+CDG (estratti al volo in riproduzione)
-   - video (MP4, MKV, AVI, FLV…)
-   - audio semplice (senza testo, con lettura tag ID3/Vorbis/MP4)
-   - MIDI/KAR: con testi sincronizzati e sintetizzatore integrato
-   La libreria è salvata in un database SQLite locale con ricerca veloce full-text FTS5 (insensibile ad accenti e maiuscole).
-2. **Impostazioni → Schermo testi**: scegli la TV o il secondo monitor, poi in alto premi **Apri schermo testi**.
-3. **Libreria**: cerca un brano e usa **Riproduci subito**, **Aggiungi alla scaletta** o **Aggiungi alla riserva**.
-4. **Cantanti**: aggiungi i nomi e assegna ogni brano a chi canta. Il nome compare sulla TV.
-5. **Mixer**: tonalità, velocità, equalizzatore, voce spenta, microfono con eco, jingle e applausi (tasti 1–9).
-6. **Mix** (accanto a *Prossimo*): dissolvenza del brano in corso e partenza del successivo.
+## Scaricare e installare
 
-Tasti rapidi: **Spazio** pausa/riprendi · **M** mix · **1–9** jingle.
+Apri [Releases](https://github.com/CosmoNetinfo/CosmoKaraoke/releases/latest) e scarica il pacchetto per il tuo sistema:
 
-### Aspetto: pulsante «Aa»
+- **Windows:** installer `.exe`
+- **macOS:** immagine `.dmg`; trascina CosmoKaraoke nella cartella Applicazioni
 
-In alto a destra: dimensione del testo (100–200%), tre combinazioni di colori (*Scuro*, *Crema*, *Alto contrasto giallo su nero*), quattro caratteri (*Atkinson Hyperlegible*, *Lexend*, *OpenDyslexic*, quello del computer) e spaziatura di lettere e righe. In **Impostazioni → Schermo testi** si ingrandiscono anche le scritte sulla TV.
+Questa versione non è firmata con certificati di distribuzione del produttore. Windows o macOS possono quindi mostrare un avviso di sicurezza. Scarica il programma solo dalla pagina Releases ufficiale e non disattivare le protezioni del sistema per aprire file di provenienza incerta.
 
-### Uso con un mixer esterno
+Quando è disponibile un aggiornamento, l'app mostra un avviso e propone di aggiornarsi e riavviarsi. L'aggiornamento non parte da solo mentre il programma è in uso.
 
-Se il Mac è collegato a un mixer e il microfono è nel mixer, **non serve fare niente nel programma**: l'audio esce dall'uscita scelta in *Impostazioni di Sistema → Suono → Uscita*, e voce, riverbero ed effetti li gestisce il mixer. In *Impostazioni → Audio* l'opzione «Usa il microfono dentro il programma» resta spenta, così il Mac non chiede nemmeno il permesso del microfono. Nella scheda *Audio* puoi scegliere l'uscita **Mono** o **Stereo** a seconda del mixer.
+## Primo avvio
 
-### Effetti, stacchetti, sottofondo e sfondo TV
+1. Apri **Impostazioni → Cartelle** e scegli **Aggiungi cartella**. Seleziona la cartella che contiene i tuoi brani; vengono incluse anche le sottocartelle.
+2. Attendi che la scansione mostri quanti file ha analizzato e quanti brani ha trovato. Se alcuni percorsi non sono accessibili, l'app avvisa e mantiene la libreria precedente.
+3. Torna alla **Libreria**, cerca un titolo o un artista e premi **Accoda**. Puoi anche riprodurre subito o aggiungere il brano alla riserva.
+4. In **Impostazioni → Schermo TV**, scegli il monitor e premi **Apri TV testi** nella barra in alto.
+5. In **Cantanti**, aggiungi i nomi e scegli chi canta: il nome può apparire sullo schermo TV.
 
-Nella scheda **Effetti**:
-- **Effetti sonori:** dieci pulsanti già pronti (applausi, ovazione, fischio, rullo di tamburi, ba-dum-tss, tromba, fanfara, campanello, trombone triste, errore), creati dal programma. Puoi aggiungere i tuoi file audio. I tasti **1–9** fanno partire i primi nove.
-- **Stacchetti:** musichette che partono da sole tra un brano e l'altro (ogni brano o ogni 2–5 brani, a caso o in ordine). Non partono se premi «Prossimo».
-- **Sottofondo:** qualsiasi canzone che suona mentre nessuno canta. Si abbassa e si ferma quando parte un brano e riprende da sola alla fine della scaletta.
-- **Sfondo TV:** un'immagine che si vede sulla TV quando non c'è un brano con i testi.
+## Formati musicali
 
-### YouTube (facoltativo)
+- **CD+G:** file audio e `.cdg` con lo stesso nome. L'app rileva i file accoppiati.
+- **Archivi ZIP:** coppie audio e CDG; audio supportato negli archivi: MP3, WAV, WMA e OGG. I file vengono estratti nella cache durante la riproduzione.
+- **Audio senza testo:** MP3, WMA, WAV, OGG, M4A, FLAC e AAC. Quando disponibili, titolo e artista vengono letti dai tag; altrimenti dal nome del file.
+- **MIDI e KAR:** riproduzione con sintetizzatore incluso; i testi incorporati vengono mostrati quando presenti.
+- **Video:** MP4, MKV, AVI, FLV, WebM, MOV e M4V. La riproduzione di audio e video dipende anche dai codec disponibili nel WebView del sistema operativo; due computer possono quindi supportare file diversi.
 
-Serve il programma gratuito **yt-dlp**. Nella scheda *YouTube*, se manca, compare il pulsante **Scarica yt-dlp**: lo installa da solo, senza terminale.
+La libreria è indicizzata in SQLite sul computer e consente di cercare per titolo o artista. Quando aggiungi o rimuovi file, usa **Impostazioni → Cartelle → Riscansiona**.
 
-È una funzione **per uso personale**: scaricare i video può violare i termini di YouTube e il diritto d'autore.
+## Scaletta e riproduzione
 
-### Server Live: prenotazioni e voti da smartphone
+- La **Scaletta** contiene i brani in attesa; la **Riserva** tiene pronti quelli da usare più tardi.
+- Puoi riordinare i brani trascinandoli oppure usando i pulsanti **Sposta più in alto** e **Sposta più in basso**. I pulsanti sono utilizzabili anche con la tastiera.
+- Puoi assegnare un cantante a ogni brano, salvare una scaletta e ricaricarla.
+- Il pannello di riproduzione consente di mettere in pausa, passare al brano successivo, cambiare tonalità e velocità e sfumare verso il brano successivo.
 
-Nella scheda **Live**:
-- **Punto di accesso e QR Code:** avvia il server locale con un clic. Gli ospiti inquadrano il QR code con la fotocamera del telefono: si apre subito l'interfaccia web leggera, senza installare nessuna app.
-- **Prenotazioni dal cellulare:** il pubblico cerca i brani nel catalogo del locale e prenota con il proprio nome e un'eventuale dedica. Dalla regia puoi approvare in scaletta, in riserva o rifiutare (o attivare l'accettazione automatica).
-- **Dediche sulla TV:** i messaggi inviati dagli smartphone arrivano in tempo reale e puoi proiettarli sulla TV per 10 secondi con un clic.
-- **Voti e classifica cantanti:** il pubblico vota l'esibizione in corso da 1 a 5 stelle; la scheda Live mostra la classifica aggiornata in tempo reale.
-- **Sicurezza della sala:** PIN di sala opzionale, limite di prenotazioni per persona e filtro per bloccare parole vietate.
+Tasti rapidi:
 
-## Pubblicare una nuova versione (per chi sviluppa)
+- **Spazio:** pausa o riprendi, quando il cursore non è in un campo di testo.
+- **Ctrl+M** su Windows o **⌘+M** su Mac: dissolvenza e avvio del brano successivo.
+- **1–9:** avvia uno dei primi nove effetti disponibili.
+- **Esc:** ferma gli effetti attivi.
 
-1. Fai le modifiche.
-2. Cambia il numero di versione: `npm run bump patch` (oppure `minor`, `major`, o un numero preciso come `npm run bump 0.3.5`).
-3. Commit e push su `main`.
-4. GitHub Actions compila Windows e Mac e pubblica gli installer. Le app già installate si aggiornano da sole quando l'utente preme il pulsante.
+## Aspetto e accessibilità
 
-Se il numero di versione non cambia, GitHub **non** pubblica niente.
+Il menu **Aa** permette di scegliere la dimensione del testo, il carattere, la spaziatura e uno dei temi **Scuro**, **Crema** e **Alto contrasto**. Carattere e tema si applicano anche ai testi e alle informazioni sullo schermo TV; i colori originali di video e file CD+G restano quelli del contenuto. Nelle impostazioni TV puoi inoltre ingrandire i testi proiettati e scegliere colore o immagine di sfondo.
 
-### Chiavi di firma (una volta sola)
+## Audio ed effetti
 
-Gli aggiornamenti sono firmati. Nel repository, in *Settings → Secrets and variables → Actions → New repository secret*, servono due segreti:
+La scheda **Audio** offre tonalità, velocità, equalizzatore, riduzione della voce centrale e impostazione mono/stereo. L'uso del microfono nel programma è facoltativo e disattivato per impostazione iniziale: se il microfono è collegato a un mixer esterno, puoi lasciare che il mixer gestisca voce ed effetti. Quando abiliti il microfono nel programma, sono disponibili eco e riverbero.
 
-- `TAURI_SIGNING_PRIVATE_KEY` — il contenuto del file della chiave privata
-- `TAURI_SIGNING_PRIVATE_KEY_PASSWORD` — la sua password
+La scheda **Effetti** include effetti sonori, effetti personalizzati, stacchetti automatici tra i brani e musica di sottofondo. Puoi anche impostare un'immagine da mostrare sullo schermo TV quando non ci sono testi.
 
-La chiave **pubblica** è già dentro `src-tauri/tauri.conf.json`. La chiave privata non va mai caricata nel repository. Se la perdi, le app già installate non potranno più aggiornarsi da sole e andranno reinstallate a mano.
+## YouTube (facoltativo)
+
+La scheda **YouTube** può cercare e mostrare anteprime. Per scaricare i video usa `yt-dlp`: se non è installato, l'app offre un pulsante per scaricarlo. L'uso della funzione e dei contenuti deve rispettare i termini del servizio, il diritto d'autore e le autorizzazioni dei titolari dei contenuti.
+
+## Live: smartphone nella sala
+
+La scheda **Live** può avviare un server locale e mostrare un QR code. Gli ospiti collegati alla stessa rete possono cercare brani nel catalogo o su YouTube, prenotarli con il proprio nome e inviare dediche. Dalla regia puoi approvare le richieste nella scaletta o nella riserva, rifiutarle, proiettare una dedica per 5, 10 o 20 secondi oppure lasciarla fissa, e consultare voti e classifica.
+
+Sono disponibili un PIN facoltativo, un limite di prenotazioni per cantante e un filtro per parole bloccate. Avvia Live solo quando vuoi usare queste funzioni e interrompilo al termine della serata.
+
+## Aggiornamenti
+
+Gli aggiornamenti dell'app sono firmati con la chiave Tauri del progetto. Per pubblicare una versione, chi sviluppa aggiorna il numero di versione e carica il codice su `main`; GitHub Actions prepara i pacchetti Windows e macOS e crea la release.
+
+La chiave privata di aggiornamento è conservata nei segreti GitHub Actions e **non deve essere caricata nel repository**. Se la chiave viene persa o sostituita, gli aggiornamenti delle installazioni già distribuite potrebbero non funzionare.
 
 ## Sviluppo
 
-```
+Requisiti: Node.js 22 e Rust. Per lo sviluppo nativo su macOS o Windows servono anche gli strumenti di compilazione richiesti da Tauri per quel sistema.
+
+Per aggiornare la versione prima di un rilascio usa `npm run bump patch` (oppure `minor`, `major` o un numero preciso, per esempio `npm run bump 0.3.5`). Il flusso automatico crea la release quando il numero di versione è nuovo.
+
+```sh
 npm install
-npm run tauri dev      # avvia l'app in modalità sviluppo
-npm run build          # controlla e compila solo la parte grafica
+npm run tauri dev
+npm run build
+npm run lint
 ```
 
-Servono Node.js 22, Rust e, su Linux, le librerie di Tauri (vedi la guida ufficiale).
-
-Struttura: interfaccia in `src/` (React + TypeScript + Tailwind), parte nativa in `src-tauri/src/lib.rs` (Rust), compilazione in `.github/workflows/release.yml`. Il piano completo delle funzioni è in `BRIEF-CosmoKaraoke.md`.
+`npm run build` controlla TypeScript e compila l'interfaccia. `npm run tauri dev` avvia l'app desktop. La pipeline di rilascio è in `.github/workflows/release.yml`; il backend Rust si trova in `src-tauri/`.
 
 ## Licenze
 
-Codice del progetto: uso personale. Componenti di terzi: Tauri (MIT/Apache-2.0), React (MIT), SoundTouchJS (MPL-2.0), spessasynth_lib (Apache-2.0), SoundFont TimGM6mb (GPL, 5,7 MB in public/soundfont/TimGM6mb.sf2), rusqlite (MIT), lofty (MIT/Apache-2.0), zip (MIT), axum (MIT), tokio (MIT), qrcode (MIT), lucide (ISC), caratteri Atkinson Hyperlegible, Lexend e OpenDyslexic (SIL Open Font License 1.1).
+Il codice del progetto è attualmente destinato all'uso personale. Il programma include componenti di terze parti: Tauri (MIT/Apache-2.0), React (MIT), SoundTouchJS (MPL-2.0), spessasynth_lib (Apache-2.0), SoundFont TimGM6mb (GPL, incluso in `public/soundfont/TimGM6mb.sf2`), rusqlite (MIT), lofty (MIT/Apache-2.0), zip (MIT), axum (MIT), tokio (MIT), qrcode (MIT), lucide (ISC) e i caratteri Atkinson Hyperlegible, Lexend e OpenDyslexic (SIL Open Font License 1.1).

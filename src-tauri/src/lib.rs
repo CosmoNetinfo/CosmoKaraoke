@@ -4,7 +4,7 @@ mod server;
 
 use db::{
     extract_zip_song, load_songs_from_db, open_db, save_songs_to_db, scan_directories,
-    search_songs_fts, ExtractedZipSong, Song,
+    search_songs_fts, ExtractedZipSong, ScanProgress, Song,
 };
 use server::{
     get_lan_ip, BookingRequest, LiveMessage, LiveServerConfig, LiveServerController,
@@ -13,23 +13,40 @@ use server::{
 use std::path::PathBuf;
 use std::process::Command;
 use std::sync::Arc;
-use tauri::{Manager, WebviewUrl, WebviewWindowBuilder};
+use tauri::{Emitter, Manager, WebviewUrl, WebviewWindowBuilder};
 
 // ---------------------------------------------------------------------------
 // Libreria SQLite + FTS5
 // ---------------------------------------------------------------------------
 
 #[tauri::command]
-async fn scan_library(app: tauri::AppHandle, paths: Vec<String>) -> Result<Vec<Song>, String> {
+async fn scan_library(
+    app: tauri::AppHandle,
+    paths: Vec<String>,
+) -> Result<ScanLibraryResult, String> {
     tauri::async_runtime::spawn_blocking(move || {
-        let songs = scan_directories(&paths);
-        if let Ok(mut conn) = open_db(&app) {
-            let _ = save_songs_to_db(&mut conn, &songs);
+        let (songs, progress) = scan_directories(&paths, |progress| {
+            let _ = app.emit("library:scan-progress", progress);
+        });
+        if progress.unreadable_paths > 0 {
+            return Err(format!(
+                "Scansione incompleta: {} percorsi non accessibili. La libreria precedente è stata mantenuta.",
+                progress.unreadable_paths
+            ));
         }
-        Ok(songs)
+        let mut conn = open_db(&app)?;
+        save_songs_to_db(&mut conn, &songs)?;
+        Ok(ScanLibraryResult { songs, progress })
     })
     .await
     .map_err(|e| e.to_string())?
+}
+
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+struct ScanLibraryResult {
+    songs: Vec<Song>,
+    progress: ScanProgress,
 }
 
 #[tauri::command]

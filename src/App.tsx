@@ -36,13 +36,13 @@ import {
 } from './lib/player'
 import { useStore, type Tab } from './lib/store'
 
-const TABS: Array<{ id: Tab; label: string; icon: typeof LibraryIcon; color?: string }> = [
-  { id: 'library', label: 'Libreria', icon: LibraryIcon, color: 'text-accent-text' },
-  { id: 'youtube', label: 'YouTube', icon: Film, color: 'text-red-400' },
-  { id: 'mixer', label: 'Audio', icon: SlidersHorizontal, color: 'text-cyan-400' },
-  { id: 'effects', label: 'Effetti', icon: Sparkles, color: 'text-amber-400' },
-  { id: 'live', label: 'Live', icon: QrCode, color: 'text-emerald-400' },
-  { id: 'settings', label: 'Impostazioni', icon: SettingsIcon, color: 'text-muted' },
+const TABS: Array<{ id: Tab; label: string; icon: typeof LibraryIcon }> = [
+  { id: 'library', label: 'Libreria', icon: LibraryIcon },
+  { id: 'youtube', label: 'YouTube', icon: Film },
+  { id: 'mixer', label: 'Audio', icon: SlidersHorizontal },
+  { id: 'effects', label: 'Effetti', icon: Sparkles },
+  { id: 'live', label: 'Live', icon: QrCode },
+  { id: 'settings', label: 'Impostazioni', icon: SettingsIcon },
 ]
 
 export default function App() {
@@ -86,6 +86,7 @@ export default function App() {
   const settings = useStore((s) => s.settings)
   useEffect(() => {
     applyAppearance(settings)
+    queueMicrotask(pushDisplay)
   }, [settings])
 
   useEffect(() => {
@@ -112,7 +113,7 @@ export default function App() {
         stopAllSounds()
         return
       }
-      if (e.key >= '1' && e.key <= '8' && !inInput && !e.ctrlKey && !e.metaKey && !e.altKey) {
+      if (e.key >= '1' && e.key <= '9' && !inInput && !e.ctrlKey && !e.metaKey && !e.altKey) {
         const idx = Number(e.key) - 1
         const item = effectList()[idx]
         if (item) {
@@ -179,16 +180,16 @@ export default function App() {
               <button
                 key={t.id}
                 onClick={() => patch({ tab: t.id })}
-                className={`relative inline-flex items-center gap-2 rounded-lg px-3.5 py-1.5 text-sm font-bold transition-all ${
+                className={`relative inline-flex min-h-11 items-center gap-2 rounded-lg px-3.5 py-1.5 text-base font-bold transition-all ${
                   active
                     ? 'bg-accent text-on-accent shadow-xs'
                     : 'text-muted hover:bg-btn hover:text-text'
                 }`}
               >
-                <t.icon className={`h-4 w-4 ${active ? 'text-on-accent' : t.color}`} />
+                <t.icon className={`h-4 w-4 ${active ? 'text-on-accent' : 'text-accent-text'}`} />
                 <span>{t.label}</span>
                 {t.id === 'live' && livePendingCount > 0 && (
-                  <span className="ml-1 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-danger px-1 text-[11px] font-black text-on-danger">
+                <span className="ml-1 inline-flex min-h-6 min-w-6 items-center justify-center rounded-full bg-danger px-1.5 text-base font-black text-on-danger">
                     {livePendingCount}
                   </span>
                 )}
@@ -205,7 +206,7 @@ export default function App() {
             variant={displayBlack ? 'danger' : 'default'}
             onClick={toggleBlack}
             disabled={!displayOpen}
-            className="text-xs font-bold"
+            className="text-base font-bold"
             title="Oscura momentaneamente lo schermo dei testi"
           >
             Schermo nero
@@ -214,7 +215,7 @@ export default function App() {
           <Btn
             variant={displayOpen ? 'danger' : 'primary'}
             onClick={() => void toggleDisplay()}
-            className="text-xs font-bold"
+            className="text-base font-bold"
           >
             {displayOpen ? <MonitorOff className="h-4 w-4" /> : <Monitor className="h-4 w-4" />}
             <span>{displayOpen ? 'Chiudi TV' : 'Apri TV testi'}</span>
@@ -243,7 +244,7 @@ export default function App() {
 
       {/* TOAST NOTIFICHE POPUP */}
       {toast && (
-        <div className="pointer-events-none fixed bottom-5 left-1/2 z-50 max-w-xl -translate-x-1/2 rounded-xl border border-accent/40 bg-panel/95 px-5 py-3 text-sm font-bold text-text shadow-2xl backdrop-blur-md">
+        <div className="pointer-events-none fixed bottom-5 left-1/2 z-50 max-w-xl -translate-x-1/2 rounded-xl border border-accent/40 bg-panel/95 px-5 py-3 text-base font-bold text-text shadow-2xl backdrop-blur-md">
           {toast}
         </div>
       )}

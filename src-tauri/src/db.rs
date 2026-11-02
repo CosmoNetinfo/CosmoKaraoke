@@ -30,6 +30,14 @@ pub struct ExtractedZipSong {
     pub cdg_path: Option<String>,
 }
 
+#[derive(Serialize, Clone, Copy, Debug, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct ScanProgress {
+    pub scanned_files: usize,
+    pub found_songs: usize,
+    pub unreadable_paths: usize,
+}
+
 pub fn db_path(app: &tauri::AppHandle) -> Result<PathBuf, String> {
     use tauri::Manager;
     let dir = app.path().app_data_dir().map_err(|e| e.to_string())?;
@@ -87,18 +95,40 @@ fn read_audio_tags(p: &Path) -> Option<(String, String)> {
 }
 
 /// Scansiona una cartella riconoscendo file audio, video, MIDI/KAR e archivi .zip con MP3+CDG.
-pub fn scan_directories(paths: &[String]) -> Vec<Song> {
+pub fn scan_directories<F>(paths: &[String], mut on_progress: F) -> (Vec<Song>, ScanProgress)
+where
+    F: FnMut(ScanProgress),
+{
     let mut songs = Vec::new();
     let mut seen = HashSet::new();
+    let mut progress = ScanProgress::default();
+    let mut visited_entries = 0usize;
 
     for root in paths {
-        for entry in WalkDir::new(root)
-            .follow_links(false)
-            .into_iter()
-            .filter_map(|e| e.ok())
-        {
+        for result in WalkDir::new(root).follow_links(false).into_iter() {
+            visited_entries += 1;
+            let entry = match result {
+                Ok(entry) => entry,
+                Err(_) => {
+                    progress.unreadable_paths += 1;
+                    if visited_entries % 64 == 0 {
+                        progress.found_songs = songs.len();
+                        on_progress(progress);
+                    }
+                    continue;
+                }
+            };
             if !entry.file_type().is_file() {
+                if visited_entries % 64 == 0 {
+                    progress.found_songs = songs.len();
+                    on_progress(progress);
+                }
                 continue;
+            }
+            progress.scanned_files += 1;
+            if progress.scanned_files % 64 == 0 {
+                progress.found_songs = songs.len();
+                on_progress(progress);
             }
             let p = entry.path();
             let ext = match p.extension().and_then(|e| e.to_str()) {
@@ -222,6 +252,7 @@ pub fn scan_directories(paths: &[String]) -> Vec<Song> {
                 cdg,
                 zip_entry: None,
             });
+
         }
     }
 
@@ -232,7 +263,9 @@ pub fn scan_directories(paths: &[String]) -> Vec<Song> {
             .then(a.title.to_lowercase().cmp(&b.title.to_lowercase()))
     });
 
-    songs
+    progress.found_songs = songs.len();
+    on_progress(progress);
+    (songs, progress)
 }
 
 /// Salva i brani in SQLite e aggiorna l'indice FTS5 in una singola transazione.

@@ -1,6 +1,7 @@
 import { invoke } from '@tauri-apps/api/core'
+import { listen } from '@tauri-apps/api/event'
 import { create } from 'zustand'
-import type { Jingle, QueueItem, SavedPlaylist, Settings, Song } from '../types'
+import type { Jingle, LibraryScanProgress, QueueItem, SavedPlaylist, Settings, Song } from '../types'
 import type { KarLine } from './kar'
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -62,6 +63,9 @@ interface AppState {
   songs: Song[]
   libraryPaths: string[]
   scanning: boolean
+  scanProgress: LibraryScanProgress | null
+  scanSummary: string
+  scanIssue: string
   queueA: QueueItem[]
   queueB: QueueItem[]
   singers: string[]
@@ -123,6 +127,9 @@ export const useStore = create<AppState>((set, get) => ({
   songs: [],
   libraryPaths: [],
   scanning: false,
+  scanProgress: null,
+  scanSummary: '',
+  scanIssue: '',
   queueA: [],
   queueB: [],
   singers: [],
@@ -191,20 +198,32 @@ export const useStore = create<AppState>((set, get) => ({
 
   rescan: async () => {
     const { libraryPaths } = get()
-    if (libraryPaths.length === 0) {
-      set({ songs: [] })
-      await invoke('save_blob', { name: 'library', json: '[]' })
-      return
-    }
-    set({ scanning: true })
+    set({
+      scanning: true,
+      scanProgress: { scannedFiles: 0, foundSongs: 0, unreadablePaths: 0 },
+      scanSummary: '',
+      scanIssue: '',
+    })
+    const unlisten = await listen<LibraryScanProgress>('library:scan-progress', (event) => {
+      set({ scanProgress: event.payload })
+    }).catch(() => undefined)
     try {
-      const songs = await invoke<Song[]>('scan_library', { paths: libraryPaths })
-      set({ songs })
-      await invoke('save_blob', { name: 'library', json: JSON.stringify(songs) })
-      get().notify(`Libreria aggiornata: ${songs.length} brani`)
+      const result = await invoke<{ songs: Song[]; progress: LibraryScanProgress }>(
+        'scan_library',
+        { paths: libraryPaths },
+      )
+      set({ songs: result.songs, scanProgress: result.progress })
+      await invoke('save_blob', { name: 'library', json: JSON.stringify(result.songs) })
+      set({
+        scanSummary: `Scansione completata: ${result.songs.length.toLocaleString('it-IT')} brani trovati.`,
+      })
+      get().notify(`Libreria aggiornata: ${result.songs.length} brani`)
     } catch (e) {
-      get().notify(`Scansione non riuscita: ${String(e)}`)
+      const message = String(e)
+      set({ scanIssue: message })
+      get().notify(`Scansione non riuscita: ${message}`)
     } finally {
+      unlisten?.()
       set({ scanning: false })
     }
   },

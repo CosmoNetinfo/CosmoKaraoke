@@ -29,6 +29,8 @@ export function Display() {
     const setup = async () => {
       const u1 = await listen<DisplayState>('display:state', (e) => {
         const p = e.payload
+        document.documentElement.dataset.theme = p.theme
+        document.documentElement.dataset.font = p.fontFamily
         base.current = {
           pos: p.position,
           at: performance.now(),
@@ -90,7 +92,7 @@ export function Display() {
   const isNoLyricsKar = kind === 'kar' && karLines.length === 0
   const showNext = !!st?.next && (kind === 'idle' || kind === 'audio' || isNoLyricsKar || remaining < 25)
 
-  if (st?.black) return <div style={{ position: 'fixed', inset: 0, background: '#000' }} />
+  if (st?.black) return <div className="fixed inset-0 bg-black" />
 
   return (
     <div
@@ -99,10 +101,10 @@ export function Display() {
         inset: 0,
         background:
           st?.bgImage && (kind === 'idle' || kind === 'audio' || isNoLyricsKar)
-            ? `center / cover no-repeat url("${st.bgImage}"), ${st?.bg ?? '#0b1020'}`
-            : (st?.bg ?? '#0b1020'),
-        color: '#fff',
-        fontFamily: 'system-ui, sans-serif',
+            ? `center / cover no-repeat url("${st.bgImage}"), ${st?.bg ?? 'var(--bg)'}`
+            : (st?.bg ?? 'var(--bg)'),
+        color: 'var(--text)',
+        fontFamily: 'var(--font)',
       }}
     >
       {kind === 'cdg' && (
@@ -118,7 +120,7 @@ export function Display() {
           src={st.mediaUrl}
           crossOrigin="anonymous"
           muted
-          style={{ width: '100%', height: '100%', objectFit: 'contain', background: '#000' }}
+          style={{ width: '100%', height: '100%', objectFit: 'contain', background: 'var(--bg)' }}
         />
       )}
       {kind === 'kar' && karLines.length > 0 && (
@@ -141,17 +143,16 @@ export function Display() {
             textAlign: 'center',
             padding: '4vw',
             gap: '1.5vw',
-            textShadow: '0 0.3vw 1.2vw #000, 0 0 0.4vw #000',
           }}
         >
-          <div style={{ fontSize: `${5 * k}vw`, fontWeight: 700, lineHeight: 1.2 }}>
+          <div className="rounded-2xl border border-line bg-panel/90 px-6 py-4" style={{ fontSize: `${5 * k}vw`, fontWeight: 700, lineHeight: 1.2 }}>
             {kind === 'idle' ? 'CosmoKaraoke' : st?.title}
           </div>
           {(kind === 'audio' || kind === 'kar') && st?.artist && (
-            <div style={{ fontSize: `${3 * k}vw`, opacity: 0.95 }}>{st.artist}</div>
+            <div className="rounded-xl border border-line bg-panel/90 px-5 py-3" style={{ fontSize: `${3 * k}vw`, opacity: 0.95 }}>{st.artist}</div>
           )}
           {kind === 'idle' && (
-            <div style={{ fontSize: `${2.2 * k}vw`, opacity: 0.85 }}>Scegli un brano e canta!</div>
+            <div className="rounded-xl border border-line bg-panel/90 px-5 py-3" style={{ fontSize: `${2.2 * k}vw`, opacity: 0.85 }}>Scegli un brano e canta!</div>
           )}
         </div>
       )}
@@ -164,11 +165,10 @@ export function Display() {
             left: '2.5vw',
             padding: '1vh 2vw',
             borderRadius: 999,
-            background: 'rgba(0,0,0,0.85)',
-            border: '0.4vh solid #fff',
             fontSize: `${3.4 * k}vh`,
             fontWeight: 700,
           }}
+          className="border border-line bg-panel/90 text-text"
         >
           Canta: {st?.singer}
         </div>
@@ -182,11 +182,10 @@ export function Display() {
             right: '2.5vw',
             padding: '1vh 2vw',
             borderRadius: 999,
-            background: 'rgba(0,0,0,0.85)',
-            border: '0.4vh solid #fff',
             fontSize: `${3 * k}vh`,
             fontWeight: 700,
           }}
+          className="border border-line bg-panel/90 text-text"
         >
           Prossimo: {st?.next}
         </div>
@@ -200,13 +199,12 @@ export function Display() {
             right: 0,
             bottom: 0,
             padding: '2vh 3vw',
-            background: 'rgba(250, 204, 21, 0.95)',
-            color: '#111',
             fontSize: `${5 * k}vh`,
             fontWeight: 800,
             lineHeight: 1.15,
             textAlign: 'center',
           }}
+          className="border-t-2 border-line bg-accent text-on-accent"
         >
           {message}
         </div>
