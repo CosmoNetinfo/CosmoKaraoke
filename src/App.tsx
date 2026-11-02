@@ -168,7 +168,7 @@ export default function App() {
           </div>
           <div className="leading-tight">
             <h1 className="text-xl font-black tracking-tight text-text">Cosmo<span className="text-accent-text">Karaoke</span></h1>
-            <div className="mt-1 text-[0.68rem] font-bold uppercase tracking-[0.2em] text-muted">Live control room</div>
+            <div className="brand-subtitle mt-1 text-[0.68rem] font-bold uppercase tracking-[0.2em] text-muted">Regia live</div>
           </div>
         </div>
 

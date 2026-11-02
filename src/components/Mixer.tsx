@@ -4,7 +4,7 @@ import { applyMicFx, applySettingsToEngine, setPitch, setTempo } from '../lib/pl
 import { DEFAULT_SETTINGS, useStore } from '../lib/store'
 import type { Settings } from '../types'
 import { useState } from 'react'
-import { Btn, Panel, Slider, SubTabs } from './ui'
+import { Btn, Panel, Slider, SubTabs, rangeProgressStyle } from './ui'
 
 /** Combinazioni pronte per la voce: ognuna imposta tutti i controlli qui sotto. */
 const MIC_PRESETS: { name: string; fx: Partial<Settings> }[] = [
@@ -242,14 +242,14 @@ export function Mixer() {
                     max={12}
                     step={1}
                     value={st.eq[i]}
+                    style={{ ...rangeProgressStyle(st.eq[i], -12, 12), writingMode: 'vertical-lr', direction: 'rtl' }}
                     onChange={(e) => {
                       const db = Number(e.target.value)
                       const eq = st.eq.map((v, k) => (k === i ? db : v))
                       patch({ eq })
                       engine.setEq(i, db)
                     }}
-                    className="h-24 w-4"
-                    style={{ writingMode: 'vertical-lr', direction: 'rtl' }}
+                    className="range-control range-vertical h-24 w-4"
                   />
                   <span className="text-base text-muted">{freqLabel(f)}</span>
                 </div>

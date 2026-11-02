@@ -1,4 +1,9 @@
-import type { ButtonHTMLAttributes, ReactNode } from 'react'
+import type { ButtonHTMLAttributes, CSSProperties, ReactNode } from 'react'
+
+export function rangeProgressStyle(value: number, min: number, max: number): CSSProperties {
+  const percent = max <= min ? 0 : ((value - min) / (max - min)) * 100
+  return { '--range-fill': `${Math.min(100, Math.max(0, percent))}%` } as CSSProperties
+}
 
 export function fmtTime(sec: number): string {
   if (!Number.isFinite(sec) || sec < 0) return '0:00'
@@ -31,7 +36,7 @@ export function Btn({
     <button
       aria-label={rest['aria-label'] ?? rest.title}
       {...rest}
-      className={`inline-flex min-h-11 min-w-11 items-center justify-center gap-2 rounded-xl px-3.5 py-1.5 text-base font-medium disabled:cursor-not-allowed disabled:opacity-35 ${styles} ${className}`}
+      className={`app-button app-button-${variant} inline-flex min-h-11 min-w-11 items-center justify-center gap-2 rounded-xl px-3.5 py-1.5 text-base font-medium disabled:cursor-not-allowed disabled:opacity-35 ${styles} ${className}`}
     >
       {children}
     </button>
@@ -88,8 +93,9 @@ export function Slider({
         max={max}
         step={step}
         value={value}
+        style={rangeProgressStyle(value, min, max)}
         onChange={(e) => onChange(Number(e.target.value))}
-        className="h-8 min-w-32 flex-1 accent-accent"
+        className="range-control h-8 min-w-32 flex-1"
       />
       <span className="w-16 text-right font-bold tabular-nums text-text">{display}</span>
     </label>
@@ -114,6 +120,7 @@ export function SubTabs<T extends string>({
           <button
             key={t.id}
             onClick={() => onChange(t.id)}
+            aria-current={active ? 'page' : undefined}
             className={`min-h-11 rounded-lg px-3.5 py-1 text-base font-semibold transition-all ${
               active
                 ? 'bg-accent text-on-accent shadow-xs'
