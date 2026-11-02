@@ -50,9 +50,9 @@ export function Panel({
   className?: string
 }) {
   return (
-    <section className={`rounded-2xl border border-line bg-panel shadow-md overflow-hidden ${className}`}>
+    <section className={`app-panel overflow-hidden rounded-2xl border border-line bg-panel shadow-md ${className}`}>
       {title && (
-        <header className="flex flex-wrap items-center justify-between gap-2 border-b border-line bg-header/60 px-5 py-3">
+        <header className="app-panel-heading flex flex-wrap items-center justify-between gap-2 border-b border-line bg-header/60 px-5 py-3">
           <h2 className="text-lg font-bold tracking-tight text-text">{title}</h2>
           {right}
         </header>
