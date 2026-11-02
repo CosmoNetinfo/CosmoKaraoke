@@ -2,7 +2,7 @@ import { Minus, Plus, Type, X } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { FONT_OPTIONS, THEME_OPTIONS } from '../lib/appearance'
 import { useStore } from '../lib/store'
-import { Btn } from './ui'
+import { Btn, rangeProgressStyle } from './ui'
 
 const clamp = (v: number, min: number, max: number) => Math.min(max, Math.max(min, v))
 
@@ -109,8 +109,9 @@ export function AccessibilityMenu() {
                 max={0.14}
                 step={0.02}
                 value={st.letterSpacing}
+                style={rangeProgressStyle(st.letterSpacing, 0, 0.14)}
                 onChange={(e) => patch({ letterSpacing: Number(e.target.value) })}
-                className="h-8 flex-1"
+                className="range-control h-8 flex-1"
               />
             </label>
             <label className="flex items-center gap-3">
@@ -121,8 +122,9 @@ export function AccessibilityMenu() {
                 max={2}
                 step={0.1}
                 value={st.lineHeight}
+                style={rangeProgressStyle(st.lineHeight, 1.3, 2)}
                 onChange={(e) => patch({ lineHeight: Number(e.target.value) })}
-                className="h-8 flex-1"
+                className="range-control h-8 flex-1"
               />
             </label>
           </div>

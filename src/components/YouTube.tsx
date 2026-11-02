@@ -1,5 +1,5 @@
 import { invoke } from '@tauri-apps/api/core'
-import { Download, Eye, ListPlus, Loader2, Plus, Search, X } from 'lucide-react'
+import { Download, Eye, ListPlus, Loader2, Music, Plus, Search, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useStore } from '../lib/store'
 import { queueYoutube } from '../lib/youtube'
@@ -19,6 +19,7 @@ export function YouTube() {
   const [missing, setMissing] = useState('')
   const [installing, setInstalling] = useState(false)
   const [query, setQuery] = useState('')
+  const [searched, setSearched] = useState(false)
   const [busy, setBusy] = useState(false)
   const [results, setResults] = useState<YtItem[]>([])
   const [preview, setPreview] = useState<YtItem | null>(null)
@@ -47,6 +48,8 @@ export function YouTube() {
   const search = async () => {
     if (!query.trim()) return
     setBusy(true)
+    setSearched(true)
+    setResults([])
     try {
       setResults(await invoke<YtItem[]>('ytdlp_search', { query }))
     } catch (e) {
@@ -81,9 +84,13 @@ export function YouTube() {
   }
 
   return (
-    <div className="flex h-full flex-col gap-3">
+    <div className="youtube-view flex h-full flex-col gap-3">
+      <div className="youtube-heading">
+        <div><div className="catalog-eyebrow">Ricerca facoltativa</div><h2>Un altro modo per trovare la canzone</h2><p>Cerca una base karaoke su YouTube e aggiungila alla serata.</p></div>
+        <span className="youtube-heading-icon"><Music /></span>
+      </div>
       {missing && (
-        <div className="rounded-md border border-accent bg-accent/15 p-3 text-base text-text">
+        <div className="youtube-missing rounded-xl border border-accent bg-accent/15 p-3 text-base text-text">
           <p>{missing}</p>
           <div className="mt-2">
             <Btn variant="primary" disabled={installing} onClick={() => void install()}>
@@ -93,17 +100,18 @@ export function YouTube() {
           </div>
         </div>
       )}
-      {version && <div className="text-base text-muted">yt-dlp versione {version}</div>}
+      {version && <div className="youtube-version">yt-dlp <span>v{version}</span></div>}
 
-      <div className="flex gap-2">
+      <div className="youtube-searchbar flex gap-2">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-3.5 text-muted" />
           <input
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            aria-label="Cerca una base su YouTube"
+            onChange={(e) => { setQuery(e.target.value); setSearched(false) }}
             onKeyDown={(e) => e.key === 'Enter' && void search()}
             placeholder="Cerca una base karaoke su YouTube…"
-            className="w-full rounded-lg border-2 border-line bg-inset py-2.5 pl-10 pr-3 text-base outline-none focus:border-accent"
+            className="youtube-search-input w-full rounded-xl border border-line bg-inset py-2.5 pl-10 pr-3 text-base outline-none focus:border-accent"
           />
         </div>
         <Btn variant="primary" disabled={busy || !query.trim()} onClick={() => void search()}>
@@ -117,9 +125,17 @@ export function YouTube() {
         d'autore.
       </p>
 
-      <ul className="min-h-0 flex-1 space-y-1 overflow-y-auto pr-1">
+      {results.length === 0 && (
+        <div className="youtube-empty">
+          <div className="youtube-empty-icon"><Search className="h-7 w-7" /></div>
+          <h2>{busy ? 'Sto cercando le basi…' : searched ? 'Nessun risultato trovato' : 'Quale canzone vuoi cantare?'}</h2>
+          <p>{searched ? 'Prova con il titolo del brano e la parola “karaoke”.' : 'Scrivi un titolo o un artista qui sopra. Quando trovi la base giusta, aggiungila alla scaletta con un clic.'}</p>
+        </div>
+      )}
+
+      <ul className={`youtube-results min-h-0 flex-1 space-y-1 overflow-y-auto pr-1 ${results.length ? '' : 'hidden'}`}>
         {results.map((r) => (
-          <li key={r.id} className="flex items-center gap-3 rounded-md bg-row p-2">
+          <li key={r.id} className="youtube-result flex items-center gap-3 rounded-xl bg-row p-2">
             <img
               src={`https://i.ytimg.com/vi/${r.id}/mqdefault.jpg`}
               alt=""

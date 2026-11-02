@@ -241,6 +241,7 @@ export function Playlists() {
           <div className="flex flex-wrap items-center gap-1.5">
             <button
               onClick={() => setActiveTab('A')}
+              aria-current={activeTab === 'A' ? 'page' : undefined}
               className={`flex min-h-11 items-center gap-1.5 rounded-lg px-3 py-1.5 text-base font-bold transition-all ${
                 activeTab === 'A'
                   ? 'bg-accent text-on-accent shadow-xs'
@@ -256,6 +257,7 @@ export function Playlists() {
 
             <button
               onClick={() => setActiveTab('B')}
+              aria-current={activeTab === 'B' ? 'page' : undefined}
               className={`flex min-h-11 items-center gap-1.5 rounded-lg px-3 py-1.5 text-base font-bold transition-all ${
                 activeTab === 'B'
                   ? 'bg-accent text-on-accent shadow-xs'
@@ -270,6 +272,7 @@ export function Playlists() {
 
             <button
               onClick={() => setActiveTab('singers')}
+              aria-current={activeTab === 'singers' ? 'page' : undefined}
               className={`flex min-h-11 items-center gap-1.5 rounded-lg px-3 py-1.5 text-base font-bold transition-all ${
                 activeTab === 'singers'
                   ? 'bg-accent text-on-accent shadow-xs'
@@ -285,6 +288,7 @@ export function Playlists() {
 
             <button
               onClick={() => setActiveTab('saved')}
+              aria-current={activeTab === 'saved' ? 'page' : undefined}
               className={`flex min-h-11 items-center gap-1.5 rounded-lg px-3 py-1.5 text-base font-bold transition-all ${
                 activeTab === 'saved'
                   ? 'bg-accent text-on-accent shadow-xs'

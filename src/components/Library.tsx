@@ -110,7 +110,8 @@ export function Library() {
         <div className="flex shrink-0 items-center gap-1 rounded-xl border border-line bg-inset p-1">
           <button
             onClick={() => setFormat('all')}
-            className={`min-h-11 rounded-lg px-3 py-1.5 text-base font-bold transition-all ${
+            aria-pressed={format === 'all'}
+            className={`catalog-filter min-h-11 rounded-lg px-3 py-1.5 text-base font-bold transition-all ${
               format === 'all'
                 ? 'bg-accent text-on-accent shadow-xs'
                 : 'text-muted hover:bg-btn hover:text-text'
@@ -120,7 +121,8 @@ export function Library() {
           </button>
           <button
             onClick={() => setFormat('cdg')}
-            className={`min-h-11 rounded-lg px-3 py-1.5 text-base font-bold transition-all ${
+            aria-pressed={format === 'cdg'}
+            className={`catalog-filter min-h-11 rounded-lg px-3 py-1.5 text-base font-bold transition-all ${
               format === 'cdg'
                 ? 'bg-accent text-on-accent shadow-xs'
                 : 'text-muted hover:bg-btn hover:text-text'
@@ -130,7 +132,8 @@ export function Library() {
           </button>
           <button
             onClick={() => setFormat('kar')}
-            className={`min-h-11 rounded-lg px-3 py-1.5 text-base font-bold transition-all ${
+            aria-pressed={format === 'kar'}
+            className={`catalog-filter min-h-11 rounded-lg px-3 py-1.5 text-base font-bold transition-all ${
               format === 'kar'
                 ? 'bg-accent text-on-accent shadow-xs'
                 : 'text-muted hover:bg-btn hover:text-text'
@@ -140,7 +143,8 @@ export function Library() {
           </button>
           <button
             onClick={() => setFormat('video')}
-            className={`min-h-11 rounded-lg px-3 py-1.5 text-base font-bold transition-all ${
+            aria-pressed={format === 'video'}
+            className={`catalog-filter min-h-11 rounded-lg px-3 py-1.5 text-base font-bold transition-all ${
               format === 'video'
                 ? 'bg-accent text-on-accent shadow-xs'
                 : 'text-muted hover:bg-btn hover:text-text'
@@ -149,6 +153,14 @@ export function Library() {
             Video
           </button>
         </div>
+      </div>
+
+      <div className="catalog-heading">
+        <div>
+          <div className="catalog-eyebrow">Catalogo musicale</div>
+          <h2>La tua libreria</h2>
+        </div>
+        <div className="catalog-total"><Music className="h-4 w-4" />{songs.length} {songs.length === 1 ? 'brano' : 'brani'}</div>
       </div>
 
       {/* RIEPILOGO STATISTICHE */}
@@ -160,7 +172,7 @@ export function Library() {
             </span>
           ) : (
             <span>
-              Trovati <span className="text-text">{filtered.length}</span> brani
+              Trovati <span className="text-text">{filtered.length}</span> {filtered.length === 1 ? 'brano' : 'brani'}
               {filtered.length !== songs.length && ` su ${songs.length} totali`}
             </span>
           )}
@@ -185,14 +197,24 @@ export function Library() {
         </div>
       )}
 
+      {songs.length > 0 && filtered.length === 0 && (
+        <div className="catalog-empty flex flex-col items-center justify-center rounded-2xl border border-dashed border-line p-8 text-center">
+          <div className="catalog-empty-icon mb-4 flex h-16 w-16 items-center justify-center rounded-3xl border border-line bg-panel text-accent-text"><Search className="h-7 w-7" /></div>
+          <div className="text-base font-bold text-text">Nessun brano trovato</div>
+          <p className="mt-1 max-w-md text-base text-muted">Prova con un altro titolo, artista o formato.</p>
+          <Btn className="mt-4" onClick={() => { setQuery(''); setFormat('all') }}>Mostra tutti i brani</Btn>
+        </div>
+      )}
+
       {/* LISTA DEI BRANI DEL CATALOGO */}
-      <div className="catalog-list min-h-0 flex-1 overflow-hidden rounded-2xl border border-line bg-panel shadow-sm">
-        <ul className="h-full divide-y divide-line/30 overflow-y-auto pr-1">
+      {filtered.length > 0 && <div className="catalog-list min-h-0 rounded-2xl border border-line bg-panel shadow-sm">
+        <ul className="divide-y divide-line/30 pr-1">
           {filtered.slice(0, limit).map((song) => (
             <li
               key={song.id}
               className="catalog-row group flex items-center justify-between gap-3 p-3 transition-colors hover:bg-row-hover"
             >
+              <span className="catalog-song-icon"><Music /></span>
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
                   <span className="truncate text-base font-bold text-text group-hover:text-accent-text">
@@ -252,7 +274,7 @@ export function Library() {
             </li>
           )}
         </ul>
-      </div>
+      </div>}
     </div>
   )
 }

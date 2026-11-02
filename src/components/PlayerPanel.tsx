@@ -17,7 +17,7 @@ import { mixNext, playNext, seekTo, sendDisplayMessage, setPitch, setTempo, stop
 import { useStore } from '../lib/store'
 import { CdgCanvas } from './CdgCanvas'
 import { KarDisplay } from './KarDisplay'
-import { Btn, fmtTime } from './ui'
+import { Btn, fmtTime, rangeProgressStyle } from './ui'
 
 export function PlayerPanel() {
   const current = useStore((s) => s.current)
@@ -121,7 +121,7 @@ export function PlayerPanel() {
       </div>
 
       {/* TITOLO BRANO & CANTANTE OSPITE (DECK INFO) */}
-      <div className="rounded-2xl border border-line bg-panel p-4 shadow-sm">
+      <div className="player-details rounded-2xl border border-line bg-panel p-4 shadow-sm">
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0 flex-1">
             <div className="truncate text-xl font-extrabold tracking-tight text-text">
@@ -161,15 +161,16 @@ export function PlayerPanel() {
               max={Math.max(duration, 1)}
               step={0.5}
               value={Math.min(position, Math.max(duration, 1))}
+              style={rangeProgressStyle(Math.min(position, Math.max(duration, 1)), 0, Math.max(duration, 1))}
               disabled={!current}
               onChange={(e) => seekTo(Number(e.target.value))}
-              className="h-2 w-full cursor-pointer accent-accent"
+              className="range-control h-2 w-full cursor-pointer"
             />
           </div>
         </div>
 
         {/* CONTROLLI TRASPORTO CONSOLLE */}
-        <div className="mt-4 grid grid-cols-4 gap-2">
+        <div className="transport-controls mt-4 grid grid-cols-4 gap-2">
           <Btn
             onClick={stopAll}
             title="Ferma"
@@ -207,7 +208,7 @@ export function PlayerPanel() {
             <div className="flex items-center gap-1.5">
               <button
                 onClick={() => handleSetPitch(Math.max(-6, pitch - 1))}
-                className="h-5 w-5 rounded bg-btn font-bold hover:bg-btn-hover"
+                className="h-9 w-9 rounded-xl bg-btn font-bold hover:bg-btn-hover"
                 title="Abbassa di un semitono"
               >
                 -
@@ -217,7 +218,7 @@ export function PlayerPanel() {
               </span>
               <button
                 onClick={() => handleSetPitch(Math.min(6, pitch + 1))}
-                className="h-5 w-5 rounded bg-btn font-bold hover:bg-btn-hover"
+                className="h-9 w-9 rounded-xl bg-btn font-bold hover:bg-btn-hover"
                 title="Alza di un semitono"
               >
                 +
@@ -230,7 +231,7 @@ export function PlayerPanel() {
             <div className="flex items-center gap-1.5">
               <button
                 onClick={() => handleSetTempo(Math.max(0.75, Number((tempo - 0.05).toFixed(2))))}
-                className="h-5 w-5 rounded bg-btn font-bold hover:bg-btn-hover"
+                className="h-9 w-9 rounded-xl bg-btn font-bold hover:bg-btn-hover"
                 title="Rallenta 5%"
               >
                 -
@@ -240,7 +241,7 @@ export function PlayerPanel() {
               </span>
               <button
                 onClick={() => handleSetTempo(Math.min(1.3, Number((tempo + 0.05).toFixed(2))))}
-                className="h-5 w-5 rounded bg-btn font-bold hover:bg-btn-hover"
+                className="h-9 w-9 rounded-xl bg-btn font-bold hover:bg-btn-hover"
                 title="Accelera 5%"
               >
                 +
@@ -263,7 +264,7 @@ export function PlayerPanel() {
       </div>
 
       {/* REGIA TV: INVIO MESSAGGIO RAPIDO A SCHERMO */}
-      <div className="rounded-2xl border border-line bg-panel p-3 shadow-xs">
+      <div className="tv-message-card rounded-2xl border border-line bg-panel p-3 shadow-xs">
         <div className="mb-2 text-xs font-bold uppercase tracking-wider text-muted">
           📢 Messaggio sullo schermo TV
         </div>
