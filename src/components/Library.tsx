@@ -81,12 +81,13 @@ export function Library() {
   return (
     <div className="flex h-full flex-col gap-3.5">
       {/* BARRA SUPERIORE: RICERCA E FILTRI RAPIDI */}
-      <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center">
+      <div className="catalog-toolbar flex flex-col gap-2.5 rounded-2xl border border-line bg-panel p-3 sm:flex-row sm:items-center">
         {/* Ricerca */}
         <div className="relative min-w-0 flex-1">
           <Search className="absolute left-3.5 top-3.5 h-4 w-4 text-muted" />
           <input
             value={query}
+            aria-label="Cerca nella libreria"
             onChange={(e) => {
               setQuery(e.target.value)
               setLimit(PAGE)
@@ -151,7 +152,7 @@ export function Library() {
       </div>
 
       {/* RIEPILOGO STATISTICHE */}
-      <div className="flex items-center justify-between text-base font-semibold text-muted">
+      <div className="catalog-summary flex items-center justify-between text-base font-semibold text-muted">
         <div>
           {scanning ? (
             <span className="flex items-center gap-1 text-accent-text">
@@ -168,8 +169,10 @@ export function Library() {
 
       {/* STATO VUOTO */}
       {songs.length === 0 && !scanning && (
-        <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-line p-10 text-center">
-          <Music className="mb-2 h-10 w-10 text-muted/60" />
+        <div className="catalog-empty flex flex-col items-center justify-center rounded-2xl border border-dashed border-line p-10 text-center">
+          <div className="catalog-empty-icon mb-4 flex h-16 w-16 items-center justify-center rounded-3xl border border-line bg-panel text-accent-text">
+            <Music className="h-8 w-8" />
+          </div>
           <div className="text-base font-bold text-text">Libreria vuota</div>
           <p className="mt-1 max-w-md text-base text-muted">
             {libraryPaths.length === 0
@@ -183,12 +186,12 @@ export function Library() {
       )}
 
       {/* LISTA DEI BRANI DEL CATALOGO */}
-      <div className="min-h-0 flex-1 overflow-hidden rounded-2xl border border-line bg-panel shadow-sm">
+      <div className="catalog-list min-h-0 flex-1 overflow-hidden rounded-2xl border border-line bg-panel shadow-sm">
         <ul className="h-full divide-y divide-line/30 overflow-y-auto pr-1">
           {filtered.slice(0, limit).map((song) => (
             <li
               key={song.id}
-              className="group flex items-center justify-between gap-3 p-3 transition-colors hover:bg-row-hover"
+              className="catalog-row group flex items-center justify-between gap-3 p-3 transition-colors hover:bg-row-hover"
             >
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">

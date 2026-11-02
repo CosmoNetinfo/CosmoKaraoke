@@ -4,6 +4,15 @@ CosmoKaraoke è un programma karaoke per Windows e macOS. La versione attuale è
 
 L'interfaccia è in italiano e include caratteri leggibili, testo ingrandibile e temi ad alto contrasto. La libreria musicale e le impostazioni restano sul computer; non servono account o un server cloud. Internet serve per gli aggiornamenti e, se attivate, le funzioni YouTube.
 
+## Novità in v0.4.0
+
+- Restyling della regia: navigazione più chiara, stato della serata sempre visibile e stato della TV a colpo d'occhio.
+- Libreria e scaletta hanno superfici e stati vuoti più leggibili; dalla scaletta vuota si può aprire direttamente la Libreria.
+- Anteprima TV e schermata di attesa hanno una gerarchia visiva più curata, mantenendo temi, caratteri e impostazioni esistenti.
+- Sezioni Live riorganizzate in schede più leggibili, con stato del server messo in evidenza.
+- Interfaccia Live per smartphone aggiornata con schede compatte, pulsanti comodi al tocco e stati di connessione più chiari.
+- Lo script di aggiornamento versione mantiene allineati i metadati dei lockfile Node e Rust.
+
 ## Novità in v0.3.0
 
 - La scansione della libreria mostra l'avanzamento e il numero di brani trovati. Se alcuni percorsi non sono accessibili, segnala il problema e conserva la libreria precedente.
@@ -86,7 +95,7 @@ La chiave privata di aggiornamento è conservata nei segreti GitHub Actions e **
 
 Requisiti: Node.js 22 e Rust. Per lo sviluppo nativo su macOS o Windows servono anche gli strumenti di compilazione richiesti da Tauri per quel sistema.
 
-Per aggiornare la versione prima di un rilascio usa `npm run bump patch` (oppure `minor`, `major` o un numero preciso, per esempio `npm run bump 0.3.5`). Il flusso automatico crea la release quando il numero di versione è nuovo.
+Per aggiornare la versione prima di un rilascio usa `npm run bump patch` (oppure `minor`, `major` o un numero preciso, per esempio `npm run bump 0.4.1`). Il comando aggiorna i file di configurazione e i lockfile Node e Rust. Il flusso automatico crea la release quando il numero di versione è nuovo.
 
 ```sh
 npm install
