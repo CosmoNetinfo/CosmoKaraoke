@@ -53,6 +53,12 @@ export interface ActiveSound {
   name: string
 }
 
+interface QueueRemovalUndo {
+  item: QueueItem
+  queue: 'A' | 'B'
+  index: number
+}
+
 export type Tab = 'library' | 'youtube' | 'mixer' | 'effects' | 'live' | 'settings'
 
 interface AppState {
@@ -88,6 +94,7 @@ interface AppState {
   activeFx: ActiveSound[]
   settings: Settings
   toast: string
+  queueRemovalUndo: QueueRemovalUndo | null
 
   patch: (p: Partial<AppState>) => void
   patchSettings: (p: Partial<Settings>) => void
@@ -99,7 +106,8 @@ interface AppState {
   addSinger: (name: string) => void
   removeSinger: (name: string) => void
   enqueue: (song: Song, to?: 'A' | 'B', singer?: string) => void
-  removeFromQueue: (uid: string) => void
+  removeFromQueue: (uid: string, undoable?: boolean) => void
+  undoQueueRemoval: () => void
   moveInQueue: (uid: string, dir: -1 | 1) => void
   transfer: (uid: string) => void
   setSingerOf: (uid: string, singer: string) => void
@@ -150,14 +158,15 @@ export const useStore = create<AppState>((set, get) => ({
   savedPlaylists: [],
   settings: DEFAULT_SETTINGS,
   toast: '',
+  queueRemovalUndo: null,
 
   patch: (p) => set(p),
   patchSettings: (p) => set((s) => ({ settings: { ...s.settings, ...p } })),
 
   notify: (msg) => {
-    set({ toast: msg })
+    set({ toast: msg, queueRemovalUndo: null })
     clearTimeout(toastTimer)
-    toastTimer = setTimeout(() => set({ toast: '' }), 5000)
+    toastTimer = setTimeout(() => set({ toast: '', queueRemovalUndo: null }), 5000)
   },
 
   hydrate: async () => {
@@ -261,11 +270,51 @@ export const useStore = create<AppState>((set, get) => ({
     else set((s) => ({ queueB: [...s.queueB, item] }))
   },
 
-  removeFromQueue: (uid) =>
+  removeFromQueue: (uid, undoable = false) => {
+    const state = get()
+    const queue = state.queueA.some((item) => item.uid === uid) ? 'A' : 'B'
+    const source = queue === 'A' ? state.queueA : state.queueB
+    const index = source.findIndex((item) => item.uid === uid)
+    if (index < 0) return
+
+    const item = source[index]
     set((s) => ({
       queueA: s.queueA.filter((q) => q.uid !== uid),
       queueB: s.queueB.filter((q) => q.uid !== uid),
-    })),
+      ...(undoable
+        ? {
+            toast: `«${item.song.title}» rimosso dalla ${queue === 'A' ? 'scaletta' : 'riserva'}.`,
+            queueRemovalUndo: { item, queue, index },
+          }
+        : {}),
+    }))
+
+    if (undoable) {
+      clearTimeout(toastTimer)
+      toastTimer = setTimeout(() => set({ toast: '', queueRemovalUndo: null }), 6000)
+    }
+  },
+
+  undoQueueRemoval: () => {
+    const removal = get().queueRemovalUndo
+    if (!removal) return
+    const { item, queue, index } = removal
+    set((s) => {
+      const current = queue === 'A' ? s.queueA : s.queueB
+      if (current.some((entry) => entry.uid === item.uid)) {
+        return { toast: '', queueRemovalUndo: null }
+      }
+      const restored = [...current]
+      restored.splice(Math.min(index, restored.length), 0, item)
+      return {
+        ...(queue === 'A' ? { queueA: restored } : { queueB: restored }),
+        toast: `«${item.song.title}» ripristinato nella ${queue === 'A' ? 'scaletta' : 'riserva'}.`,
+        queueRemovalUndo: null,
+      }
+    })
+    clearTimeout(toastTimer)
+    toastTimer = setTimeout(() => set({ toast: '', queueRemovalUndo: null }), 3500)
+  },
 
   moveInQueue: (uid, dir) =>
     set((s) => {
