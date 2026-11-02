@@ -4,7 +4,7 @@ CosmoKaraoke è un programma karaoke per Windows e macOS. La versione attuale è
 
 L'interfaccia è in italiano e include caratteri leggibili, testo ingrandibile e temi ad alto contrasto. La libreria musicale e le impostazioni restano sul computer; non servono account o un server cloud. Internet serve per gli aggiornamenti e, se attivate, le funzioni YouTube.
 
-## Novità in v0.4.1
+## Novità in v0.4.2
 
 - Due modalità grafiche: **Standard**, con temi e colore principale regolabili, e **Professionale**, con navigazione laterale e aspetto da consolle broadcast.
 - La dimensione dell'intera interfaccia si può regolare dal **75% al 200%**. Carattere, spaziatura e temi accessibili restano disponibili nella modalità Standard.
