@@ -13,12 +13,33 @@ export const THEME_OPTIONS: Array<{ id: Settings['theme']; label: string; bg: st
   { id: 'contrasto', label: 'Alto contrasto', bg: '#000000', fg: '#ffd400' },
 ]
 
+function textOnColor(hex: string): string {
+  const color = hex.replace('#', '')
+  const rgb = color.length === 3
+    ? color.split('').map((part) => parseInt(part + part, 16))
+    : [0, 2, 4].map((offset) => parseInt(color.slice(offset, offset + 2), 16))
+  const luminance = (rgb[0] * 299 + rgb[1] * 587 + rgb[2] * 114) / 1000
+  return luminance > 155 ? '#201a10' : '#ffffff'
+}
+
 /** Applica carattere, dimensioni e colori scelti alla finestra. */
 export function applyAppearance(s: Settings): void {
   const root = document.documentElement
   root.dataset.theme = s.theme
+  root.dataset.design = s.designMode
   root.dataset.font = s.fontFamily
   root.style.setProperty('--ui-scale', String(s.uiScale))
   root.style.setProperty('--ls', `${s.letterSpacing}em`)
   root.style.setProperty('--lh', String(s.lineHeight))
+
+  const accent = s.designMode === 'professional' ? '#e4ad4d' : s.accentColor
+  root.style.setProperty('--accent', accent)
+  root.style.setProperty('--accent-hover', `color-mix(in srgb, ${accent} 82%, white)`)
+  root.style.setProperty('--accent-text', s.designMode === 'professional' ? '#72d8c1' : accent)
+  root.style.setProperty('--glow', `color-mix(in srgb, ${accent} 20%, transparent)`)
+  if (s.designMode === 'professional') {
+    root.style.setProperty('--on-accent', '#201a10')
+  } else {
+    root.style.setProperty('--on-accent', textOnColor(accent))
+  }
 }

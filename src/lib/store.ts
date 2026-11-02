@@ -41,6 +41,8 @@ export const DEFAULT_SETTINGS: Settings = {
   micComp: 0.3,
   fontFamily: 'atkinson',
   theme: 'scuro',
+  designMode: 'standard',
+  accentColor: '#a76df2',
   uiScale: 1.25,
   letterSpacing: 0.02,
   lineHeight: 1.5,
