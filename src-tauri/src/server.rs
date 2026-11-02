@@ -134,56 +134,57 @@ const MOBILE_HTML: &str = r#"<!DOCTYPE html>
   <title>CosmoKaraoke Live</title>
   <style>
     :root {
-      --bg: #0f172a;
-      --panel: #1e293b;
-      --card: #334155;
+      --bg: #080d18;
+      --panel: #10182a;
+      --card: #17233a;
       --text: #f8fafc;
-      --muted: #94a3b8;
-      --accent: #38bdf8;
-      --accent-hover: #0284c7;
-      --on-accent: #0f172a;
-      --success: #22c55e;
-      --danger: #ef4444;
-      --border: #475569;
+      --muted: #a7b4ca;
+      --accent: #5b8cff;
+      --accent-hover: #38bdf8;
+      --on-accent: #ffffff;
+      --success: #34d399;
+      --danger: #fb7185;
+      --border: rgba(148, 163, 184, .2);
     }
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
-    body { background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; }
-    header { background: var(--panel); padding: 1rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
-    h1 { font-size: 1.25rem; font-weight: 700; color: var(--accent); }
-    .status-badge { font-size: 0.8rem; padding: 0.25rem 0.6rem; border-radius: 9999px; background: #064e3b; color: #6ee7b7; font-weight: 600; }
-    .status-badge.offline { background: #7f1d1d; color: #fca5a5; }
+    body { background: radial-gradient(ellipse at 50% -15%, rgba(91, 140, 255, .16), transparent 38rem), var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; padding-bottom: env(safe-area-inset-bottom); }
+    header { position: sticky; top: 0; z-index: 5; background: rgba(16, 24, 42, .9); padding: 1rem max(1rem, calc((100vw - 600px) / 2)); border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; gap: .75rem; backdrop-filter: blur(18px); }
+    h1 { font-size: 1.2rem; font-weight: 800; letter-spacing: -.025em; color: var(--text); }
+    .status-badge { font-size: 0.78rem; padding: 0.35rem 0.7rem; border-radius: 9999px; background: rgba(52, 211, 153, .14); border: 1px solid rgba(52, 211, 153, .3); color: #6ee7b7; font-weight: 700; white-space: nowrap; }
+    .status-badge.offline { background: rgba(251, 113, 133, .14); border-color: rgba(251, 113, 133, .3); color: #fda4af; }
 
-    nav { display: flex; background: var(--panel); border-bottom: 1px solid var(--border); }
-    nav button { flex: 1; padding: 0.85rem 0.5rem; background: transparent; border: none; color: var(--muted); font-size: 1rem; font-weight: 600; cursor: pointer; border-bottom: 3px solid transparent; }
-    nav button.active { color: var(--accent); border-bottom-color: var(--accent); background: rgba(56, 189, 248, 0.05); }
+    nav { position: sticky; top: 4.3rem; z-index: 4; display: flex; gap: .25rem; max-width: 600px; width: calc(100% - 1.25rem); margin: .65rem auto 0; padding: .3rem; border: 1px solid var(--border); border-radius: 1rem; background: rgba(16, 24, 42, .92); box-shadow: 0 12px 28px rgba(0, 0, 0, .22); backdrop-filter: blur(18px); }
+    nav button { flex: 1; min-width: 0; min-height: 2.8rem; padding: 0.55rem 0.25rem; background: transparent; border: none; border-radius: .75rem; color: var(--muted); font-size: .85rem; font-weight: 700; cursor: pointer; transition: background .16s ease, color .16s ease, transform .16s ease; }
+    nav button.active { color: var(--on-accent); background: linear-gradient(135deg, var(--accent), #426fe0); box-shadow: 0 5px 16px rgba(75, 120, 238, .28), inset 0 1px rgba(255,255,255,.2); }
+    nav button:active { transform: scale(.97); }
 
-    main { flex: 1; padding: 1rem; max-width: 600px; margin: 0 auto; width: 100%; }
+    main { flex: 1; padding: 1rem .85rem; max-width: 600px; margin: 0 auto; width: 100%; }
     .tab-content { display: none; }
     .tab-content.active { display: block; }
 
-    .card { background: var(--panel); border: 1px solid var(--border); border-radius: 0.75rem; padding: 1.1rem; margin-bottom: 1rem; }
+    .card { background: linear-gradient(145deg, rgba(255,255,255,.025), transparent 52%), var(--panel); border: 1px solid var(--border); border-radius: 1.1rem; padding: 1.1rem; margin-bottom: 1rem; box-shadow: 0 12px 30px rgba(0,0,0,.14), inset 0 1px rgba(255,255,255,.035); }
     .card-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 0.5rem; display: flex; align-items: center; justify-content: space-between; }
     
     label { display: block; font-size: 0.95rem; font-weight: 600; color: var(--muted); margin-bottom: 0.4rem; }
     input, textarea, select {
       width: 100%; padding: 0.85rem 1rem; font-size: 1.05rem; background: var(--bg); color: var(--text);
-      border: 1px solid var(--border); border-radius: 0.5rem; margin-bottom: 0.9rem; outline: none;
+      border: 1px solid var(--border); border-radius: 0.75rem; margin-bottom: 0.9rem; outline: none; transition: border-color .16s ease, box-shadow .16s ease;
     }
-    input:focus, textarea:focus { border-color: var(--accent); }
+    input:focus, textarea:focus, select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(91,140,255,.2); }
 
     .btn {
       display: inline-flex; justify-content: center; align-items: center; width: 100%;
-      min-height: 3rem; padding: 0.75rem 1.25rem; font-size: 1.1rem; font-weight: 700;
-      background: var(--accent); color: var(--on-accent); border: none; border-radius: 0.6rem;
-      cursor: pointer; text-decoration: none; transition: opacity 0.15s;
+      min-height: 3rem; padding: 0.75rem 1.25rem; font-size: 1.05rem; font-weight: 750;
+      background: linear-gradient(135deg, var(--accent), #426fe0); color: var(--on-accent); border: 1px solid rgba(255,255,255,.12); border-radius: 0.8rem;
+      cursor: pointer; text-decoration: none; transition: opacity 0.15s, transform .15s, box-shadow .15s; box-shadow: 0 6px 18px rgba(67, 112, 226, .2);
     }
-    .btn:active { opacity: 0.85; }
-    .btn-secondary { background: var(--card); color: var(--text); }
-    .btn-small { min-height: 2.2rem; font-size: 0.95rem; padding: 0.4rem 0.8rem; width: auto; }
+    .btn:active { opacity: 0.88; transform: scale(.98); }
+    .btn-secondary { background: var(--card); color: var(--text); box-shadow: none; }
+    .btn-small { min-height: 2.75rem; font-size: 0.9rem; padding: 0.45rem 0.65rem; width: auto; }
 
     .song-item {
-      background: var(--card); border-radius: 0.5rem; padding: 0.85rem 1rem; margin-bottom: 0.6rem;
-      display: flex; justify-content: space-between; align-items: center; gap: 0.5rem;
+      background: linear-gradient(120deg, rgba(91,140,255,.08), transparent 55%), var(--card); border: 1px solid rgba(148,163,184,.12); border-radius: 0.9rem; padding: 0.85rem; margin-bottom: 0.65rem;
+      display: flex; justify-content: space-between; align-items: center; gap: 0.65rem;
     }
     .song-info { flex: 1; min-width: 0; }
     .song-title { font-weight: 700; font-size: 1.05rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -203,6 +204,9 @@ const MOBILE_HTML: &str = r#"<!DOCTYPE html>
     .notice.info { background: rgba(56, 189, 248, 0.15); border: 1px solid var(--accent); color: var(--accent); }
     .notice.success { background: rgba(34, 197, 94, 0.15); border: 1px solid var(--success); color: var(--success); }
     .notice.error { background: rgba(239, 68, 68, 0.15); border: 1px solid var(--danger); color: var(--danger); }
+    :focus-visible { outline: 3px solid var(--accent-hover); outline-offset: 2px; }
+    @media (max-width: 360px) { nav button { font-size: .76rem; } header { padding-inline: .75rem; } }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; } }
   </style>
 </head>
 <body>

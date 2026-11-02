@@ -282,9 +282,9 @@ export function LivePanel() {
   }
 
   return (
-    <div className="flex h-full flex-col gap-3">
+    <div className="live-console flex h-full flex-col gap-3">
       {/* Intestazione e stato del server */}
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg bg-panel p-3">
+      <div className="live-status-card flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-line bg-panel p-4">
         <div className="flex items-center gap-3">
           <div
             className={`flex h-11 w-11 items-center justify-center rounded-full ${
@@ -325,13 +325,14 @@ export function LivePanel() {
       </div>
 
       {/* Barra sottomenu */}
-      <div className="flex gap-1 border-b border-border bg-panel px-2 pt-1">
+      <nav aria-label="Sezioni Live" className="live-nav flex gap-1 overflow-x-auto rounded-2xl border border-line bg-inset p-1">
         <button
           onClick={() => setSubTab('qr')}
-          className={`flex items-center gap-2 border-b-2 px-4 py-2 font-bold ${
+          aria-current={subTab === 'qr' ? 'page' : undefined}
+          className={`live-subtab flex min-h-11 shrink-0 items-center gap-2 rounded-xl px-4 py-2 font-bold ${
             subTab === 'qr'
-              ? 'border-accent text-accent'
-              : 'border-transparent text-muted hover:text-text'
+              ? 'is-active bg-accent text-on-accent'
+              : 'text-muted hover:bg-btn hover:text-text'
           }`}
         >
           <QrCode className="h-5 w-5" />
@@ -340,10 +341,11 @@ export function LivePanel() {
 
         <button
           onClick={() => setSubTab('bookings')}
-          className={`relative flex items-center gap-2 border-b-2 px-4 py-2 font-bold ${
+          aria-current={subTab === 'bookings' ? 'page' : undefined}
+          className={`live-subtab relative flex min-h-11 shrink-0 items-center gap-2 rounded-xl px-4 py-2 font-bold ${
             subTab === 'bookings'
-              ? 'border-accent text-accent'
-              : 'border-transparent text-muted hover:text-text'
+              ? 'is-active bg-accent text-on-accent'
+              : 'text-muted hover:bg-btn hover:text-text'
           }`}
         >
           <Music className="h-5 w-5" />
@@ -357,10 +359,11 @@ export function LivePanel() {
 
         <button
           onClick={() => setSubTab('messages')}
-          className={`relative flex items-center gap-2 border-b-2 px-4 py-2 font-bold ${
+          aria-current={subTab === 'messages' ? 'page' : undefined}
+          className={`live-subtab relative flex min-h-11 shrink-0 items-center gap-2 rounded-xl px-4 py-2 font-bold ${
             subTab === 'messages'
-              ? 'border-accent text-accent'
-              : 'border-transparent text-muted hover:text-text'
+              ? 'is-active bg-accent text-on-accent'
+              : 'text-muted hover:bg-btn hover:text-text'
           }`}
         >
           <MessageSquare className="h-5 w-5" />
@@ -374,10 +377,11 @@ export function LivePanel() {
 
         <button
           onClick={() => setSubTab('votes')}
-          className={`flex items-center gap-2 border-b-2 px-4 py-2 font-bold ${
+          aria-current={subTab === 'votes' ? 'page' : undefined}
+          className={`live-subtab flex min-h-11 shrink-0 items-center gap-2 rounded-xl px-4 py-2 font-bold ${
             subTab === 'votes'
-              ? 'border-accent text-accent'
-              : 'border-transparent text-muted hover:text-text'
+              ? 'is-active bg-accent text-on-accent'
+              : 'text-muted hover:bg-btn hover:text-text'
           }`}
         >
           <Star className="h-5 w-5" />
@@ -386,16 +390,17 @@ export function LivePanel() {
 
         <button
           onClick={() => setSubTab('rules')}
-          className={`flex items-center gap-2 border-b-2 px-4 py-2 font-bold ${
+          aria-current={subTab === 'rules' ? 'page' : undefined}
+          className={`live-subtab flex min-h-11 shrink-0 items-center gap-2 rounded-xl px-4 py-2 font-bold ${
             subTab === 'rules'
-              ? 'border-accent text-accent'
-              : 'border-transparent text-muted hover:text-text'
+              ? 'is-active bg-accent text-on-accent'
+              : 'text-muted hover:bg-btn hover:text-text'
           }`}
         >
           <SettingsIcon className="h-5 w-5" />
           <span>Regole e filtri</span>
         </button>
-      </div>
+      </nav>
 
       {/* Contenuto sottoschede */}
       <div className="flex-1 overflow-y-auto">

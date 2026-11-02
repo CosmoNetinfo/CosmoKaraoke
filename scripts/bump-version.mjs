@@ -30,8 +30,21 @@ const pkg = JSON.parse(readFileSync('package.json', 'utf8'))
 pkg.version = next
 writeFileSync('package.json', JSON.stringify(pkg, null, 2) + '\n')
 
+const lock = JSON.parse(readFileSync('package-lock.json', 'utf8'))
+lock.version = next
+if (lock.packages?.['']) lock.packages[''].version = next
+writeFileSync('package-lock.json', JSON.stringify(lock, null, 2) + '\n')
+
 const cargo = readFileSync('src-tauri/Cargo.toml', 'utf8')
 writeFileSync('src-tauri/Cargo.toml', cargo.replace(/^version = ".*"$/m, `version = "${next}"`))
+
+const cargoLock = readFileSync('src-tauri/Cargo.lock', 'utf8')
+const appPackage = /(^name = "cosmokaraoke"\nversion = ")[^"]+("$)/m
+if (!appPackage.test(cargoLock)) {
+  console.error('Non trovo il pacchetto cosmokaraoke in src-tauri/Cargo.lock.')
+  process.exit(1)
+}
+writeFileSync('src-tauri/Cargo.lock', cargoLock.replace(appPackage, `$1${next}$2`))
 
 console.log(`Versione aggiornata: ${conf.version === next ? next : next}`)
 console.log('Ora fai commit e push su main: GitHub compila e pubblica la nuova versione.')

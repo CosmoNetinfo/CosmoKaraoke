@@ -133,6 +133,7 @@ export function Display() {
       )}
       {(kind === 'idle' || kind === 'audio' || isNoLyricsKar) && (
         <div
+          className="display-idle-stage"
           style={{
             position: 'absolute',
             inset: 0,
@@ -145,14 +146,14 @@ export function Display() {
             gap: '1.5vw',
           }}
         >
-          <div className="rounded-2xl border border-line bg-panel/90 px-6 py-4" style={{ fontSize: `${5 * k}vw`, fontWeight: 700, lineHeight: 1.2 }}>
+          <div className="display-idle-title rounded-2xl border border-line bg-panel/90 px-6 py-4" style={{ fontSize: `${5 * k}vw`, fontWeight: 700, lineHeight: 1.2 }}>
             {kind === 'idle' ? 'CosmoKaraoke' : st?.title}
           </div>
           {(kind === 'audio' || kind === 'kar') && st?.artist && (
-            <div className="rounded-xl border border-line bg-panel/90 px-5 py-3" style={{ fontSize: `${3 * k}vw`, opacity: 0.95 }}>{st.artist}</div>
+            <div className="display-idle-meta rounded-xl border border-line bg-panel/90 px-5 py-3" style={{ fontSize: `${3 * k}vw`, opacity: 0.95 }}>{st.artist}</div>
           )}
           {kind === 'idle' && (
-            <div className="rounded-xl border border-line bg-panel/90 px-5 py-3" style={{ fontSize: `${2.2 * k}vw`, opacity: 0.85 }}>Scegli un brano e canta!</div>
+            <div className="display-idle-meta rounded-xl border border-line bg-panel/90 px-5 py-3" style={{ fontSize: `${2.2 * k}vw`, opacity: 0.85 }}>Scegli un brano e canta!</div>
           )}
         </div>
       )}
@@ -168,7 +169,7 @@ export function Display() {
             fontSize: `${3.4 * k}vh`,
             fontWeight: 700,
           }}
-          className="border border-line bg-panel/90 text-text"
+          className="display-meta-pill border border-line bg-panel/90 text-text"
         >
           Canta: {st?.singer}
         </div>
@@ -185,7 +186,7 @@ export function Display() {
             fontSize: `${3 * k}vh`,
             fontWeight: 700,
           }}
-          className="border border-line bg-panel/90 text-text"
+          className="display-meta-pill border border-line bg-panel/90 text-text"
         >
           Prossimo: {st?.next}
         </div>
@@ -204,7 +205,7 @@ export function Display() {
             lineHeight: 1.15,
             textAlign: 'center',
           }}
-          className="border-t-2 border-line bg-accent text-on-accent"
+          className="display-message-banner border-t-2 border-line bg-accent text-on-accent"
         >
           {message}
         </div>

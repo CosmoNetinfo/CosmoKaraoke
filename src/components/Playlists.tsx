@@ -226,11 +226,19 @@ export function Playlists() {
   }
 
   return (
-    <Panel className="border-line/70">
+    <Panel
+      className="playlist-panel border-line/70"
+      title="La serata"
+      right={
+        <span className="text-sm font-semibold text-muted">
+          {queueA.length} {queueA.length === 1 ? 'brano' : 'brani'} in scaletta
+        </span>
+      }
+    >
       {/* SELETTORE A SCHEDE DELLA CODA */}
       <div className="-mx-5 -mt-5 mb-4 border-b border-line bg-header/40 p-2">
         <div className="flex flex-wrap items-center justify-between gap-2 px-3">
-          <div className="flex items-center gap-1.5">
+          <div className="flex flex-wrap items-center gap-1.5">
             <button
               onClick={() => setActiveTab('A')}
               className={`flex min-h-11 items-center gap-1.5 rounded-lg px-3 py-1.5 text-base font-bold transition-all ${
@@ -305,10 +313,16 @@ export function Playlists() {
       {(activeTab === 'A' || activeTab === 'B') && (
         <div className="space-y-3">
           {list.length === 0 ? (
-            <div className="rounded-xl border border-dashed border-line p-6 text-center text-base font-medium text-muted">
+            <div className="queue-empty rounded-2xl border border-dashed border-line p-6 text-center text-base font-medium text-muted">
+              <ListMusic className="mx-auto mb-3 h-8 w-8 text-accent-text" />
               {activeTab === 'A'
                 ? 'La scaletta è vuota. Cerca un brano nella Libreria o su YouTube e premi "+ Accoda".'
                 : 'La riserva è vuota. Puoi parcheggiare qui i brani di scorta.'}
+              {activeTab === 'A' && (
+                <div className="mt-4">
+                  <Btn variant="primary" onClick={() => patch({ tab: 'library' })}>Sfoglia la libreria</Btn>
+                </div>
+              )}
             </div>
           ) : (
             <ul className="space-y-2">
