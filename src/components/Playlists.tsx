@@ -164,7 +164,7 @@ function QueueRow({
         >
           <ArrowLeftRight size={15} />
         </Btn>
-        <Btn variant="ghost" className="p-0 text-muted hover:text-danger" title={`Togli ${item.song.title} dalla coda`} onClick={() => removeFromQueue(item.uid)}>
+        <Btn variant="ghost" className="p-0 text-muted hover:text-danger" title={`Togli ${item.song.title} dalla coda`} onClick={() => removeFromQueue(item.uid, true)}>
           <Trash2 size={15} />
         </Btn>
       </div>

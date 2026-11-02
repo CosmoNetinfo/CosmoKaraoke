@@ -10,6 +10,7 @@ import {
   Settings as SettingsIcon,
   SlidersHorizontal,
   Sparkles,
+  Undo2,
 } from 'lucide-react'
 import { useEffect } from 'react'
 import { AccessibilityMenu } from './components/AccessibilityMenu'
@@ -50,6 +51,7 @@ export default function App() {
   const hydrated = useStore((s) => s.hydrated)
   const livePendingCount = useStore((s) => s.livePendingCount)
   const toast = useStore((s) => s.toast)
+  const queueRemovalUndo = useStore((s) => s.queueRemovalUndo)
   const displayOpen = useStore((s) => s.displayOpen)
   const displayBlack = useStore((s) => s.displayBlack)
   const monitorIndex = useStore((s) => s.settings.monitorIndex)
@@ -58,6 +60,7 @@ export default function App() {
   const playing = useStore((s) => s.playing)
   const patch = useStore((s) => s.patch)
   const notify = useStore((s) => s.notify)
+  const undoQueueRemoval = useStore((s) => s.undoQueueRemoval)
 
   useEffect(() => {
     let alive = true
@@ -105,6 +108,16 @@ export default function App() {
       if (e.code === 'Space' && !inInput) {
         e.preventDefault()
         void togglePause()
+        return
+      }
+      if (
+        e.code === 'KeyZ' &&
+        !inInput &&
+        (e.ctrlKey || e.metaKey) &&
+        useStore.getState().queueRemovalUndo
+      ) {
+        e.preventDefault()
+        useStore.getState().undoQueueRemoval()
         return
       }
       if (e.code === 'KeyM' && !inInput && (e.ctrlKey || e.metaKey)) {
@@ -253,8 +266,13 @@ export default function App() {
 
       {/* TOAST NOTIFICHE POPUP */}
       {toast && (
-        <div className="pointer-events-none fixed bottom-5 left-1/2 z-50 max-w-xl -translate-x-1/2 rounded-xl border border-accent/40 bg-panel/95 px-5 py-3 text-base font-bold text-text shadow-2xl backdrop-blur-md">
-          {toast}
+        <div role="status" aria-live="polite" className="fixed bottom-5 left-1/2 z-50 flex max-w-[calc(100%-2rem)] -translate-x-1/2 items-center gap-4 rounded-xl border border-accent/40 bg-panel/95 px-5 py-3 text-base font-bold text-text shadow-2xl backdrop-blur-md">
+          <span className="min-w-0">{toast}</span>
+          {queueRemovalUndo && (
+            <Btn variant="ghost" className="shrink-0 text-accent-text" title="Annulla rimozione (Ctrl+Z o ⌘Z)" onClick={undoQueueRemoval}>
+              <Undo2 className="h-4 w-4" /> Annulla
+            </Btn>
+          )}
         </div>
       )}
     </div>
