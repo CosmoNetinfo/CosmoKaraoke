@@ -53,6 +53,9 @@ export default function App() {
   const displayOpen = useStore((s) => s.displayOpen)
   const displayBlack = useStore((s) => s.displayBlack)
   const monitorIndex = useStore((s) => s.settings.monitorIndex)
+  const current = useStore((s) => s.current)
+  const queueCount = useStore((s) => s.queueA.length)
+  const playing = useStore((s) => s.playing)
   const patch = useStore((s) => s.patch)
   const notify = useStore((s) => s.notify)
 
@@ -153,34 +156,31 @@ export default function App() {
   }
 
   return (
-    <div className="flex h-full flex-col bg-bg text-text selection:bg-accent selection:text-on-accent">
+    <div className="app-shell flex h-full flex-col bg-bg text-text selection:bg-accent selection:text-on-accent">
       <UpdateBanner />
       <NowPlaying />
       <Tooltips />
 
-      {/* TOP HEADER MODERNO */}
-      <header className="flex flex-wrap items-center justify-between gap-3 border-b border-line bg-header px-4 py-2.5 shadow-sm">
-        {/* Brand & Logo */}
-        <div className="flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-accent to-accent-hover text-on-accent shadow-xs">
+      <header className="app-topbar flex flex-wrap items-center justify-between gap-3 px-5 py-3">
+        <div className="flex min-w-fit items-center gap-3">
+          <div className="brand-mark flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-accent to-accent-hover text-on-accent">
             <Mic className="h-5 w-5" />
           </div>
-          <div>
-            <h1 className="text-xl font-black tracking-tight text-text">
-              Cosmo<span className="text-accent-text">Karaoke</span>
-            </h1>
+          <div className="leading-tight">
+            <h1 className="text-xl font-black tracking-tight text-text">Cosmo<span className="text-accent-text">Karaoke</span></h1>
+            <div className="mt-1 text-[0.68rem] font-bold uppercase tracking-[0.2em] text-muted">Live control room</div>
           </div>
         </div>
 
-        {/* Tab centrali sagomate */}
-        <nav className="flex flex-wrap items-center gap-1 rounded-xl border border-line bg-inset p-1">
+        <nav aria-label="Sezioni principali" className="app-nav flex flex-wrap items-center gap-1 rounded-2xl p-1">
           {TABS.map((t) => {
             const active = tab === t.id
             return (
               <button
                 key={t.id}
                 onClick={() => patch({ tab: t.id })}
-                className={`relative inline-flex min-h-11 items-center gap-2 rounded-lg px-3.5 py-1.5 text-base font-bold transition-all ${
+                aria-current={active ? 'page' : undefined}
+                className={`relative inline-flex min-h-11 items-center gap-2 rounded-xl px-3.5 py-1.5 text-base font-bold transition-all ${
                   active
                     ? 'bg-accent text-on-accent shadow-xs'
                     : 'text-muted hover:bg-btn hover:text-text'
@@ -198,8 +198,7 @@ export default function App() {
           })}
         </nav>
 
-        {/* Azioni rapide di destra */}
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center justify-end gap-2">
           <AccessibilityMenu />
 
           <Btn
@@ -223,9 +222,20 @@ export default function App() {
         </div>
       </header>
 
-      {/* CORPO PRINCIPALE A 2 COLONNE ADATTIVE */}
-      <main className="grid min-h-0 flex-1 grid-cols-1 gap-4 overflow-y-auto p-4 xl:grid-cols-[minmax(0,1fr)_minmax(26rem,32rem)] xl:overflow-hidden">
-        {/* Pannello sinistro: Contenuto della Scheda Attiva */}
+      <div className="session-bar flex flex-wrap items-center justify-between gap-3 px-5 py-2.5">
+        <div className="flex items-center gap-3">
+          <span className={`live-indicator h-2.5 w-2.5 rounded-full ${playing ? 'is-live' : ''}`} />
+          <span aria-live="polite" className="text-sm font-extrabold tracking-wide">{playing ? 'IN RIPRODUZIONE' : current ? 'IN PAUSA' : 'REGIA PRONTA'}</span>
+          <span className="h-4 w-px bg-line" />
+          <span className="max-w-[26rem] truncate text-sm text-muted">{current?.song.title ?? 'Seleziona un brano per iniziare la serata'}</span>
+        </div>
+        <div className="flex items-center gap-2 text-sm font-semibold text-muted">
+          <span className="rounded-full border border-line bg-panel px-3 py-1">{queueCount} {queueCount === 1 ? 'brano' : 'brani'} in scaletta</span>
+          <span className="rounded-full border border-line bg-panel px-3 py-1">{displayOpen ? 'TV collegata' : 'TV non avviata'}</span>
+        </div>
+      </div>
+
+      <main className="app-workspace grid min-h-0 flex-1 grid-cols-1 gap-4 overflow-y-auto p-5 xl:grid-cols-[minmax(0,1fr)_minmax(27rem,31rem)] xl:overflow-hidden">
         <div className="min-h-[28rem] xl:min-h-0 xl:overflow-hidden">
           {tab === 'library' && <Library />}
           {tab === 'youtube' && <YouTube />}
@@ -235,8 +245,7 @@ export default function App() {
           {tab === 'settings' && <Settings />}
         </div>
 
-        {/* Pannello destro: Deck Now Playing & Scalette A/B */}
-        <aside className="min-h-0 space-y-4 xl:overflow-y-auto xl:pr-1.5">
+        <aside className="app-rail min-h-0 space-y-4 xl:overflow-y-auto xl:pr-1.5">
           <PlayerPanel />
           <Playlists />
         </aside>

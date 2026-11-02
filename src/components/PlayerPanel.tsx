@@ -69,7 +69,7 @@ export function PlayerPanel() {
   return (
     <div className="space-y-3.5">
       {/* DECK SCREEN / VIDEO PREVIEW */}
-      <div className="relative aspect-video overflow-hidden rounded-2xl border border-line/80 bg-black shadow-lg">
+      <div className="preview-stage relative aspect-video overflow-hidden rounded-2xl border border-line/80 bg-black shadow-lg">
         <div
           ref={videoBox}
           className={`absolute inset-0 ${format === 'video' ? '' : 'invisible'}`}
@@ -109,6 +109,10 @@ export function PlayerPanel() {
         )}
 
         {/* Badge formato in sovrimpressione video */}
+        <div className="absolute top-2.5 left-2.5 inline-flex items-center gap-2 rounded-lg border border-white/15 bg-black/55 px-2.5 py-1 text-xs font-bold tracking-wide text-white backdrop-blur-sm">
+          <span className={`h-2 w-2 rounded-full ${playing ? 'bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,.9)]' : 'bg-white/60'}`} />
+          ANTEPRIMA TV
+        </div>
         {current && (
           <div className="absolute top-2.5 right-2.5 rounded-lg border border-white/20 bg-black/60 px-2 py-0.5 text-xs font-black tracking-wider text-white uppercase backdrop-blur-xs">
             {format?.toUpperCase()}
