@@ -1,10 +1,21 @@
-import { Minus, Plus, Type, X } from 'lucide-react'
+import { Minus, Plus, SlidersHorizontal, Type, X } from 'lucide-react'
+import type { CSSProperties } from 'react'
 import { useEffect, useRef, useState } from 'react'
 import { FONT_OPTIONS, THEME_OPTIONS } from '../lib/appearance'
 import { useStore } from '../lib/store'
 import { Btn, rangeProgressStyle } from './ui'
 
 const clamp = (v: number, min: number, max: number) => Math.min(max, Math.max(min, v))
+const SCALE_MIN = 0.75
+const SCALE_MAX = 2
+const ACCENT_OPTIONS = [
+  { name: 'Viola cosmo', value: '#a76df2' },
+  { name: 'Blu studio', value: '#4e83ff' },
+  { name: 'Turchese', value: '#16b8a6' },
+  { name: 'Corallo', value: '#e76573' },
+  { name: 'Ambra', value: '#e4ad4d' },
+  { name: 'Verde lime', value: '#83c95d' },
+]
 
 /** Menu rapido "Aa": carattere, dimensione del testo e colori, sempre a portata di mano. */
 export function AccessibilityMenu() {
@@ -27,11 +38,11 @@ export function AccessibilityMenu() {
     }
   }, [open])
 
-  const setScale = (v: number) => patch({ uiScale: Math.round(clamp(v, 1, 2) * 100) / 100 })
+  const setScale = (v: number) => patch({ uiScale: Math.round(clamp(v, SCALE_MIN, SCALE_MAX) * 100) / 100 })
 
   return (
     <div ref={box} className="relative">
-      <Btn onClick={() => setOpen((o) => !o)} aria-expanded={open} title="Aspetto: carattere, dimensione e colori">
+      <Btn onClick={() => setOpen((o) => !o)} aria-expanded={open} title="Aspetto: Standard o Professionale, colore e dimensione">
         <Type /> Aa
       </Btn>
 
@@ -39,7 +50,7 @@ export function AccessibilityMenu() {
         <div
           role="dialog"
           aria-label="Aspetto dell'app"
-          className="absolute right-0 top-full z-50 mt-2 w-[min(92vw,26rem)] space-y-4 rounded-xl border-2 border-line bg-panel p-4 shadow-2xl"
+          className="absolute right-0 top-full z-50 mt-2 max-h-[calc(100vh-5rem)] w-[min(92vw,30rem)] space-y-4 overflow-y-auto rounded-2xl border border-line bg-panel p-4 shadow-2xl"
         >
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-bold">Aspetto</h2>
@@ -49,20 +60,84 @@ export function AccessibilityMenu() {
           </div>
 
           <div>
-            <div className="mb-1 font-medium">Dimensione del testo</div>
+            <div className="mb-2 font-medium">Stile dell'interfaccia</div>
+            <div className="design-mode-picker grid grid-cols-2 gap-2">
+              <button
+                onClick={() => patch({ designMode: 'standard' })}
+                aria-pressed={st.designMode === 'standard'}
+                className={`design-mode-card ${st.designMode === 'standard' ? 'is-selected' : ''}`}
+              >
+                <span className="design-mode-icon"><Type /></span>
+                <span><b>Standard</b><small>Colori e temi regolabili</small></span>
+              </button>
+              <button
+                onClick={() => patch({ designMode: 'professional' })}
+                aria-pressed={st.designMode === 'professional'}
+                className={`design-mode-card ${st.designMode === 'professional' ? 'is-selected' : ''}`}
+              >
+                <span className="design-mode-icon"><SlidersHorizontal /></span>
+                <span><b>Professionale</b><small>Regia broadcast</small></span>
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <div className="mb-1 flex items-center justify-between gap-3">
+              <div>
+                <div className="font-medium">Dimensione dell'interfaccia</div>
+                <div className="text-sm text-muted">Regolabile dal 75% al 200%</div>
+              </div>
+              <div className="text-lg font-bold tabular-nums">{Math.round(st.uiScale * 100)}%</div>
+            </div>
             <div className="flex items-center gap-2">
-              <Btn onClick={() => setScale(st.uiScale - 0.1)} title="Più piccolo" disabled={st.uiScale <= 1}>
+              <Btn onClick={() => setScale(st.uiScale - 0.1)} title="Riduci l'interfaccia" disabled={st.uiScale <= SCALE_MIN}>
                 <Minus />
               </Btn>
-              <div className="flex-1 text-center text-lg font-bold">{Math.round(st.uiScale * 100)}%</div>
-              <Btn onClick={() => setScale(st.uiScale + 0.1)} title="Più grande" disabled={st.uiScale >= 2}>
+              <input
+                type="range"
+                min={SCALE_MIN}
+                max={SCALE_MAX}
+                step={0.05}
+                value={st.uiScale}
+                style={rangeProgressStyle(st.uiScale, SCALE_MIN, SCALE_MAX)}
+                aria-label="Dimensione dell'interfaccia"
+                onChange={(e) => setScale(Number(e.target.value))}
+                className="range-control h-8 flex-1"
+              />
+              <Btn onClick={() => setScale(st.uiScale + 0.1)} title="Ingrandisci l'interfaccia" disabled={st.uiScale >= SCALE_MAX}>
                 <Plus />
               </Btn>
             </div>
           </div>
 
-          <div>
-            <div className="mb-1 font-medium">Colori</div>
+          {st.designMode === 'standard' && <div>
+            <div className="mb-1 font-medium">Colore principale</div>
+            <div className="accent-picker flex flex-wrap items-center gap-2">
+              {ACCENT_OPTIONS.map((accent) => (
+                <button
+                  key={accent.value}
+                  onClick={() => patch({ accentColor: accent.value })}
+                  aria-label={accent.name}
+                  aria-pressed={st.accentColor === accent.value}
+                  title={accent.name}
+                  className={`accent-swatch ${st.accentColor === accent.value ? 'is-selected' : ''}`}
+                  style={{ '--swatch-color': accent.value } as CSSProperties}
+                />
+              ))}
+              <label className="accent-custom-color" title="Scegli un colore personalizzato">
+                <input
+                  type="color"
+                  value={st.accentColor}
+                  aria-label="Scegli un colore personalizzato"
+                  onChange={(e) => patch({ accentColor: e.target.value })}
+                />
+                <span>Altro</span>
+              </label>
+            </div>
+          </div>}
+
+          {st.designMode === 'standard' && <div>
+            <div className="mb-1 font-medium">Tema</div>
             <div className="grid grid-cols-3 gap-2">
               {THEME_OPTIONS.map((t) => (
                 <button
@@ -79,9 +154,9 @@ export function AccessibilityMenu() {
                 </button>
               ))}
             </div>
-          </div>
+          </div>}
 
-          <div>
+          {st.designMode === 'standard' && <div>
             <div className="mb-1 font-medium">Carattere</div>
             <div className="space-y-1.5">
               {FONT_OPTIONS.map((f) => (
@@ -98,9 +173,9 @@ export function AccessibilityMenu() {
                 </button>
               ))}
             </div>
-          </div>
+          </div>}
 
-          <div className="space-y-2">
+          {st.designMode === 'standard' && <div className="space-y-2">
             <label className="flex items-center gap-3">
               <span className="w-36 shrink-0 font-medium">Spazio tra lettere</span>
               <input
@@ -127,7 +202,7 @@ export function AccessibilityMenu() {
                 className="range-control h-8 flex-1"
               />
             </label>
-          </div>
+          </div>}
         </div>
       )}
     </div>

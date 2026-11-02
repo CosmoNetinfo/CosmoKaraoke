@@ -132,6 +132,8 @@ export interface Settings {
   micComp: number
   fontFamily: 'atkinson' | 'lexend' | 'opendyslexic' | 'sistema'
   theme: 'scuro' | 'crema' | 'contrasto'
+  designMode: 'standard' | 'professional'
+  accentColor: string
   uiScale: number
   letterSpacing: number
   lineHeight: number
