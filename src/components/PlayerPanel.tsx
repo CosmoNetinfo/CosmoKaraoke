@@ -19,7 +19,7 @@ import { CdgCanvas } from './CdgCanvas'
 import { KarDisplay } from './KarDisplay'
 import { Btn, fmtTime, rangeProgressStyle } from './ui'
 
-export function PlayerPanel() {
+export function PlayerPanel({ compact = false }: { compact?: boolean }) {
   const current = useStore((s) => s.current)
   const playing = useStore((s) => s.playing)
   const position = useStore((s) => s.position)
@@ -67,7 +67,7 @@ export function PlayerPanel() {
   }
 
   return (
-    <div className="space-y-3.5">
+    <div className={compact ? 'player-dock-layout' : 'space-y-3.5'}>
       {/* DECK SCREEN / VIDEO PREVIEW */}
       <div className="preview-stage relative aspect-video overflow-hidden rounded-2xl border border-line/80 bg-black shadow-lg">
         <div

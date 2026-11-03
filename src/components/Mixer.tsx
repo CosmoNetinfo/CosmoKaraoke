@@ -88,6 +88,14 @@ const SECTIONS: { id: Section; label: string }[] = [
   { id: 'effetti', label: 'Effetti voce' },
 ]
 
+const EQ_PRESETS = [
+  { name: 'Neutro', values: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0] },
+  { name: 'Voce chiara', values: [-2, -1, 0, 1, 3, 3, 2, 1, 0, -1] },
+  { name: 'Caldo', values: [3, 2, 1, 0, -1, -1, 0, 1, 2, 2] },
+  { name: 'Bassi', values: [4, 3, 2, 1, 0, 0, 0, 0, 0, 0] },
+  { name: 'Brillante', values: [-1, 0, 0, 0, 0, 1, 2, 3, 3, 2] },
+]
+
 export function Mixer() {
   const [section, setSection] = useState<Section>('brano')
   const st = useStore((s) => s.settings)
@@ -105,7 +113,7 @@ export function Mixer() {
     const next = !st.micOn
     try {
       await engine.setMic(next)
-      patch({ micOn: next })
+      patch({ micOn: next, ...(next ? { micInApp: true } : {}) })
     } catch {
       notify('Non riesco ad accendere il microfono: controlla i permessi del sistema.')
       patch({ micOn: false })
@@ -125,7 +133,7 @@ export function Mixer() {
   return (
     <div className="flex h-full flex-col gap-3">
       <SubTabs
-        tabs={SECTIONS.filter((s) => st.micInApp || (s.id !== 'voce' && s.id !== 'effetti'))}
+        tabs={SECTIONS}
         value={section}
         onChange={setSection}
       />
@@ -228,7 +236,19 @@ export function Mixer() {
         )}
 
         {section === 'eq' && (
-          <Panel title="Equalizzatore">
+          <Panel title="Equalizzatore a 10 bande" right={
+            <label className="flex items-center gap-2 text-sm font-semibold text-muted">Preset
+              <select value={EQ_PRESETS.find((preset) => preset.values.every((v, i) => v === st.eq[i]))?.name ?? 'Personalizzato'} onChange={(e) => {
+                const preset = EQ_PRESETS.find((p) => p.name === e.target.value)
+                if (!preset) return
+                patch({ eq: preset.values })
+                preset.values.forEach((value, index) => engine.setEq(index, value))
+              }} className="rounded-lg border border-line bg-inset px-2 py-1.5 text-text">
+                {!EQ_PRESETS.some((preset) => preset.values.every((v, i) => v === st.eq[i])) && <option>Personalizzato</option>}
+                {EQ_PRESETS.map((preset) => <option key={preset.name}>{preset.name}</option>)}
+              </select>
+            </label>
+          }>
             <div className="flex items-end justify-between gap-1">
               {EQ_FREQS.map((f, i) => (
                 <div key={f} className="flex flex-1 flex-col items-center gap-1">

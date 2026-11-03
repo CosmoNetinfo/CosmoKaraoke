@@ -42,6 +42,11 @@ export const DEFAULT_SETTINGS: Settings = {
   fontFamily: 'atkinson',
   theme: 'scuro',
   designMode: 'standard',
+  skinId: 'cosmo-night',
+  navCollapsed: false,
+  navWidth: 196,
+  dockTab: 'regia',
+  dockHeight: 270,
   accentColor: '#a76df2',
   uiScale: 1.25,
   letterSpacing: 0.02,
@@ -186,7 +191,11 @@ export const useStore = create<AppState>((set, get) => ({
           interludes: d.interludes ?? [],
           bgTracks: d.bgTracks ?? [],
           savedPlaylists: d.savedPlaylists ?? [],
-          settings: { ...DEFAULT_SETTINGS, ...(d.settings ?? {}) },
+          settings: {
+            ...DEFAULT_SETTINGS,
+            ...(d.settings ?? {}),
+            skinId: d.settings?.skinId ?? (d.settings?.designMode === 'professional' ? 'pro-broadcast' : DEFAULT_SETTINGS.skinId),
+          },
         })
       }
       try {

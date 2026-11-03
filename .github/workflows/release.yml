@@ -93,7 +93,17 @@ jobs:
         with:
           tagName: v__VERSION__
           releaseName: 'CosmoKaraoke v__VERSION__'
-          releaseBody: 'Scarica il file giusto per il tuo computer: il programma di installazione .exe per Windows, il file .dmg per Mac. Se hai già CosmoKaraoke installato, ti proporrà da solo di aggiornarsi.'
+          releaseBody: |
+            ## CosmoKaraoke v0.4.4
+
+            ### Novità
+            - Sette skin con palette, categorie e anteprime distinte: Cosmo Notte, Studio Perla, Broadcast, Control Room, Salotto, Festa e Stage Black.
+            - Navigazione laterale Professionale comprimibile e ridimensionabile.
+            - Dock inferiore regolabile per player, anteprima TV, messaggi, scaletta e cantanti.
+            - Sezioni Microfono ed Effetti voce accessibili dalla scheda Audio e cinque preset per l'equalizzatore a 10 bande.
+            - README aggiornato e nuova guida utente in `docs/Guida-utente.md`.
+
+            Scarica l'installer `.exe` per Windows o il pacchetto `.dmg` per macOS. Le istruzioni complete sono nel README del repository.
           releaseDraft: false
           prerelease: false
           includeUpdaterJson: true

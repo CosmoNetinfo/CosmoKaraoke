@@ -133,6 +133,11 @@ export interface Settings {
   fontFamily: 'atkinson' | 'lexend' | 'opendyslexic' | 'sistema'
   theme: 'scuro' | 'crema' | 'contrasto'
   designMode: 'standard' | 'professional'
+  skinId: string
+  navCollapsed: boolean
+  navWidth: number
+  dockTab: 'regia' | 'serata'
+  dockHeight: number
   accentColor: string
   uiScale: number
   letterSpacing: number

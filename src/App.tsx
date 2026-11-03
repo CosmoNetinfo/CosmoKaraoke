@@ -6,13 +6,17 @@ import {
   Mic,
   Monitor,
   MonitorOff,
+  PanelLeftClose,
+  PanelLeftOpen,
+  ChevronDown,
+  ChevronUp,
   QrCode,
   Settings as SettingsIcon,
   SlidersHorizontal,
   Sparkles,
   Undo2,
 } from 'lucide-react'
-import { useEffect } from 'react'
+import { useEffect, type CSSProperties, type PointerEvent as ReactPointerEvent } from 'react'
 import { AccessibilityMenu } from './components/AccessibilityMenu'
 import { Effetti } from './components/Effetti'
 import { Library } from './components/Library'
@@ -61,6 +65,10 @@ export default function App() {
   const patch = useStore((s) => s.patch)
   const notify = useStore((s) => s.notify)
   const undoQueueRemoval = useStore((s) => s.undoQueueRemoval)
+  const navCollapsed = useStore((s) => s.settings.navCollapsed)
+  const navWidth = useStore((s) => s.settings.navWidth)
+  const dockTab = useStore((s) => s.settings.dockTab)
+  const dockHeight = useStore((s) => s.settings.dockHeight)
 
   useEffect(() => {
     let alive = true
@@ -160,6 +168,26 @@ export default function App() {
     queueMicrotask(pushDisplay)
   }
 
+  const resizeSidebar = (event: ReactPointerEvent<HTMLDivElement>) => {
+    event.preventDefault()
+    const startX = event.clientX
+    const startWidth = navWidth
+    const move = (e: globalThis.PointerEvent) => patch({ settings: { ...useStore.getState().settings, navWidth: Math.max(156, Math.min(300, startWidth + e.clientX - startX)) } })
+    const done = () => { window.removeEventListener('pointermove', move); window.removeEventListener('pointerup', done) }
+    window.addEventListener('pointermove', move)
+    window.addEventListener('pointerup', done, { once: true })
+  }
+
+  const resizeDock = (event: ReactPointerEvent<HTMLDivElement>) => {
+    event.preventDefault()
+    const startY = event.clientY
+    const startHeight = dockHeight
+    const move = (e: globalThis.PointerEvent) => patch({ settings: { ...useStore.getState().settings, dockHeight: Math.max(190, Math.min(430, startHeight + startY - e.clientY)) } })
+    const done = () => { window.removeEventListener('pointermove', move); window.removeEventListener('pointerup', done) }
+    window.addEventListener('pointermove', move)
+    window.addEventListener('pointerup', done, { once: true })
+  }
+
   if (!hydrated) {
     return (
       <div className="flex h-full items-center justify-center text-lg font-bold text-muted">
@@ -169,13 +197,16 @@ export default function App() {
   }
 
   return (
-    <div className="app-shell flex h-full flex-col bg-bg text-text selection:bg-accent selection:text-on-accent">
+    <div className="app-shell flex h-full flex-col bg-bg text-text selection:bg-accent selection:text-on-accent" style={{ '--nav-width': `${navCollapsed ? 76 : navWidth}px` } as CSSProperties}>
       <UpdateBanner />
       <NowPlaying />
       <Tooltips />
 
       <header className="app-topbar flex flex-wrap items-center justify-between gap-3 px-5 py-3">
         <div className="flex min-w-fit items-center gap-3">
+          <button className="nav-collapse-toggle" onClick={() => patch({ settings: { ...useStore.getState().settings, navCollapsed: !navCollapsed } })} aria-label={navCollapsed ? 'Espandi navigazione' : 'Comprimi navigazione'} title={navCollapsed ? 'Espandi pannello laterale' : 'Comprimi pannello laterale'}>
+            {navCollapsed ? <PanelLeftOpen size={18} /> : <PanelLeftClose size={18} />}
+          </button>
           <div className="brand-mark flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-accent to-accent-hover text-on-accent">
             <Mic className="h-5 w-5" />
           </div>
@@ -185,7 +216,7 @@ export default function App() {
           </div>
         </div>
 
-        <nav aria-label="Sezioni principali" className="app-nav flex flex-wrap items-center gap-1 rounded-2xl p-1">
+        <nav aria-label="Sezioni principali" data-collapsed={navCollapsed} className="app-nav flex flex-wrap items-center gap-1 rounded-2xl p-1">
           {TABS.map((t) => {
             const active = tab === t.id
             return (
@@ -193,6 +224,7 @@ export default function App() {
                 key={t.id}
                 onClick={() => patch({ tab: t.id })}
                 aria-current={active ? 'page' : undefined}
+                title={navCollapsed ? t.label : undefined}
                 className={`relative inline-flex min-h-11 items-center gap-2 rounded-xl px-3.5 py-1.5 text-base font-bold transition-all ${
                   active
                     ? 'bg-accent text-on-accent shadow-xs'
@@ -210,6 +242,7 @@ export default function App() {
             )
           })}
         </nav>
+        <div className="app-nav-resize" role="separator" aria-label="Ridimensiona navigazione" onPointerDown={resizeSidebar} />
 
         <div className="flex flex-wrap items-center justify-end gap-2">
           <AccessibilityMenu />
@@ -248,7 +281,7 @@ export default function App() {
         </div>
       </div>
 
-      <main className="app-workspace grid min-h-0 flex-1 grid-cols-1 gap-4 overflow-y-auto p-5 xl:grid-cols-[minmax(0,1fr)_minmax(27rem,31rem)] xl:overflow-hidden">
+      <main className={`app-workspace grid min-h-0 flex-1 grid-cols-1 gap-4 overflow-y-auto p-5 ${settings.designMode === 'professional' ? 'xl:grid-cols-1 xl:overflow-hidden' : 'xl:grid-cols-[minmax(0,1fr)_minmax(27rem,31rem)] xl:overflow-hidden'}`}>
         <div className="min-h-[28rem] xl:min-h-0 xl:overflow-hidden">
           {tab === 'library' && <Library />}
           {tab === 'youtube' && <YouTube />}
@@ -258,11 +291,20 @@ export default function App() {
           {tab === 'settings' && <Settings />}
         </div>
 
-        <aside className="app-rail min-h-0 space-y-4 xl:overflow-y-auto xl:pr-1.5">
-          <PlayerPanel />
-          <Playlists />
-        </aside>
+        {settings.designMode !== 'professional' && <aside className="app-rail min-h-0 space-y-4 xl:overflow-y-auto xl:pr-1.5"><PlayerPanel /><Playlists /></aside>}
       </main>
+
+      {settings.designMode === 'professional' && <section className="control-dock shrink-0" style={{ height: `${dockHeight}px` }} aria-label="Pannello di regia">
+        <div className="dock-resize-handle" role="separator" aria-label="Ridimensiona pannello di regia" onPointerDown={resizeDock} />
+        <div className="dock-toolbar">
+          <div className="dock-tabs" role="tablist" aria-label="Pannelli di regia">
+            <button role="tab" aria-selected={dockTab === 'regia'} onClick={() => patch({ settings: { ...useStore.getState().settings, dockTab: 'regia' } })}>Riproduzione e TV</button>
+            <button role="tab" aria-selected={dockTab === 'serata'} onClick={() => patch({ settings: { ...useStore.getState().settings, dockTab: 'serata' } })}>Scaletta e cantanti ({queueCount})</button>
+          </div>
+          <button className="dock-height-reset" title="Alterna altezza compatta e ampia" aria-label="Alterna altezza compatta e ampia" onClick={() => patch({ settings: { ...useStore.getState().settings, dockHeight: dockHeight > 300 ? 270 : 350 } })}><ChevronUp size={16} /><ChevronDown size={16} /></button>
+        </div>
+        <div className="dock-content" role="tabpanel">{dockTab === 'regia' ? <PlayerPanel compact /> : <Playlists />}</div>
+      </section>}
 
       {/* TOAST NOTIFICHE POPUP */}
       {toast && (

@@ -63,7 +63,7 @@ export function AccessibilityMenu() {
             <div className="mb-2 font-medium">Stile dell'interfaccia</div>
             <div className="design-mode-picker grid grid-cols-2 gap-2">
               <button
-                onClick={() => patch({ designMode: 'standard' })}
+                onClick={() => patch({ designMode: 'standard', skinId: 'custom' })}
                 aria-pressed={st.designMode === 'standard'}
                 className={`design-mode-card ${st.designMode === 'standard' ? 'is-selected' : ''}`}
               >
@@ -71,7 +71,7 @@ export function AccessibilityMenu() {
                 <span><b>Standard</b><small>Colori e temi regolabili</small></span>
               </button>
               <button
-                onClick={() => patch({ designMode: 'professional' })}
+                onClick={() => patch({ designMode: 'professional', skinId: 'custom' })}
                 aria-pressed={st.designMode === 'professional'}
                 className={`design-mode-card ${st.designMode === 'professional' ? 'is-selected' : ''}`}
               >
@@ -116,7 +116,7 @@ export function AccessibilityMenu() {
               {ACCENT_OPTIONS.map((accent) => (
                 <button
                   key={accent.value}
-                  onClick={() => patch({ accentColor: accent.value })}
+                  onClick={() => patch({ accentColor: accent.value, skinId: 'custom' })}
                   aria-label={accent.name}
                   aria-pressed={st.accentColor === accent.value}
                   title={accent.name}
@@ -129,7 +129,7 @@ export function AccessibilityMenu() {
                   type="color"
                   value={st.accentColor}
                   aria-label="Scegli un colore personalizzato"
-                  onChange={(e) => patch({ accentColor: e.target.value })}
+                  onChange={(e) => patch({ accentColor: e.target.value, skinId: 'custom' })}
                 />
                 <span>Altro</span>
               </label>
@@ -142,7 +142,7 @@ export function AccessibilityMenu() {
               {THEME_OPTIONS.map((t) => (
                 <button
                   key={t.id}
-                  onClick={() => patch({ theme: t.id })}
+                  onClick={() => patch({ theme: t.id, skinId: 'custom' })}
                   aria-pressed={st.theme === t.id}
                   className={`rounded-lg border-2 p-2 text-center text-base font-bold ${
                     st.theme === t.id ? 'border-accent' : 'border-line'

@@ -1,22 +1,24 @@
 import { invoke } from '@tauri-apps/api/core'
 import { open } from '@tauri-apps/plugin-dialog'
-import { FolderPlus, ImagePlus, RefreshCw, Trash2 } from 'lucide-react'
+import { Check, FolderPlus, ImagePlus, RefreshCw, Trash2 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { engine } from '../lib/engine'
 import { previewSupported, pushDisplay } from '../lib/player'
 import { useStore } from '../lib/store'
+import { SKINS } from '../lib/appearance'
 import type { MonitorInfo } from '../types'
 import { Guida } from './Guida'
 import { Btn, Panel, Slider, SubTabs } from './ui'
 import { UpdatesPanel, YtdlpPanel } from './UpdatesPanel'
 
-type Section = 'cartelle' | 'schermo' | 'audio' | 'cuffie' | 'youtube' | 'aggiornamenti' | 'guida'
+type Section = 'cartelle' | 'schermo' | 'audio' | 'cuffie' | 'youtube' | 'aspetto' | 'aggiornamenti' | 'guida'
 const SECTIONS: { id: Section; label: string }[] = [
   { id: 'cartelle', label: 'Cartelle' },
   { id: 'schermo', label: 'Schermo TV' },
   { id: 'audio', label: 'Audio' },
   { id: 'cuffie', label: 'Cuffie' },
   { id: 'youtube', label: 'YouTube' },
+  { id: 'aspetto', label: 'Aspetto' },
   { id: 'aggiornamenti', label: 'Aggiornamenti' },
   { id: 'guida', label: 'Guida' },
 ]
@@ -61,6 +63,38 @@ export function Settings() {
       <SubTabs tabs={SECTIONS} value={section} onChange={setSection} />
       <div className="min-h-0 flex-1 space-y-3 overflow-y-auto pr-2">
         {section === 'guida' && <Guida />}
+        {section === 'aspetto' && (
+          <Panel title="Skin e layout">
+            <p className="mb-4 text-base text-muted">Ogni preset cambia la palette e mantiene i controlli leggibili. I layout Professionali mantengono la navigazione laterale e la regia inferiore.</p>
+            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+              {SKINS.map((skin) => {
+                const selected = st.skinId === skin.id
+                return (
+                  <button key={skin.id} type="button" onClick={() => patch({ skinId: skin.id, designMode: skin.design, theme: skin.theme, accentColor: skin.accent })} aria-pressed={selected} className={`skin-card text-left ${selected ? 'is-selected' : ''}`}>
+                    <div className="skin-card-preview" style={{ background: skin.colors[0], borderColor: skin.colors[1] }}>
+                      {skin.design === 'professional' && <div className="skin-preview-sidebar" style={{ background: skin.colors[1] }} />}
+                      <div className={`skin-preview-content ${skin.design === 'standard' ? 'is-standard' : ''}`}>
+                        {skin.design === 'standard' && <span className="skin-preview-nav" style={{ background: skin.colors[1], borderLeft: `1rem solid ${skin.accent}` }} />}
+                        <span style={{ background: skin.colors[1] }} />
+                        <span style={{ background: skin.accent, width: '58%' }} />
+                        <span style={{ background: skin.colors[2], width: '78%' }} />
+                      </div>
+                    </div>
+                    <div className="mt-3 flex items-start justify-between gap-2">
+                      <span><span className="block font-bold text-text">{skin.name}</span><span className="text-sm text-muted">{skin.family} · {skin.design === 'professional' ? 'Regia' : 'Standard'}</span></span>
+                      {selected && <Check className="mt-1 h-4 w-4 shrink-0 text-accent-text" aria-label="Selezionata" />}
+                    </div>
+                  </button>
+                )
+              })}
+            </div>
+            <div className="mt-4 flex flex-wrap items-center gap-3 border-t border-line pt-4">
+              <label className="text-base font-semibold" htmlFor="custom-accent">Colore personalizzato</label>
+              <input id="custom-accent" type="color" value={st.accentColor} onChange={(e) => patch({ skinId: 'custom', accentColor: e.target.value })} className="h-10 w-16 rounded border border-line bg-inset" />
+              <span className="text-sm text-muted">La modifica del colore mantiene l’ultimo layout scelto.</span>
+            </div>
+          </Panel>
+        )}
         {section === 'cartelle' && (
           <Panel
             title="Cartelle della libreria"
@@ -229,11 +263,18 @@ export function Settings() {
                 <input
                   type="checkbox"
                   checked={st.micInApp}
-                  onChange={(e) => {
-                    patch({ micInApp: e.target.checked })
-                    if (!e.target.checked && st.micOn) {
-                      void engine.setMic(false)
-                      patch({ micOn: false })
+                  onChange={async (e) => {
+                    const enabled = e.target.checked
+                    if (!enabled) {
+                      if (st.micOn) await engine.setMic(false)
+                      patch({ micInApp: false, micOn: false })
+                      return
+                    }
+                    try {
+                      await engine.setMic(true)
+                      patch({ micInApp: true, micOn: true })
+                    } catch {
+                      patch({ micInApp: false, micOn: false })
                     }
                   }}
                 />
