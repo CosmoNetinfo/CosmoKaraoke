@@ -1090,6 +1090,60 @@ html[data-design='professional'] .control-dock .playlist-panel > div:last-child 
   html[data-design='professional'] .player-dock-layout > .tv-message-card { display: none; }
 }
 
+/* Navigazione professionale: icone di servizio, leggibili anche a barra compressa. */
+html[data-design='professional'] .app-nav button {
+  min-height: 3.55rem;
+  gap: .7rem;
+  border-radius: .65rem;
+  color: var(--text);
+  font-size: .88rem;
+  font-weight: 700;
+}
+
+html[data-design='professional'] .app-nav button > svg {
+  box-sizing: border-box;
+  width: 2.55rem;
+  height: 2.55rem;
+  flex-basis: 2.55rem;
+  padding: .32rem;
+  border: 1px solid color-mix(in srgb, var(--accent-text) 45%, var(--line));
+  border-radius: .62rem;
+  background: color-mix(in srgb, var(--accent-text) 11%, var(--panel));
+  color: var(--accent-text);
+  stroke-width: 2.2;
+  filter: none;
+  transition: color .14s ease, border-color .14s ease, background-color .14s ease;
+}
+
+html[data-design='professional'] .app-nav button:hover:not([aria-current='page']) > svg {
+  border-color: var(--accent-text);
+  background: color-mix(in srgb, var(--accent-text) 20%, var(--panel));
+}
+
+html[data-design='professional'] .app-nav button[aria-current='page'] > svg {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+html[data-design='professional'] .app-nav button:focus-visible {
+  outline: 2px solid var(--accent-text);
+  outline-offset: 2px;
+}
+
+html[data-design='professional'] .app-nav[data-collapsed='true'] button {
+  min-height: 3.65rem;
+  padding: .45rem .2rem;
+}
+
+html[data-design='professional'] .app-nav[data-collapsed='true'] button > svg {
+  width: 2.75rem;
+  height: 2.75rem;
+  flex-basis: 2.75rem;
+  padding: .38rem;
+  border-radius: .7rem;
+}
+
 /* Scrollbar discrete, coerenti con il tema. */
 ::-webkit-scrollbar {
   width: 10px;

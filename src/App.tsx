@@ -1,8 +1,8 @@
 import { invoke } from '@tauri-apps/api/core'
 import { listen } from '@tauri-apps/api/event'
 import {
-  Film,
-  Library as LibraryIcon,
+  AudioLines,
+  LibraryBig as LibraryIcon,
   Mic,
   Monitor,
   MonitorOff,
@@ -10,11 +10,11 @@ import {
   PanelLeftOpen,
   ChevronDown,
   ChevronUp,
-  QrCode,
-  Settings as SettingsIcon,
+  Radio,
+  Settings2 as SettingsIcon,
   SlidersHorizontal,
-  Sparkles,
   Undo2,
+  Youtube as YoutubeIcon,
 } from 'lucide-react'
 import { useEffect, type CSSProperties, type PointerEvent as ReactPointerEvent } from 'react'
 import { AccessibilityMenu } from './components/AccessibilityMenu'
@@ -43,10 +43,10 @@ import { useStore, type Tab } from './lib/store'
 
 const TABS: Array<{ id: Tab; label: string; icon: typeof LibraryIcon }> = [
   { id: 'library', label: 'Libreria', icon: LibraryIcon },
-  { id: 'youtube', label: 'YouTube', icon: Film },
+  { id: 'youtube', label: 'YouTube', icon: YoutubeIcon },
   { id: 'mixer', label: 'Audio', icon: SlidersHorizontal },
-  { id: 'effects', label: 'Effetti', icon: Sparkles },
-  { id: 'live', label: 'Live', icon: QrCode },
+  { id: 'effects', label: 'Effetti', icon: AudioLines },
+  { id: 'live', label: 'Live', icon: Radio },
   { id: 'settings', label: 'Impostazioni', icon: SettingsIcon },
 ]
 
