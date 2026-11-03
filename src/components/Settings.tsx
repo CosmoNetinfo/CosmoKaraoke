@@ -1,7 +1,7 @@
 import { invoke } from '@tauri-apps/api/core'
 import { open } from '@tauri-apps/plugin-dialog'
 import { Check, FolderPlus, ImagePlus, RefreshCw, Trash2 } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type CSSProperties } from 'react'
 import { engine } from '../lib/engine'
 import { previewSupported, pushDisplay } from '../lib/player'
 import { useStore } from '../lib/store'
@@ -22,6 +22,13 @@ const SECTIONS: { id: Section; label: string }[] = [
   { id: 'aggiornamenti', label: 'Aggiornamenti' },
   { id: 'guida', label: 'Guida' },
 ]
+
+const SKIN_GROUPS = [
+  { title: 'Standard', description: 'Navigazione superiore e pannello serata laterale.', family: 'Standard' },
+  { title: 'Casa · Standard', description: 'Palette più accoglienti con la disposizione semplice di CosmoKaraoke.', family: 'Casa' },
+  { title: 'Professionale · Regia', description: 'Barra laterale e dock inferiore, con superfici da console di regia.', family: 'Professionale' },
+  { title: 'Premium · Regia', description: 'Una regia palco più essenziale, scura e con dettagli metallici.', family: 'Premium' },
+] as const
 
 export function Settings() {
   const [section, setSection] = useState<Section>('cartelle')
@@ -65,27 +72,43 @@ export function Settings() {
         {section === 'guida' && <Guida />}
         {section === 'aspetto' && (
           <Panel title="Skin e layout">
-            <p className="mb-4 text-base text-muted">Ogni preset cambia la palette e mantiene i controlli leggibili. I layout Professionali mantengono la navigazione laterale e la regia inferiore.</p>
-            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-              {SKINS.map((skin) => {
+            <p className="mb-5 text-base text-muted">Scegli la disposizione e il carattere visivo della regia. Standard e Casa mantengono i controlli principali sulla schermata; Professionale e Premium usano barra laterale e dock inferiore.</p>
+            <div className="space-y-6">
+              {SKIN_GROUPS.map((group) => {
+                const skins = SKINS.filter((skin) => skin.family === group.family)
+                if (skins.length === 0) return null
+                return <section key={group.family} aria-label={group.title}>
+                  <div className="mb-2 flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                    <h3 className="text-base font-extrabold tracking-wide text-text">{group.title}</h3>
+                    <p className="text-sm text-muted">{group.description}</p>
+                  </div>
+                  <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+              {skins.map((skin) => {
                 const selected = st.skinId === skin.id
                 return (
                   <button key={skin.id} type="button" onClick={() => patch({ skinId: skin.id, designMode: skin.design, theme: skin.theme, accentColor: skin.accent })} aria-pressed={selected} className={`skin-card text-left ${selected ? 'is-selected' : ''}`}>
-                    <div className="skin-card-preview" style={{ background: skin.colors[0], borderColor: skin.colors[1] }}>
-                      {skin.design === 'professional' && <div className="skin-preview-sidebar" style={{ background: skin.colors[1] }} />}
-                      <div className={`skin-preview-content ${skin.design === 'standard' ? 'is-standard' : ''}`}>
-                        {skin.design === 'standard' && <span className="skin-preview-nav" style={{ background: skin.colors[1], borderLeft: `1rem solid ${skin.accent}` }} />}
-                        <span style={{ background: skin.colors[1] }} />
-                        <span style={{ background: skin.accent, width: '58%' }} />
-                        <span style={{ background: skin.colors[2], width: '78%' }} />
+                    <div data-skin={skin.id} className={`skin-card-preview ${skin.design === 'professional' ? 'is-regia' : 'is-standard'}`} style={{ background: skin.colors[0], borderColor: skin.colors[1], '--preview-panel': skin.colors[1], '--preview-accent': skin.accent } as CSSProperties}>
+                      {skin.design === 'professional' && <div className="skin-preview-sidebar"><i /><i /><i /><i /></div>}
+                      <div className="skin-preview-content">
+                        {skin.design === 'standard' && <span className="skin-preview-nav" />}
+                        <div className="skin-preview-workspace">
+                          <span />
+                          <span />
+                          <span />
+                          <span />
+                        </div>
+                        {skin.design === 'professional' && <div className="skin-preview-dock"><i /><i /><i /></div>}
                       </div>
                     </div>
                     <div className="mt-3 flex items-start justify-between gap-2">
-                      <span><span className="block font-bold text-text">{skin.name}</span><span className="text-sm text-muted">{skin.family} · {skin.design === 'professional' ? 'Regia' : 'Standard'}</span></span>
+                      <span><span className="block font-bold text-text">{skin.name}</span><span className="text-sm text-muted">{group.title}</span></span>
                       {selected && <Check className="mt-1 h-4 w-4 shrink-0 text-accent-text" aria-label="Selezionata" />}
                     </div>
                   </button>
                 )
+              })}
+                  </div>
+                </section>
               })}
             </div>
             <div className="mt-4 flex flex-wrap items-center gap-3 border-t border-line pt-4">

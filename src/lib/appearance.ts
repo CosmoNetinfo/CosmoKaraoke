@@ -28,11 +28,12 @@ export type Skin = {
 export const SKINS: Skin[] = [
   { id: 'cosmo-night', name: 'Cosmo Notte', family: 'Standard', design: 'standard', theme: 'scuro', accent: '#547cf4', accentText: '#57c7ef', colors: ['#0c1220','#172033','#547cf4'], surfaces: { bg:'#0c1220',header:'#141d2d',panel:'#182235',row:'#202d42',rowHover:'#2a3a52',inset:'#0a101b',btn:'#26344a',btnHover:'#33445e',line:'#35445b',text:'#eff4fc',muted:'#aab8cc' } },
   { id: 'pearl-studio', name: 'Studio Perla', family: 'Standard', design: 'standard', theme: 'crema', accent: '#2863bd', accentText: '#28599b', colors: ['#e8edf2','#f8fafc','#2863bd'], surfaces: { bg:'#e9edf1',header:'#dfe5eb',panel:'#f7f9fb',row:'#edf1f5',rowHover:'#e0e7ee',inset:'#ffffff',btn:'#e0e6ed',btnHover:'#d1dbe5',line:'#b9c4d0',text:'#1e2934',muted:'#536273' } },
-  { id: 'pro-broadcast', name: 'Broadcast', family: 'Professionale', design: 'professional', theme: 'scuro', accent: '#e5b04d', accentText: '#66d2b4', colors: ['#11171a','#1c2428','#e5b04d'], surfaces: { bg:'#11171a',header:'#192125',panel:'#20282c',row:'#252f33',rowHover:'#303d41',inset:'#101619',btn:'#303a3e',btnHover:'#3a474c',line:'#465358',text:'#eef2f1',muted:'#aeb9b7' } },
-  { id: 'pro-blueprint', name: 'Control Room', family: 'Professionale', design: 'professional', theme: 'scuro', accent: '#4ea1ff', accentText: '#84d4ff', colors: ['#0d1724','#14263a','#4ea1ff'], surfaces: { bg:'#0d1724',header:'#122033',panel:'#192a3d',row:'#20364b',rowHover:'#2a435a',inset:'#09121d',btn:'#233a51',btnHover:'#304d68',line:'#36516b',text:'#f0f6fc',muted:'#a8bed2' } },
+  { id: 'pro-broadcast', name: 'Broadcast Grafite', family: 'Professionale', design: 'professional', theme: 'scuro', accent: '#e5b04d', accentText: '#79e1cb', colors: ['#10161b','#1b252d','#e5b04d'], surfaces: { bg:'#10161b',header:'#182129',panel:'#202b34',row:'#283540',rowHover:'#344451',inset:'#0b1116',btn:'#2c3944',btnHover:'#3a4a56',line:'#4b5d69',text:'#ffffff',muted:'#d1dbe1' } },
+  { id: 'pro-blueprint', name: 'Control Room Blu', family: 'Professionale', design: 'professional', theme: 'scuro', accent: '#58a6ff', accentText: '#c1e1ff', colors: ['#0d1a2a','#182b40','#58a6ff'], surfaces: { bg:'#0d1a2a',header:'#14263a',panel:'#1c3046',row:'#243b54',rowHover:'#304b66',inset:'#091522',btn:'#2a435d',btnHover:'#395674',line:'#42617e',text:'#ffffff',muted:'#d3deea' } },
   { id: 'home-lounge', name: 'Salotto', family: 'Casa', design: 'standard', theme: 'scuro', accent: '#b77a69', accentText: '#e9bca9', colors: ['#211917','#332522','#b77a69'], surfaces: { bg:'#211917',header:'#2b211f',panel:'#382b28',row:'#44332f',rowHover:'#543e39',inset:'#191312',btn:'#483632',btnHover:'#59423d',line:'#634b44',text:'#f7eee9',muted:'#c8b2a8' } },
   { id: 'home-party', name: 'Festa', family: 'Casa', design: 'standard', theme: 'scuro', accent: '#cf5799', accentText: '#71d8d0', colors: ['#1b1021','#2a1732','#cf5799'], surfaces: { bg:'#1b1021',header:'#24132b',panel:'#2d1a36',row:'#3a2145',rowHover:'#4a2a57',inset:'#140b19',btn:'#3c2546',btnHover:'#50315d',line:'#5b3b67',text:'#f8f0fb',muted:'#c4afcc' } },
-  { id: 'premium-stage', name: 'Stage Black', family: 'Premium', design: 'professional', theme: 'scuro', accent: '#d4af62', accentText: '#a9dbd1', colors: ['#090c0d','#131819','#d4af62'], surfaces: { bg:'#090c0d',header:'#111617',panel:'#191f20',row:'#202727',rowHover:'#2b3433',inset:'#080b0c',btn:'#252d2d',btnHover:'#343e3d',line:'#3c4947',text:'#f4f2ec',muted:'#b5b6ae' } },
+  { id: 'home-daylight', name: 'Casa Chiara', family: 'Casa', design: 'standard', theme: 'crema', accent: '#3479b8', accentText: '#235d91', colors: ['#e6eff6','#f8fbff','#3479b8'], surfaces: { bg:'#e6eff6',header:'#d5e4ef',panel:'#f8fbff',row:'#eaf2f8',rowHover:'#dceaf4',inset:'#ffffff',btn:'#d8e7f2',btnHover:'#c7dbea',line:'#a5bdcf',text:'#172b3d',muted:'#405a70' } },
+  { id: 'premium-stage', name: 'Stage Black', family: 'Premium', design: 'professional', theme: 'scuro', accent: '#d4af62', accentText: '#b7e9df', colors: ['#080b0e','#11181d','#d4af62'], surfaces: { bg:'#080b0e',header:'#10161b',panel:'#171f24',row:'#202a30',rowHover:'#2b373e',inset:'#05080a',btn:'#222d33',btnHover:'#303d44',line:'#46565e',text:'#ffffff',muted:'#d4dcdf' } },
 ]
 
 export const CUSTOM_SKIN_ID = 'custom'
@@ -43,8 +44,14 @@ function textOnColor(hex: string): string {
   const rgb = color.length === 3
     ? color.split('').map((part) => parseInt(part + part, 16))
     : [0, 2, 4].map((offset) => parseInt(color.slice(offset, offset + 2), 16))
-  const luminance = (rgb[0] * 299 + rgb[1] * 587 + rgb[2] * 114) / 1000
-  return luminance > 155 ? '#201a10' : '#ffffff'
+  const linear = rgb.map((channel) => {
+    const value = channel / 255
+    return value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4
+  })
+  const luminance = 0.2126 * linear[0] + 0.7152 * linear[1] + 0.0722 * linear[2]
+  const whiteContrast = 1.05 / (luminance + 0.05)
+  const darkContrast = (luminance + 0.05) / 0.05
+  return darkContrast >= whiteContrast ? '#101820' : '#ffffff'
 }
 
 /** Applica carattere, dimensioni e colori scelti alla finestra. */
