@@ -184,6 +184,10 @@ Live crea un piccolo server sulla rete locale. Non è necessario installare un'a
 7. Consulta i voti e la media per cantante in **Classifica voti**.
 8. Al termine della serata torna in Live e premi **Spegni server**.
 
+![Impostazioni Live per porta, PIN e regole di prenotazione](screenshots/06-live-regole.png)
+
+*Il QR e l'indirizzo non sono fissi: Live li genera in base al server locale acceso, alla rete attiva e alla porta configurata. Il PIN di sala è facoltativo.*
+
 Il QR code e l'indirizzo mostrati in Live valgono per la rete locale del computer. Condividili solo con gli ospiti collegati alla stessa rete e non inserirli in screenshot pubblici: per una schermata dimostrativa usa un QR di prova senza un indirizzo raggiungibile.
 
 Se il telefono non apre il link, verifica che entrambi i dispositivi siano sulla stessa rete e che il firewall consenta l'accesso a CosmoKaraoke. Non pubblicare il link su reti che non controlli; se vuoi limitare l'accesso, imposta un PIN.
