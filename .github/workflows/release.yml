@@ -94,14 +94,15 @@ jobs:
           tagName: v__VERSION__
           releaseName: 'CosmoKaraoke v__VERSION__'
           releaseBody: |
-            ## CosmoKaraoke v0.4.4
+            ## CosmoKaraoke v0.4.5
 
             ### Novità
-            - Sette skin con palette, categorie e anteprime distinte: Cosmo Notte, Studio Perla, Broadcast, Control Room, Salotto, Festa e Stage Black.
-            - Navigazione laterale Professionale comprimibile e ridimensionabile.
-            - Dock inferiore regolabile per player, anteprima TV, messaggi, scaletta e cantanti.
-            - Sezioni Microfono ed Effetti voce accessibili dalla scheda Audio e cinque preset per l'equalizzatore a 10 bande.
-            - README aggiornato e nuova guida utente in `docs/Guida-utente.md`.
+            - Nuova scheda Brani eseguiti con storico locale fino a 500 riproduzioni, statistiche della sessione, cantante più presente e comando per riaccodare un brano.
+            - Skin raggruppate in Standard, Casa, Professionale e Premium, con anteprime che mostrano le diverse disposizioni.
+            - Nuova skin Casa Chiara; palette aggiornate per Broadcast Grafite e Control Room Blu, con testo ad alto contrasto.
+            - Skin Stage Black con regia palco più geometrica e icone di navigazione più riconoscibili.
+            - Aggiornata la guida italiana e le schermate documentali; le immagini pubbliche non espongono il QR o l'indirizzo della rete Live locale.
+            - Il colore del testo dei pulsanti accentati ora viene scelto in base al contrasto reale.
 
             Scarica l'installer `.exe` per Windows o il pacchetto `.dmg` per macOS. Le istruzioni complete sono nel README del repository.
           releaseDraft: false

@@ -6,6 +6,15 @@ L'interfaccia è in italiano e include caratteri leggibili, testo ingrandibile e
 
 Per le istruzioni passo per passo consulta la [Guida utente](docs/Guida-utente.md).
 
+## Novità in v0.4.5
+
+- La scheda **Brani eseguiti** registra localmente fino a 500 brani avviati; mostra i brani della sessione e il cantante più presente, permette di riaccodare un brano e di cancellare lo storico.
+- La pagina Aspetto raggruppa le skin per disposizione: **Standard**, **Casa · Standard**, **Professionale · Regia** e **Premium · Regia**. Le anteprime rappresentano navigazione, pannelli e dock.
+- Aggiunta la skin **Casa Chiara**; aggiornate **Broadcast Grafite** e **Control Room Blu** con testi bianchi e colori controllati per mantenere un contrasto leggibile.
+- **Stage Black** ha una regia palco più essenziale e geometrica. Le icone laterali sono più riconoscibili e leggibili anche con la barra compressa.
+- Aggiornata la guida italiana con indicazioni per lo storico, le nuove skin e schermate dell'app. Per proteggere l'indirizzo locale, la guida non mostra il QR personale di Live.
+- Il testo sui pulsanti accentati viene scelto in base al contrasto reale del colore, così resta leggibile anche con accenti personalizzati.
+
 ## Novità in v0.4.4
 
 - Aggiunta una raccolta di sette skin distinte: **Cosmo Notte**, **Studio Perla**, **Broadcast**, **Control Room**, **Salotto**, **Festa** e **Stage Black**, divise per stile Standard, Professionale, Casa e Premium. Le anteprime mostrano anche la disposizione del layout.
