@@ -1,0 +1,42 @@
+name: Proponi un miglioramento
+description: Suggerisci un flusso o un dettaglio dell'app che potrebbe essere più semplice.
+title: "[Miglioramento] "
+body:
+  - type: markdown
+    attributes:
+      value: Grazie del suggerimento. Parti da un'attività concreta che hai provato e indica cosa renderebbe più semplice.
+  - type: textarea
+    id: current-flow
+    attributes:
+      label: Che cosa stavi cercando di fare?
+      description: Racconta i passaggi o la parte dell'interfaccia che ti ha creato difficoltà.
+    validations:
+      required: true
+  - type: textarea
+    id: friction
+    attributes:
+      label: Che cosa ti ha rallentato o confuso?
+      description: Se c'è stato un punto preciso, descrivilo.
+    validations:
+      required: true
+  - type: textarea
+    id: improvement
+    attributes:
+      label: Come lo miglioreresti?
+      description: Anche una descrizione semplice o un esempio va bene.
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area dell'app
+      options:
+        - Libreria e ricerca
+        - Scaletta e cantanti
+        - Audio e microfono
+        - Schermo TV
+        - Live e telefono
+        - Aspetto e accessibilità
+        - Altro
+    validations:
+      required: true

@@ -1,0 +1,66 @@
+name: Segnala un problema
+description: Racconta un errore o un comportamento inatteso dell'app.
+title: "[Problema] "
+body:
+  - type: markdown
+    attributes:
+      value: >-
+        Grazie per aver provato CosmoKaraoke. Descrivi cosa succede e i passaggi che portano al problema.
+        Non inserire password, dati personali, QR o indirizzi della rete Live né brani protetti.
+  - type: dropdown
+    id: app-version
+    attributes:
+      label: Versione di CosmoKaraoke
+      description: La trovi in Impostazioni → Aggiornamenti.
+      options:
+        - 0.4.5
+        - 0.4.4
+        - Versione precedente
+        - Non lo so
+    validations:
+      required: true
+  - type: dropdown
+    id: operating-system
+    attributes:
+      label: Sistema operativo
+      options:
+        - Windows 11
+        - Windows 10
+        - macOS (indica la versione nel testo)
+        - Altro / Non lo so
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: Che cosa è successo?
+      description: Indica la schermata o la funzione coinvolta e il risultato che hai ottenuto.
+      placeholder: "Ad esempio: in Libreria, premendo Avvia su un file ..."
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Come possiamo riprodurlo?
+      description: Elenca i passaggi, nell'ordine in cui li hai eseguiti.
+      placeholder: |
+        1. Apro ...
+        2. Seleziono ...
+        3. Premo ...
+        4. Compare ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Che cosa ti aspettavi?
+      description: Facoltativo, ma aiuta a capire il risultato desiderato.
+    validations:
+      required: false
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Altri dettagli
+      description: Inserisci eventuali messaggi di errore. Prima di allegare immagini, oscura nomi, indirizzi e contenuti privati.
+    validations:
+      required: false

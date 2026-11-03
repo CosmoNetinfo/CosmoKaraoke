@@ -1,0 +1,44 @@
+name: Proponi una funzione nuova
+description: Raccontaci una capacità che renderebbe CosmoKaraoke più utile per le tue serate.
+title: "[Funzione] "
+body:
+  - type: markdown
+    attributes:
+      value: >-
+        Grazie per l'idea. Descrivi il bisogno e il momento in cui la funzione ti sarebbe utile.
+        Non occorre sapere come implementarla.
+  - type: textarea
+    id: need
+    attributes:
+      label: Che cosa vorresti poter fare?
+      description: Spiega l'obiettivo dal punto di vista di chi usa l'app.
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: In quale momento della serata ti servirebbe?
+      description: Racconta un esempio concreto.
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: Come immagini che funzioni?
+      description: Facoltativo; puoi proporre un flusso, un comando o una schermata.
+    validations:
+      required: false
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area dell'app
+      options:
+        - Libreria e ricerca
+        - Scaletta e cantanti
+        - Audio e microfono
+        - Schermo TV
+        - Live e telefono
+        - Aspetto e accessibilità
+        - Altro
+    validations:
+      required: true

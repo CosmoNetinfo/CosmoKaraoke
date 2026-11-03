@@ -6,6 +6,8 @@ L'interfaccia è in italiano e include caratteri leggibili, testo ingrandibile e
 
 Per le istruzioni passo per passo consulta la [Guida utente](docs/Guida-utente.md).
 
+Hai provato l'app? [Segnala un problema o proponi un miglioramento](https://cosmonetinfo.github.io/CosmoKaraoke-Site/feedback.html). Le segnalazioni pubbliche aiutano a riprodurre i problemi e a discutere le idee con gli altri utenti.
+
 ## Novità in v0.4.5
 
 - La scheda **Brani eseguiti** registra localmente fino a 500 brani avviati; mostra i brani della sessione e il cantante più presente, permette di riaccodare un brano e di cancellare lo storico.
