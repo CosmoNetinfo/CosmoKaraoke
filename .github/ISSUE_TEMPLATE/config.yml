@@ -1,8 +1,8 @@
 blank_issues_enabled: false
 contact_links:
-  - name: Proposte e discussioni della community
-    url: https://github.com/CosmoNetinfo/CosmoKaraoke/issues
-    about: Leggi le proposte, chiedi un confronto o commenta le segnalazioni degli altri utenti.
+  - name: Forum, domande e idee della community
+    url: https://github.com/CosmoNetinfo/CosmoKaraoke/discussions
+    about: Confrontati con gli altri utenti e commenta le idee nel forum CosmoKaraoke.
   - name: Guida utente
     url: https://cosmonetinfo.github.io/CosmoKaraoke-Site/guida.html
     about: Consulta le istruzioni prima di segnalare un problema.

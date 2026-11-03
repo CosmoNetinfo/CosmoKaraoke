@@ -6,7 +6,7 @@ L'interfaccia è in italiano e include caratteri leggibili, testo ingrandibile e
 
 Per le istruzioni passo per passo consulta la [Guida utente](docs/Guida-utente.md).
 
-Hai provato l'app? [Segnala un problema o proponi un miglioramento](https://cosmonetinfo.github.io/CosmoKaraoke-Site/feedback.html). Le segnalazioni pubbliche aiutano a riprodurre i problemi e a discutere le idee con gli altri utenti.
+Hai provato l'app? [Segnala un problema o proponi un miglioramento](https://cosmonetinfo.github.io/CosmoKaraoke-Site/feedback.html) oppure partecipa al [forum GitHub Discussions](https://github.com/CosmoNetinfo/CosmoKaraoke/discussions). Le segnalazioni pubbliche aiutano a riprodurre i problemi e a discutere le idee con gli altri utenti.
 
 ## Novità in v0.4.5
 
