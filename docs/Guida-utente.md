@@ -21,6 +21,10 @@ Le sezioni principali sono **Libreria**, **YouTube**, **Audio**, **Effetti**, **
 
 Il layout **Standard** mostra player e serata nella colonna di destra. Le skin **Broadcast**, **Control Room** e **Stage Black** usano il layout **Professionale**: navigazione laterale e pannello inferiore a schede. In quel layout **Riproduzione e TV** contiene anteprima, player e messaggi; **Scaletta e cantanti** contiene la serata.
 
+![Libreria con ricerca, risultato e dock Riproduzione e TV](screenshots/01-libreria.png)
+
+*La ricerca della libreria resta nella parte centrale; anteprima, comandi di riproduzione e messaggi TV sono raccolti nel dock inferiore.*
+
 ## 2. Installare e avviare
 
 Scarica il pacchetto adatto al computer dalla [pagina Releases](https://github.com/CosmoNetinfo/CosmoKaraoke/releases/latest): installer `.exe` per Windows oppure pacchetto `.dmg` per macOS. Installa e avvia CosmoKaraoke come un normale programma.
@@ -43,6 +47,10 @@ Apri **Impostazioni → Aspetto**. Ogni scheda mostra il nome, la categoria, il 
 
 Il nome **Premium** identifica una skin grafica: non attiva abbonamenti o funzioni a pagamento.
 
+![Galleria delle skin e delle anteprime](screenshots/03-skin-gallery.png)
+
+*Le anteprime aiutano a distinguere palette e disposizione prima di scegliere una skin.*
+
 Per usare la regia Professionale:
 
 1. Scegli **Broadcast**, **Control Room** o **Stage Black**.
@@ -50,6 +58,10 @@ Per usare la regia Professionale:
 3. Per allargare o stringere la barra, trascina il suo bordo destro. Quando è compressa, riaprila prima di ridimensionarla.
 4. Nel pannello inferiore trascina il bordo superiore per regolare quanto spazio occupa.
 5. Usa le schede **Riproduzione e TV** e **Scaletta e cantanti** per passare da player e messaggi alla gestione della serata. Il pulsante con le frecce alterna altezza compatta e ampia.
+
+![Skin Broadcast con barra laterale e dock professionale](screenshots/02-skin-professionale.png)
+
+*Nel layout Professionale la barra laterale rimane disponibile e la regia è raccolta in basso, senza spostare le sezioni principali.*
 
 Il pulsante **Aa** apre i controlli rapidi. Il cursore **Dimensione dell'interfaccia** riduce o ingrandisce testi e controlli. Nello stile Standard sono disponibili anche il colore principale, i temi Scuro/Crema/Alto contrasto, i caratteri inclusi e le regolazioni per spaziatura e altezza delle righe. In **Impostazioni → Aspetto** puoi impostare il colore personalizzato.
 
@@ -115,6 +127,10 @@ Nel pannello di riproduzione:
 
 La sezione **Audio → Brano** contiene anche volume, tonalità e velocità con cursori più precisi, uscita **Stereo/Mono**, riduzione della voce centrale e durata della dissolvenza. La riduzione della voce funziona meglio con brani stereo in cui la voce è centrata; non è disponibile per MIDI/KAR.
 
+![Controlli audio del brano](screenshots/04-audio-brano.png)
+
+*La scheda Brano raccoglie le regolazioni di riproduzione e il controllo della riduzione della voce.*
+
 ### Equalizzatore
 
 Apri **Audio → Equalizzatore**. Il controllo **Preset** applica una curva a tutte le 10 bande:
@@ -126,6 +142,8 @@ Apri **Audio → Equalizzatore**. Il controllo **Preset** applica una curva a tu
 - **Brillante:** enfatizza le frequenze alte.
 
 I preset sono punti di partenza: puoi regolare ciascuna banda individualmente da **-12 dB a +12 dB**. Se tocchi un cursore, il preset diventa **Personalizzato**. **Azzera** nella scheda Brano ripristina equalizzatore, tonalità, velocità e riduzione della voce.
+
+![Equalizzatore a dieci bande con selezione del preset](screenshots/05-equalizzatore.png)
 
 ### Microfono ed effetti voce
 
@@ -167,6 +185,10 @@ Live crea un piccolo server sulla rete locale. Non è necessario installare un'a
 6. Leggi le dediche in **Dediche e messaggi**. Puoi mostrarne una sulla TV per 10 secondi o eliminarla.
 7. Consulta i voti e la media per cantante in **Classifica voti**.
 8. Al termine della serata torna in Live e premi **Spegni server**.
+
+![Live attivo con QR code e indirizzo locale](screenshots/06-live-qr-link.png)
+
+*Questa schermata mostra l'indirizzo locale del computer e un QR code valido sulla rete della sessione fotografata. Prima di distribuire pubblicamente la guida, sostituisci questa immagine con una schermata di prova oppure oscura QR code e indirizzo.*
 
 Se il telefono non apre il link, verifica che entrambi i dispositivi siano sulla stessa rete e che il firewall consenta l'accesso a CosmoKaraoke. Non pubblicare il link su reti che non controlli; se vuoi limitare l'accesso, imposta un PIN.
 
