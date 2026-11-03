@@ -1,7 +1,7 @@
 import { invoke } from '@tauri-apps/api/core'
 import { listen } from '@tauri-apps/api/event'
 import { create } from 'zustand'
-import type { Jingle, LibraryScanProgress, QueueItem, SavedPlaylist, Settings, Song } from '../types'
+import type { Jingle, LibraryScanProgress, PlayedEntry, QueueItem, SavedPlaylist, Settings, Song } from '../types'
 import type { KarLine } from './kar'
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -81,6 +81,8 @@ interface AppState {
   scanIssue: string
   queueA: QueueItem[]
   queueB: QueueItem[]
+  playedHistory: PlayedEntry[]
+  sessionStartedAt: number
   singers: string[]
   activeSinger: string
   current: QueueItem | null
@@ -118,6 +120,8 @@ interface AppState {
   moveInQueue: (uid: string, dir: -1 | 1) => void
   transfer: (uid: string) => void
   setSingerOf: (uid: string, singer: string) => void
+  recordPlayed: (item: QueueItem) => void
+  clearPlayedHistory: () => void
   savedPlaylists: SavedPlaylist[]
   reorderQueue: (sourceUid: string, targetWhich: 'A' | 'B', targetIndex?: number) => void
   savePlaylist: (name: string, which?: 'A' | 'B') => void
@@ -147,6 +151,8 @@ export const useStore = create<AppState>((set, get) => ({
   scanIssue: '',
   queueA: [],
   queueB: [],
+  playedHistory: [],
+  sessionStartedAt: Date.now(),
   singers: [],
   activeSinger: '',
   current: null,
@@ -166,6 +172,12 @@ export const useStore = create<AppState>((set, get) => ({
   settings: DEFAULT_SETTINGS,
   toast: '',
   queueRemovalUndo: null,
+  recordPlayed: (item) => {
+    if (item.interlude) return
+    const entry: PlayedEntry = { id: crypto.randomUUID(), song: item.song, singer: item.singer, playedAt: Date.now() }
+    set((s) => ({ playedHistory: [entry, ...s.playedHistory].slice(0, 500) }))
+  },
+  clearPlayedHistory: () => set({ playedHistory: [] }),
 
   patch: (p) => set(p),
   patchSettings: (p) => set((s) => ({ settings: { ...s.settings, ...p } })),
@@ -185,6 +197,7 @@ export const useStore = create<AppState>((set, get) => ({
           libraryPaths: d.libraryPaths ?? [],
           queueA: d.queueA ?? [],
           queueB: d.queueB ?? [],
+          playedHistory: d.playedHistory ?? [],
           singers: d.singers ?? [],
           activeSinger: d.activeSinger ?? '',
           jingles: d.jingles ?? [],
@@ -442,6 +455,7 @@ useStore.subscribe((s, prev) => {
     s.libraryPaths !== prev.libraryPaths ||
     s.queueA !== prev.queueA ||
     s.queueB !== prev.queueB ||
+    s.playedHistory !== prev.playedHistory ||
     s.singers !== prev.singers ||
     s.activeSinger !== prev.activeSinger ||
     s.jingles !== prev.jingles ||
@@ -452,12 +466,13 @@ useStore.subscribe((s, prev) => {
   if (!changed) return
   clearTimeout(saveTimer)
   saveTimer = setTimeout(() => {
-    const { libraryPaths, queueA, queueB, singers, activeSinger, jingles, interludes, bgTracks, settings, savedPlaylists } =
+    const { libraryPaths, queueA, queueB, playedHistory, singers, activeSinger, jingles, interludes, bgTracks, settings, savedPlaylists } =
       useStore.getState()
     const json = JSON.stringify({
       libraryPaths,
       queueA,
       queueB,
+      playedHistory,
       singers,
       activeSinger,
       jingles,

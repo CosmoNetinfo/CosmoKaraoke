@@ -1,10 +1,12 @@
 import {
   ArrowLeftRight,
+  AudioLines,
   ChevronDown,
   ChevronUp,
   Disc3,
   Film,
   GripVertical,
+  History,
   ListMusic,
   Music,
   Play,
@@ -177,6 +179,8 @@ export function Playlists() {
   const active = useStore((s) => s.activeSinger)
   const queueA = useStore((s) => s.queueA)
   const queueB = useStore((s) => s.queueB)
+  const playedHistory = useStore((s) => s.playedHistory)
+  const sessionStartedAt = useStore((s) => s.sessionStartedAt)
   const savedPlaylists = useStore((s) => s.savedPlaylists)
   const addSinger = useStore((s) => s.addSinger)
   const removeSinger = useStore((s) => s.removeSinger)
@@ -185,11 +189,14 @@ export function Playlists() {
   const loadPlaylist = useStore((s) => s.loadPlaylist)
   const deletePlaylist = useStore((s) => s.deletePlaylist)
   const clearQueue = useStore((s) => s.clearQueue)
+  const clearPlayedHistory = useStore((s) => s.clearPlayedHistory)
   const patch = useStore((s) => s.patch)
+  const enqueue = useStore((s) => s.enqueue)
 
   const [name, setName] = useState('')
   const [playlistName, setPlaylistName] = useState('')
-  const [activeTab, setActiveTab] = useState<'A' | 'B' | 'singers' | 'saved'>('A')
+  const [todayKey] = useState(() => new Date().toDateString())
+  const [activeTab, setActiveTab] = useState<'A' | 'B' | 'singers' | 'saved' | 'history'>('A')
   const [dragUid, setDragUid] = useState<string | null>(null)
   const [overIndex, setOverIndex] = useState<number | null>(null)
 
@@ -208,6 +215,12 @@ export function Playlists() {
   }
 
   const list = activeTab === 'A' ? queueA : queueB
+  const playedThisSession = playedHistory.filter((entry) => entry.playedAt >= sessionStartedAt)
+  const singerCounts = playedHistory.reduce<Record<string, number>>((counts, entry) => {
+    if (entry.singer) counts[entry.singer] = (counts[entry.singer] ?? 0) + 1
+    return counts
+  }, {})
+  const topSinger = Object.entries(singerCounts).sort((a, b) => b[1] - a[1])[0]
 
   const handleDragStart = (uid: string) => setDragUid(uid)
   const handleDragEnd = () => {
@@ -297,6 +310,16 @@ export function Playlists() {
             >
               <Save size={15} />
               <span>Salvate</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('history')}
+              aria-current={activeTab === 'history' ? 'page' : undefined}
+              className={`flex min-h-11 items-center gap-1.5 rounded-lg px-3 py-1.5 text-base font-bold transition-all ${activeTab === 'history' ? 'bg-accent text-on-accent shadow-xs' : 'text-muted hover:bg-btn hover:text-text'}`}
+            >
+              <History size={15} />
+              <span>Brani eseguiti</span>
+              <span className={`ml-1 rounded-full px-2 py-0.5 text-base ${activeTab === 'history' ? 'bg-on-accent/20' : 'bg-inset text-muted'}`}>{playedHistory.length}</span>
             </button>
           </div>
 
@@ -452,6 +475,52 @@ export function Playlists() {
                 </li>
               ))}
             </ul>
+          )}
+        </div>
+      )}
+
+      {activeTab === 'history' && (
+        <div className="space-y-3">
+          <div className="grid gap-2 sm:grid-cols-3">
+            <div className="history-stat"><AudioLines size={17} /><span><b>{playedHistory.length}</b><small>riproduzioni registrate · max 500</small></span></div>
+            <div className="history-stat"><Play size={17} /><span><b>{playedThisSession.length}</b><small>brani in questa sessione</small></span></div>
+            <div className="history-stat"><Users size={17} /><span><b>{topSinger ? topSinger[0] : '—'}</b><small>{topSinger ? `${topSinger[1]} brani · più presente` : 'nessun cantante nello storico'}</small></span></div>
+          </div>
+
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="text-base font-bold text-text">Riproduzioni più recenti</div>
+            <Btn variant="ghost" disabled={playedHistory.length === 0} onClick={() => {
+              if (window.confirm('Vuoi cancellare lo storico dei brani eseguiti?')) clearPlayedHistory()
+            }} title="Cancella lo storico salvato">Cancella storico</Btn>
+          </div>
+
+          {playedHistory.length === 0 ? (
+            <div className="queue-empty rounded-xl border border-dashed border-line p-6 text-center text-base text-muted">
+              <History className="mx-auto mb-2 h-7 w-7 text-accent-text" />
+              I brani compariranno qui dopo l'avvio della riproduzione. Lo storico viene conservato su questo computer.
+            </div>
+          ) : (
+            <ol className="max-h-64 space-y-1.5 overflow-y-auto pr-1">
+              {playedHistory.map((entry, index) => {
+                const date = new Date(entry.playedAt)
+                const when = date.toDateString() === todayKey
+                  ? date.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })
+                  : date.toLocaleString('it-IT', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
+                return (
+                  <li key={entry.id} className="history-row">
+                    <span className="history-index">{index + 1}</span>
+                    <div className="min-w-0 flex-1">
+                      <div className="truncate font-semibold text-text">{entry.song.title}</div>
+                      <div className="truncate text-sm text-muted">{[entry.song.artist, entry.singer && `🎤 ${entry.singer}`, entry.song.format.toUpperCase()].filter(Boolean).join(' · ')}</div>
+                    </div>
+                    <time className="shrink-0 text-sm tabular-nums text-muted" dateTime={date.toISOString()}>{when}</time>
+                    <Btn className="shrink-0" title={`Aggiungi di nuovo ${entry.song.title} alla scaletta`} onClick={() => enqueue(entry.song, 'A', entry.singer)}>
+                      <ListMusic size={16} /><span className="hidden sm:inline">Accoda</span>
+                    </Btn>
+                  </li>
+                )
+              })}
+            </ol>
           )}
         </div>
       )}

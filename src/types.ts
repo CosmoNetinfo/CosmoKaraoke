@@ -22,6 +22,14 @@ export interface QueueItem {
   interlude?: boolean
 }
 
+/** Riproduzione effettivamente avviata, conservata nello storico locale. */
+export interface PlayedEntry {
+  id: string
+  song: Song
+  singer: string
+  playedAt: number
+}
+
 export interface YtItem {
   id: string
   title: string

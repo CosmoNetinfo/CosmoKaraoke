@@ -205,6 +205,7 @@ export async function startPlayback(item: QueueItem): Promise<void> {
       void emit('display:kar', lines)
       pushDisplay()
       await karEngine.play()
+      useStore.getState().recordPlayed(item)
       void invoke('sync_live_now_playing', {
         title: item.song.title,
         artist: item.song.artist,
@@ -248,6 +249,7 @@ export async function startPlayback(item: QueueItem): Promise<void> {
     }
     pushDisplay()
     await engine.play()
+    useStore.getState().recordPlayed(item)
     void invoke('sync_live_now_playing', {
       title: item.song.title,
       artist: item.song.artist,
