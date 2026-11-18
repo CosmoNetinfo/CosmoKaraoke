@@ -27,7 +27,30 @@ Il layout **Standard** mostra player e serata nella colonna di destra. Le skin *
 
 ## 2. Installare e avviare
 
-Scarica il pacchetto adatto al computer dalla [pagina Releases](https://github.com/CosmoNetinfo/CosmoKaraoke/releases/latest): installer `.exe` per Windows oppure pacchetto `.dmg` per macOS. Installa e avvia CosmoKaraoke come un normale programma.
+Scarica il pacchetto adatto al computer dalla [pagina Releases](https://github.com/CosmoNetinfo/CosmoKaraoke/releases/latest): installer `.exe` per Windows, pacchetto `.dmg` per macOS oppure `.AppImage` / `.deb` per Linux. Installa e avvia CosmoKaraoke come un normale programma.
+
+### Linux (versione in test)
+
+La versione per Linux è ancora in fase di test: se trovi un problema, segnalalo dal [modulo di feedback](https://cosmonetinfo.github.io/CosmoKaraoke-Site/feedback.html) o nelle Discussions su GitHub. Serve una distribuzione recente (Ubuntu 22.04 o successiva, Debian 12 o successiva) con WebKitGTK 4.1.
+
+- **AppImage** (consigliato, si aggiorna da solo): rendi il file eseguibile e avvialo.
+
+```
+chmod +x CosmoKaraoke*.AppImage
+./CosmoKaraoke*.AppImage
+```
+
+- **Pacchetto .deb** (Ubuntu, Debian e derivate): installalo dalla cartella in cui hai scaricato il file. Gli aggiornamenti vanno fatti a mano, scaricando la nuova versione.
+
+```
+sudo apt install ./CosmoKaraoke*.deb
+```
+
+Per audio e video servono i codec di sistema (GStreamer). Se alcuni file non si sentono o non si vedono, installa i plugin mancanti:
+
+```
+sudo apt install gstreamer1.0-plugins-good gstreamer1.0-libav
+```
 
 La prima volta l'elenco brani può essere vuoto: aggiungi una o più cartelle musicali prima di cercare. Non spostare o rinominare i file mentre una canzone è in riproduzione. Se cambi la struttura delle cartelle, esegui una nuova scansione.
 
@@ -65,7 +88,7 @@ Il pulsante **Aa** apre i controlli rapidi. Il cursore **Dimensione dell'interfa
 1. Apri **Impostazioni → Cartelle**.
 2. Premi **Aggiungi cartella** e seleziona la cartella dei brani. Puoi ripetere l'operazione per altre cartelle.
 3. Attendi la fine della scansione. La schermata mostra i file analizzati e i brani individuati.
-4. Se una cartella non è accessibile, controlla che l'unità sia collegata e che Windows/macOS permetta all'app di leggerla. La libreria precedente viene mantenuta se una scansione incontra percorsi non accessibili.
+4. Se una cartella non è accessibile, controlla che l'unità sia collegata e che Windows, macOS o Linux permetta all'app di leggerla. La libreria precedente viene mantenuta se una scansione incontra percorsi non accessibili.
 5. Per rimuovere una cartella dall'indice, usa il pulsante cestino accanto al percorso. Per aggiornare l'indice dopo aver aggiunto file, premi **Riscansiona**.
 
 Rimuovere una cartella dall'elenco dell'app non cancella i file musicali dal disco.
@@ -177,7 +200,7 @@ Live crea un piccolo server sulla rete locale. Non è necessario installare un'a
 
 1. Collega computer e telefoni alla stessa rete Wi-Fi. Le reti ospiti o alcune reti aziendali possono impedire ai dispositivi di comunicare tra loro.
 2. Apri **Live → Regole e filtri**. Imposta nome sala, porta, PIN facoltativo, numero massimo di prenotazioni per cantante, disponibilità delle richieste e parole da filtrare. Salva le impostazioni.
-3. Premi **Accendi server**. Se Windows o macOS chiede il permesso di rete, consenti l'accesso sulla rete privata che stai usando.
+3. Premi **Accendi server**. Se il sistema operativo chiede il permesso di rete, consenti l'accesso sulla rete privata che stai usando.
 4. Apri **QR Code e Link** e mostra il QR agli ospiti oppure copia l'indirizzo. Gli ospiti lo aprono con la fotocamera o il browser del telefono.
 5. Gestisci le richieste dalla scheda **Prenotazioni**: puoi inserirle in scaletta, metterle in riserva o rifiutarle. Se attivi l'approvazione automatica, le richieste seguono direttamente le regole configurate.
 6. Leggi le dediche in **Dediche e messaggi**. Puoi mostrarne una sulla TV per 10 secondi o eliminarla.
@@ -202,17 +225,17 @@ Il download può essere soggetto ai termini del servizio, alle autorizzazioni de
 
 ## 12. Aggiornare il programma
 
-Apri **Impostazioni → Aggiornamenti** per controllare manualmente la disponibilità di una versione. CosmoKaraoke controlla anche all'avvio e periodicamente; mostra una proposta di aggiornamento e non si riavvia senza il tuo consenso. Se preferisci, scarica l'ultima release dalla pagina ufficiale collegata sopra.
+Apri **Impostazioni → Aggiornamenti** per controllare manualmente la disponibilità di una versione. CosmoKaraoke controlla anche all'avvio e periodicamente; mostra una proposta di aggiornamento e non si riavvia senza il tuo consenso. Se preferisci, scarica l'ultima release dalla pagina ufficiale collegata sopra. Su Linux l'AppImage si aggiorna da sola; il pacchetto `.deb` va aggiornato a mano.
 
 ## 13. Tasti rapidi
 
 | Tasto | Azione |
 | --- | --- |
 | **Spazio** | Pausa o riprendi, se il cursore non è in un campo di testo |
-| **Ctrl+M** (Windows) / **⌘+M** (Mac) | Dissolvenza e avvio del brano successivo |
+| **Ctrl+M** (Windows e Linux) / **⌘+M** (Mac) | Dissolvenza e avvio del brano successivo |
 | **1–9** | Avvia uno dei primi nove effetti disponibili |
 | **Esc** | Ferma gli effetti attivi |
-| **Ctrl+Z** (Windows) / **⌘+Z** (Mac) | Annulla la rimozione recente di un brano, se la notifica è ancora visibile |
+| **Ctrl+Z** (Windows e Linux) / **⌘+Z** (Mac) | Annulla la rimozione recente di un brano, se la notifica è ancora visibile |
 
 ## 14. Risoluzione dei problemi
 
@@ -226,7 +249,7 @@ Ricollega il disco o rendi nuovamente disponibile la cartella. Quando una scansi
 
 ### Il brano è in riproduzione ma non sento l'audio
 
-Controlla volume dell'app e del computer, uscita audio selezionata nel sistema operativo, cavi e mixer. Prova un file audio noto e verifica se il problema riguarda un singolo formato.
+Controlla volume dell'app e del computer, uscita audio selezionata nel sistema operativo, cavi e mixer. Prova un file audio noto e verifica se il problema riguarda un singolo formato. Su Linux controlla anche di avere i plugin GStreamer indicati nella sezione 2.
 
 ### Il microfono non si accende o non si sente
 
@@ -238,7 +261,7 @@ Chiudi la finestra TV, seleziona il monitor corretto in **Impostazioni → Scher
 
 ### Un video non si apre
 
-La riproduzione video dipende dai codec installati e dal WebView del sistema operativo. Prova un MP4 supportato dal computer; file con estensioni simili possono usare codec interni diversi.
+La riproduzione video dipende dai codec installati e dal WebView del sistema operativo. Prova un MP4 supportato dal computer; file con estensioni simili possono usare codec interni diversi. Su Linux installa `gstreamer1.0-plugins-good` e `gstreamer1.0-libav`.
 
 ### Il QR Live si apre ma il telefono non carica la pagina
 
