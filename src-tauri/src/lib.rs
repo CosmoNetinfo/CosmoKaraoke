@@ -166,7 +166,7 @@ async fn ytdlp_install(app: tauri::AppHandle) -> Result<String, String> {
         } else if cfg!(target_os = "macos") {
             ("yt-dlp_macos", "yt-dlp")
         } else {
-            ("yt-dlp", "yt-dlp")
+            ("yt-dlp_linux", "yt-dlp")
         };
         let url = format!("https://github.com/yt-dlp/yt-dlp/releases/latest/download/{asset}");
         let dir = app

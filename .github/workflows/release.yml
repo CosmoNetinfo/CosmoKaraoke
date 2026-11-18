@@ -1,7 +1,7 @@
 name: Compila e pubblica
 
 # Ogni volta che carichi codice su "main" con un NUMERO DI VERSIONE NUOVO,
-# GitHub compila l'app per Windows e Mac e pubblica gli installer.
+# GitHub compila l'app per Windows, Mac e Linux e pubblica gli installer.
 # Le app già installate vedono la nuova versione e propongono l'aggiornamento.
 on:
   push:
@@ -42,7 +42,7 @@ jobs:
     if: needs.versione.outputs.nuova == 'true' || github.event_name == 'workflow_dispatch'
     strategy:
       fail-fast: false
-      # Windows e Mac uno dopo l'altro: se partono insieme litigano per creare
+      # Windows, Mac e Linux uno dopo l'altro: se partono insieme litigano per creare
       # lo stesso rilascio e uno dei due perde i suoi file (errore «valid tag»).
       max-parallel: 1
       matrix:
@@ -55,6 +55,11 @@ jobs:
             os: macos-latest
             args: '--target universal-apple-darwin'
             rust_targets: 'aarch64-apple-darwin,x86_64-apple-darwin'
+          # Ubuntu 22.04: l'AppImage compilata qui funziona anche sulle distribuzioni più vecchie.
+          - nome: Linux (AppImage + deb)
+            os: ubuntu-22.04
+            args: '--bundles appimage,deb'
+            rust_targets: ''
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
@@ -69,6 +74,19 @@ jobs:
             echo "::error::Mancano i segreti TAURI_SIGNING_PRIVATE_KEY e TAURI_SIGNING_PRIVATE_KEY_PASSWORD. Vai su Settings > Secrets and variables > Actions e aggiungili (vedi README)."
             exit 1
           fi
+
+      - name: Installa le librerie di sistema per Linux
+        if: startsWith(matrix.os, 'ubuntu')
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libwebkit2gtk-4.1-dev \
+            libgtk-3-dev \
+            libayatana-appindicator3-dev \
+            librsvg2-dev \
+            libxdo-dev \
+            libssl-dev \
+            patchelf
 
       - uses: actions/setup-node@v4
         with:
@@ -103,8 +121,9 @@ jobs:
             - Skin Stage Black con regia palco più geometrica e icone di navigazione più riconoscibili.
             - Aggiornata la guida italiana e le schermate documentali; le immagini pubbliche non espongono il QR o l'indirizzo della rete Live locale.
             - Il colore del testo dei pulsanti accentati ora viene scelto in base al contrasto reale.
+            - Nuova versione per Linux (AppImage e pacchetto .deb).
 
-            Scarica l'installer `.exe` per Windows o il pacchetto `.dmg` per macOS. Le istruzioni complete sono nel README del repository.
+            Scarica l'installer `.exe` per Windows, il pacchetto `.dmg` per macOS oppure `.AppImage` o `.deb` per Linux. Le istruzioni complete sono nel README del repository.
           releaseDraft: false
           prerelease: false
           includeUpdaterJson: true
