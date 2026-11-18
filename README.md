@@ -1,6 +1,6 @@
 # CosmoKaraoke
 
-CosmoKaraoke è un programma karaoke per Windows e macOS. La versione attuale è destinata all'uso personale e non è in vendita.
+CosmoKaraoke è un programma karaoke per Windows, macOS e Linux. La versione per Linux è nuova e in fase di test. La versione attuale è destinata all'uso personale e non è in vendita.
 
 L'interfaccia è in italiano e include caratteri leggibili, testo ingrandibile e temi ad alto contrasto. La libreria musicale e le impostazioni restano sul computer; non servono account o un server cloud. Internet serve per gli aggiornamenti e, se attivate, le funzioni YouTube.
 
@@ -64,10 +64,20 @@ Apri [Releases](https://github.com/CosmoNetinfo/CosmoKaraoke/releases/latest) e 
 
 - **Windows:** installer `.exe`
 - **macOS:** immagine `.dmg`; trascina CosmoKaraoke nella cartella Applicazioni
+- **Linux (in test):** pacchetto `.AppImage` oppure `.deb`, vedi la sezione sotto
 
 Questa versione non è firmata con certificati di distribuzione del produttore. Windows o macOS possono quindi mostrare un avviso di sicurezza. Scarica il programma solo dalla pagina Releases ufficiale e non disattivare le protezioni del sistema per aprire file di provenienza incerta.
 
 Quando è disponibile un aggiornamento, l'app mostra un avviso e propone di aggiornarsi e riavviarsi. L'aggiornamento non parte da solo mentre il programma è in uso.
+
+### Linux (versione in test)
+
+La versione per Linux è nuova e viene compilata da GitHub Actions su Ubuntu 22.04. Cerchiamo persone disposte a provarla, su qualsiasi distribuzione.
+
+- **AppImage:** scarica il file `.AppImage`, rendilo eseguibile (da terminale `chmod +x CosmoKaraoke*.AppImage`, oppure dalle proprietà del file) e avvialo con un doppio clic. Funziona senza installazione e supporta l'aggiornamento automatico.
+- **Pacchetto .deb:** per Debian, Ubuntu e derivate; si installa con il gestore software oppure con `sudo apt install ./CosmoKaraoke*.deb`. Per aggiornarlo si scarica la nuova versione dalla pagina Releases.
+- **Requisiti:** una distribuzione recente con WebKitGTK 4.1 (per esempio Ubuntu 22.04 o successiva, Debian 12 o successiva). Audio e video usano GStreamer del sistema: se un file non parte, installa i plugin `gstreamer1.0-plugins-good` e `gstreamer1.0-libav`.
+- **Come aiutare:** se la provi, scrivi come è andata, con la distribuzione e la versione che usi, tramite il [modulo di segnalazione](https://cosmonetinfo.github.io/CosmoKaraoke-Site/feedback.html) o il [forum GitHub Discussions](https://github.com/CosmoNetinfo/CosmoKaraoke/discussions). Vanno bene anche i problemi: ci servono proprio per sistemarli.
 
 ## Primo avvio
 
@@ -97,7 +107,7 @@ La libreria è indicizzata in SQLite sul computer e consente di cercare per tito
 Tasti rapidi:
 
 - **Spazio:** pausa o riprendi, quando il cursore non è in un campo di testo.
-- **Ctrl+M** su Windows o **⌘+M** su Mac: dissolvenza e avvio del brano successivo.
+- **Ctrl+M** su Windows e Linux o **⌘+M** su Mac: dissolvenza e avvio del brano successivo.
 - **1–9:** avvia uno dei primi nove effetti disponibili.
 - **Esc:** ferma gli effetti attivi.
 
@@ -123,13 +133,13 @@ Sono disponibili un PIN facoltativo, un limite di prenotazioni per cantante e un
 
 ## Aggiornamenti
 
-Gli aggiornamenti dell'app sono firmati con la chiave Tauri del progetto. Per pubblicare una versione, chi sviluppa aggiorna il numero di versione e carica il codice su `main`; GitHub Actions prepara i pacchetti Windows e macOS e crea la release.
+Gli aggiornamenti dell'app sono firmati con la chiave Tauri del progetto. Per pubblicare una versione, chi sviluppa aggiorna il numero di versione e carica il codice su `main`; GitHub Actions prepara i pacchetti Windows, macOS e Linux e crea la release.
 
 La chiave privata di aggiornamento è conservata nei segreti GitHub Actions e **non deve essere caricata nel repository**. Se la chiave viene persa o sostituita, gli aggiornamenti delle installazioni già distribuite potrebbero non funzionare.
 
 ## Sviluppo
 
-Requisiti: Node.js 22 e Rust. Per lo sviluppo nativo su macOS o Windows servono anche gli strumenti di compilazione richiesti da Tauri per quel sistema.
+Requisiti: Node.js 22 e Rust. Per lo sviluppo nativo su macOS, Windows o Linux servono anche gli strumenti di compilazione richiesti da Tauri per quel sistema. Su Debian e Ubuntu l'elenco dei pacchetti è nello step «Installa le librerie di sistema per Linux» di `.github/workflows/release.yml`.
 
 Per aggiornare la versione prima di un rilascio usa `npm run bump patch` (oppure `minor`, `major` o un numero preciso, per esempio `npm run bump 0.4.1`). Il comando aggiorna i file di configurazione e i lockfile Node e Rust. Il flusso automatico crea la release quando il numero di versione è nuovo.
 
